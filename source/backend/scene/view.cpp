@@ -2,6 +2,12 @@
  * view.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/scene/view.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/scene/view.cpp $
+ * $Revision: #2 $
+ * $Change: 5948 $
+ * $DateTime: 2013/07/22 20:36:31 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <boost/thread.hpp>
@@ -671,6 +677,7 @@ void View::StartRender(POVMS_Object& renderOptions)
 	DBL jitterscale = 1.0;
 	bool jitter = false;
 	DBL aathreshold = 0.3;
+	DBL aaconfidence = 0.9;
 	unsigned int aadepth = 3;
 	DBL aaGammaValue = 1.0;
 	GammaCurvePtr aaGammaCurve;
@@ -691,10 +698,11 @@ void View::StartRender(POVMS_Object& renderOptions)
 	viewData.qualitySettings.Quality_Flags = QualityValues[viewData.qualitySettings.Quality];
 
 	if(renderOptions.TryGetBool(kPOVAttrib_Antialias, false) == true)
-		tracingmethod = clip(renderOptions.TryGetInt(kPOVAttrib_SamplingMethod, 1), 0, 2);
+		tracingmethod = clip(renderOptions.TryGetInt(kPOVAttrib_SamplingMethod, 1), 0, 3); // TODO FIXME - magic number in clip
 
-	aadepth = clip((unsigned int)renderOptions.TryGetInt(kPOVAttrib_AntialiasDepth, 3), 1u, 9u);
+	aadepth = clip((unsigned int)renderOptions.TryGetInt(kPOVAttrib_AntialiasDepth, 3), 1u, 9u); // TODO FIXME - magic number in clip
 	aathreshold = clip(renderOptions.TryGetFloat(kPOVAttrib_AntialiasThreshold, 0.3f), 0.0f, 1.0f);
+	aaconfidence = clip(renderOptions.TryGetFloat(kPOVAttrib_AntialiasConfidence, 0.9f), 0.0f, 1.0f);
 	if(renderOptions.TryGetBool(kPOVAttrib_Jitter, true) == true)
 		jitterscale = clip(renderOptions.TryGetFloat(kPOVAttrib_JitterAmount, 1.0f), 0.0f, 1.0f);
 	else
@@ -1094,7 +1102,7 @@ void View::StartRender(POVMS_Object& renderOptions)
 	{
 		// do render with mosaic preview start size
 		for(int i = 0; i < maxRenderThreads; i++)
-			viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, 0, jitterscale, aathreshold, aadepth, aaGammaCurve, previewstartsize, false, false, highReproducibility))));
+			viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, 0, jitterscale, aathreshold, aaconfidence, aadepth, aaGammaCurve, previewstartsize, false, false, highReproducibility))));
 
 		for(unsigned int step = (previewstartsize >> 1); step >= previewendsize; step >>= 1)
 		{
@@ -1109,7 +1117,7 @@ void View::StartRender(POVMS_Object& renderOptions)
 
 			// do render with current mosaic preview size
 			for(int i = 0; i < maxRenderThreads; i++)
-				viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, 0, jitterscale, aathreshold, aadepth, aaGammaCurve, step, true, ((step == 1) && (tracingmethod == 0)), highReproducibility))));
+				viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, 0, jitterscale, aathreshold, aaconfidence, aadepth, aaGammaCurve, step, true, ((step == 1) && (tracingmethod == 0)), highReproducibility))));
 		}
 
 		// do render everything again if the final mosaic preview block size was not one or anti-aliasing is required
@@ -1125,14 +1133,14 @@ void View::StartRender(POVMS_Object& renderOptions)
 			renderTasks.AppendSync();
 
 			for(int i = 0; i < maxRenderThreads; i++)
-				viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, tracingmethod, jitterscale, aathreshold, aadepth, aaGammaCurve, 0, false, true, highReproducibility))));
+				viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, tracingmethod, jitterscale, aathreshold, aaconfidence, aadepth, aaGammaCurve, 0, false, true, highReproducibility))));
 		}
 	}
 	// do render without mosaic preview
 	else
 	{
 		for(int i = 0; i < maxRenderThreads; i++)
-			viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, tracingmethod, jitterscale, aathreshold, aadepth, aaGammaCurve, 0, false, true, highReproducibility))));
+			viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new TraceTask(&viewData, tracingmethod, jitterscale, aathreshold, aaconfidence, aadepth, aaGammaCurve, 0, false, true, highReproducibility))));
 	}
 
 	// wait for render to finish

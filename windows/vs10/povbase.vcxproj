@@ -395,6 +395,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\source\base\branch.h" />
     <ClInclude Include="..\..\source\base\configbase.h" />
     <ClInclude Include="..\..\source\base\fileinputoutput.h" />
     <ClInclude Include="..\..\source\base\font\crystal.h" />

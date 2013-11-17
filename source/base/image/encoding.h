@@ -4,6 +4,12 @@
  * This file contains code for handling image data quantization.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -24,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/base/image/encoding.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/base/image/encoding.h $
+ * $Revision: #2 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BASE_IMAGE_ENCODING_H
@@ -196,23 +202,65 @@ inline unsigned int IntEncode(const GammaCurvePtr& g, float x, unsigned int max,
 // convenience functions for image file decoding
 
 void SetEncodedGrayValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int gray);
-void SetEncodedGrayAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int gray, unsigned int alpha, bool premul = false);
+void SetEncodedGrayAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int gray, unsigned int alpha, bool premul);
 void SetEncodedRGBValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int red, unsigned int green, unsigned int blue);
-void SetEncodedRGBAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha, bool premul = false);
+void SetEncodedRGBAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha, bool premul);
 void SetEncodedGrayValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float gray);
-void SetEncodedGrayAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float gray, float alpha, bool premul = false);
+void SetEncodedGrayAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float gray, float alpha, bool premul);
 void SetEncodedRGBValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float red, float green, float blue);
-void SetEncodedRGBAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float red, float green, float blue, float alpha, bool premul = false);
+void SetEncodedRGBAValue(Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float red, float green, float blue, float alpha, bool premul);
 
 // convenience functions for image file encoding
 unsigned int GetEncodedGrayValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, DitherHandler& dh);
-void GetEncodedGrayAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int& gray, unsigned int& alpha, DitherHandler& dh, bool premul = false);
-void GetEncodedRGBValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, DitherHandler& dh);
-void GetEncodedRGBAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, unsigned int& alpha, DitherHandler& dh, bool premul = false);
+void GetEncodedGrayAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int& gray, unsigned int& alpha, DitherHandler& dh, bool premul);
+void GetEncodedRGBValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, DitherHandler& dh, float glareDesaturation);
+void GetEncodedRGBAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, unsigned int& alpha, DitherHandler& dh, float glareDesaturation, bool premul);
 float GetEncodedGrayValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&);
-void GetEncodedGrayAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float& gray, float& alpha, bool premul = false);
+void GetEncodedGrayAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float& gray, float& alpha, bool premul);
 void GetEncodedRGBValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float& red, float& green, float& blue);
-void GetEncodedRGBAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float& red, float& green, float& blue, float& alpha, bool premul = false);
+void GetEncodedRGBAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr&, float& red, float& green, float& blue, float& alpha, bool premul);
+
+inline void fixOverexposure(RGBColour& col, COLC fudgeFactor)
+{
+	if (fudgeFactor == 0.0)
+		return;
+
+	COLC targetBrightness = col.greyscale();
+	RGBColour clippedColour = col.clip(0.0,1.0);
+	COLC clippedBrightness = clippedColour.greyscale();
+	COLC missingBrightness = targetBrightness - clippedBrightness;
+
+	if (missingBrightness > 0)
+	{
+		// some color channels are overexposed; if the clipped brightness is still lower than that of pure white,
+		// mix with white as much as needed to achieve target brightness
+		COLC achievableBrightness = 1.0 - clippedBrightness;
+		if (achievableBrightness > 0)
+		{
+			COLC mix = fudgeFactor * missingBrightness / achievableBrightness;
+			col = RGBColour(1.0) * mix + clippedColour * (1.0 - mix);
+		}
+	}
+	else if (missingBrightness < 0)
+	{
+		// some channels are negative; if the clipped brightness is still higher than that of pure black,
+		// mix with black as much as needed to achieve target brightness
+		if (clippedBrightness > 0)
+		{
+			COLC mix = fudgeFactor * targetBrightness / clippedBrightness;
+			col = clippedColour * mix;
+		}
+	}
+}
+
+inline void fixOverexposure(COLC& r, COLC& g, COLC& b, COLC fudgeFactor)
+{
+	RGBColour col(r,g,b);
+	fixOverexposure(col, fudgeFactor);
+	r = col.red();
+	g = col.green();
+	b = col.blue();
+}
 
 }
 

@@ -2,6 +2,12 @@
  * task.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/support/task.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/support/task.cpp $
+ * $Revision: #3 $
+ * $Change: 5944 $
+ * $DateTime: 2013/07/22 09:27:03 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <cassert>
@@ -197,7 +203,7 @@ void Task::TaskThread(const boost::function0<void>& completion)
 		// can't raise a new exception object here as the alloc will probably fail
 #if 0
 		FatalErrorHandler(POV_EXCEPTION_STRING("Out of memory! There is not enough memory available for\n"
-		                                       "POV-Ray to complete a task. Usually this suggests the scene\n"
+		                                       BRANCH_NAME " to complete a task. Usually this suggests the scene\n"
 		                                       "you are trying to render is too complex for your hardware\n"
 		                                       "to handle. Refer to the platform-specific documentation for\n"
 		                                       "details, it might contain hints how to work around this.\n"));

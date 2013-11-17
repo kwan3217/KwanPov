@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/vfe/win/vfeplatform.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/vfe/win/vfeplatform.cpp $
+ * $Revision: #4 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <windows.h>
@@ -193,7 +199,7 @@ namespace vfePlatform
   // you would probably display the message immediately.
   void vfeWinSession::NotifyCriticalError (const char *message, const char *filename, int line)
   {
-    MessageBox (NULL, message, "POV-Ray Critical Error", MB_ICONERROR | MB_OK) ;
+    MessageBox (NULL, message, BRANCH_NAME " Critical Error", MB_ICONERROR | MB_OK) ;
   }
 
   ////////////////////////////////////////////////////////////////////////
@@ -216,7 +222,7 @@ namespace vfePlatform
     SYSTEMTIME        systemTime ;
 
     GetSystemTime (&systemTime) ;
-    SystemTimeToFileTime (&systemTime, (FILETIME *) &fileTime) ;
+    SystemTimeToFileTime (&systemTime, reinterpret_cast<FILETIME *>(&fileTime)) ;
     fileTime /= 10000;
     fileTime += m_TimestampOffset;
     if (fileTime < m_LastTimestamp)
@@ -570,7 +576,7 @@ namespace vfePlatform
                      NULL,
                      m_LastError,
                      MAKELANGID (LANG_ENGLISH, SUBLANG_ENGLISH_US),
-                     (char *) &buffer,
+                     reinterpret_cast<char *>(&buffer),
                      0,
                      NULL);
       output += buffer;

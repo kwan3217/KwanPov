@@ -37,11 +37,19 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/math/chi2.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * This file is distributed as part of:
+ *
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
+ * $File: //depot/clipka/upov/source/backend/math/chi2.cpp $
+ * $Revision: #3 $
+ * $Change: 6003 $
+ * $DateTime: 2013/08/18 17:28:22 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -212,7 +220,6 @@ static DBL polevl (DBL x, const DBL * coef, int N);
 static DBL p1evl (DBL x, const DBL * coef, int N);
 static DBL igamc (DBL a, DBL x);
 static DBL igam (DBL a, DBL x);
-static DBL ndtri (DBL y0);
 
 
 
@@ -851,7 +858,7 @@ done:
  *
  */
 
-static DBL ndtri(DBL y0)
+DBL ndtri(DBL y0)
 {
 	DBL x, y, z, y2, x0, x1;
 	int code;

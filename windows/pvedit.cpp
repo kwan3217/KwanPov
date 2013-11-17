@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/windows/pvedit.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/windows/pvedit.cpp $
+ * $Revision: #5 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #define POVWIN_FILE
@@ -191,13 +197,13 @@ bool LoadEditorDLL (char *path, bool errorOK)
                "Check the README in the source for instructions on how to copy the DLL's from "
                "the official distribution to the naming convention used by debug builds.",
                err) ;
-      PovMessageBox (str, "POV-Ray Editor error") ;
+      PovMessageBox (str, BRANCH_NAME " Editor error") ;
       PovMessageBox ("See the 'Internal Editor Reference' section in the help file for\n"
                      "instructions on how to correct this or turn editor loading off.", "Important!") ;
 #else
       if (MessageBox (main_window,
-                      "POV-Ray could not load its internal editor. This is to be expected "
-                      "if you installed the AGPL-licenced distribution, as the editor DLL "
+                      BRANCH_NAME " could not load POV-Ray's internal editor. This is to be expected "
+                      "if you installed the AGPL-licenced distribution of POV-Ray, as the editor DLL "
                       "is not included. If you do not wish to use the editor you can turn "
                       "it off (and stop this message appearing) by unchecking 'Use Editor' "
                       "under the 'Other Settings' sub-menu of the Options menu.\n\n"
@@ -219,7 +225,7 @@ bool LoadEditorDLL (char *path, bool errorOK)
     if (!errorOK)
       PovMessageBox ("Editor DLL initialization failed [could not resolve GetDLLVersion]\n\n"
                      "See the 'Built-In Editors' section in the help file",
-                     "POV-Ray Editor Error") ;
+                     BRANCH_NAME " Editor Error") ;
     return (false) ;
   }
   if ((DllVersion = GetDLLVersion ()) != EDITDLLVERSION)
@@ -229,7 +235,7 @@ bool LoadEditorDLL (char *path, bool errorOK)
       debug_output ("%s\n", str) ;
     if (!errorOK)
     {
-      MessageBox (NULL, str, "POV-Ray Editor Error", MB_ICONSTOP) ;
+      MessageBox (NULL, str, BRANCH_NAME " Editor Error", MB_ICONSTOP) ;
       PovMessageBox ("Editor switched off.\n\nSee the 'Built-In Editors' section in the help file", "Important!") ;
     }
     return (false) ;

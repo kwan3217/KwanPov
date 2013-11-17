@@ -4,6 +4,12 @@
  * This module contains the code to read and write the PNG output file
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -24,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/base/image/png.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/base/image/png.cpp $
+ * $Revision: #3 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 /*****************************************************************************
@@ -145,7 +151,7 @@ extern "C"
 
 	void png_pov_warn(png_structp png_ptr, png_const_charp msg)
 	{
-		Messages *m = (Messages *)png_get_error_ptr(png_ptr);
+		Messages *m = reinterpret_cast<Messages *>(png_get_error_ptr(png_ptr));
 
 		if (m)
 			m->warnings.push_back (string(msg)) ;
@@ -175,7 +181,7 @@ extern "C"
 
 	void png_pov_err(png_structp png_ptr, png_const_charp msg)
 	{
-		Messages *m = (Messages *)png_get_error_ptr(png_ptr);
+		Messages *m = reinterpret_cast<Messages *>(png_get_error_ptr(png_ptr));
 
 		if (m)
 			m->error = string(msg) ;
@@ -205,11 +211,11 @@ extern "C"
 
 	void png_pov_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
 	{
-		IStream *file = (IStream *)png_get_io_ptr(png_ptr);
+		IStream *file = reinterpret_cast<IStream *>(png_get_io_ptr(png_ptr));
 
-		if (!file->read ((char *)data, length))
+		if (!file->read (data, length))
 		{
-			Messages *m = (Messages *)png_get_error_ptr(png_ptr);
+			Messages *m = reinterpret_cast<Messages *>(png_get_error_ptr(png_ptr));
 			if (m)
 				m->error = string("Cannot read PNG data");
 			throw POV_EXCEPTION(kFileDataErr, "Cannot read PNG data");
@@ -239,11 +245,11 @@ extern "C"
 
 	void png_pov_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
 	{
-		OStream *file = (OStream *)png_get_io_ptr(png_ptr);
+		OStream *file = reinterpret_cast<OStream *>(png_get_io_ptr(png_ptr));
 
-		if (!file->write ((char *)data, length))
+		if (!file->write (data, length))
 		{
-			Messages *m = (Messages *)png_get_error_ptr(png_ptr);
+			Messages *m = reinterpret_cast<Messages *>(png_get_error_ptr(png_ptr));
 			if (m)
 				m->error = string("Cannot write PNG data");
 			throw POV_EXCEPTION(kFileDataErr, "Cannot write PNG data");
@@ -273,11 +279,11 @@ extern "C"
 
 	void png_pov_flush_data(png_structp png_ptr)
 	{
-		OStream *file = (OStream *)png_get_io_ptr(png_ptr);
+		OStream *file = reinterpret_cast<OStream *>(png_get_io_ptr(png_ptr));
 		file->flush();
 	}
 
-	static bool ReadPNGUpdateInfo (png_structp png_ptr, png_infop info_ptr)
+	bool ReadPNGUpdateInfo (png_structp png_ptr, png_infop info_ptr)
 	{
 		if (setjmp(png_jmpbuf(png_ptr)))
 		{
@@ -288,7 +294,7 @@ extern "C"
 		return (true);
 	}
 
-	static bool ReadPNGImage (png_structp r_png_ptr, png_bytepp row_ptrs)
+	bool ReadPNGImage (png_structp r_png_ptr, png_bytepp row_ptrs)
 	{
 		if (setjmp(png_jmpbuf(r_png_ptr)))
 		{
@@ -845,12 +851,12 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 					{
 						if (use_alpha)
 						{
-							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, premul);
+							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, options.glareDesaturation, premul);
 							row_ptr[j + 3] = alpha << hiShift;
 							row_ptr[j + 3] |= alpha >> loShift;
 						}
 						else
-							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither);
+							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither, options.glareDesaturation);
 
 						row_ptr[j] = r << hiShift;
 						row_ptr[j] |= r >> loShift;
@@ -889,11 +895,11 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 					{
 						if (use_alpha)
 						{
-							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, premul);
+							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, options.glareDesaturation, premul);
 							row_ptr[j + 3] = alpha;
 						}
 						else
-							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither) ;
+							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither, options.glareDesaturation) ;
 						row_ptr[j] = r;
 						row_ptr[j + 1] = g;
 						row_ptr[j + 2] = b;
@@ -922,12 +928,12 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 					{
 						if (use_alpha)
 						{
-							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, premul);
+							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, options.glareDesaturation, premul);
 							row_ptr[j+6] = alpha >> 8;
 							row_ptr[j+7] = alpha & 0xff;
 						}
 						else
-							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither) ;
+							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither, options.glareDesaturation) ;
 
 						row_ptr[j] = r >> 8;
 						row_ptr[j + 1] = r & 0xFF;
@@ -968,13 +974,13 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 					{
 						if (use_alpha)
 						{
-							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, premul);
+							GetEncodedRGBAValue (image, col, row, gamma, maxValue, r, g, b, alpha, *dither, options.glareDesaturation, premul);
 							row_ptr[j + 6] = alpha >> (8 - hiShift);
 							row_ptr[j + 7] = alpha << hiShift;
 							row_ptr[j + 7] |= alpha >> loShift;
 						}
 						else
-							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither) ;
+							GetEncodedRGBValue (image, col, row, gamma, maxValue, r, g, b, *dither, options.glareDesaturation) ;
 
 						row_ptr[j] = r >> (8 - hiShift);
 						row_ptr[j + 1] = r << hiShift;

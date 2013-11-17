@@ -2,6 +2,12 @@
  * tracetask.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/render/tracetask.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/render/tracetask.h $
+ * $Revision: #2 $
+ * $Change: 5948 $
+ * $DateTime: 2013/07/22 20:36:31 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BACKEND_TRACETASK_H
@@ -57,7 +63,7 @@ namespace pov
 class TraceTask : public RenderTask
 {
 	public:
-		TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr);
+		TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr);
 		virtual ~TraceTask();
 
 		virtual void Run();
@@ -93,6 +99,7 @@ class TraceTask : public RenderTask
 		unsigned int tracingMethod;
 		DBL jitterScale;
 		DBL aaThreshold;
+		DBL aaConfidence;
 		unsigned int aaDepth;
 		unsigned int previewSize;
 		bool previewSkipCorner;
@@ -112,6 +119,7 @@ class TraceTask : public RenderTask
 		void SimpleSamplingM0P();
 		void NonAdaptiveSupersamplingM1();
 		void AdaptiveSupersamplingM2();
+		void StochasticSupersamplingM3();
 
 		void NonAdaptiveSupersamplingForOnePixel(DBL x, DBL y, Colour& leftcol, Colour& topcol, Colour& curcol, bool& sampleleft, bool& sampletop, bool& samplecurrent);
 		void SupersampleOnePixel(DBL x, DBL y, Colour& col);

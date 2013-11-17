@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/vfe/vfe.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/vfe/vfe.cpp $
+ * $Revision: #3 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifdef _MSC_VER
@@ -617,8 +623,8 @@ bool VirtualFrontEnd::Start(POVMS_Object& opts)
 
   Path ip (m_Session->GetInputFilename());
   shelloutProcessing.reset(m_Session->CreateShelloutProcessing(opts, UCS2toASCIIString(ip.GetFile()), m_Session->GetRenderWidth(), m_Session->GetRenderHeight())) ;
-  shelloutProcessing->SetCancelMessage("Render halted because the %1% shell-out ('%6%') requested POV-Ray to %5%.");
-  shelloutProcessing->SetSkipMessage("The %1% shell-out ('%3%') requested POV-Ray to %2%.");
+  shelloutProcessing->SetCancelMessage("Render halted because the %1% shell-out ('%6%') requested " BRANCH_NAME " to %5%.");
+  shelloutProcessing->SetSkipMessage("The %1% shell-out ('%3%') requested " BRANCH_NAME " to %2%.");
 
   POVMS_List declares;
   if(opts.Exist(kPOVAttrib_Declare) == true)
@@ -1076,7 +1082,7 @@ State VirtualFrontEnd::Process()
             // case.
             return state;
           }
-          try { viewId = renderFrontend.CreateView(sceneId, options, imageProcessing, boost::bind(&vfe::VirtualFrontEnd::CreateDisplay, this, _1, _2, _3)); }
+          try { viewId = renderFrontend.CreateView(sceneId, options, imageProcessing, boost::bind(&vfe::VirtualFrontEnd::CreateDisplay, this, _1, _2, _3, _4)); }
           catch(pov_base::Exception& e)
           {
             m_Session->SetFailed();

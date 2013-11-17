@@ -2,6 +2,12 @@
  * threaddata.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/scene/threaddata.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/scene/threaddata.cpp $
+ * $Revision: #2 $
+ * $Change: 5948 $
+ * $DateTime: 2013/07/22 20:36:31 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -49,7 +55,9 @@
 namespace pov
 {
 
-SceneThreadData::SceneThreadData(shared_ptr<SceneData> sd): sceneData(sd)
+SceneThreadData::SceneThreadData(shared_ptr<SceneData> sd):
+	sceneData(sd),
+	stochasticRandomGenerator(GetRandomDoubleGenerator(0.0,1.0))
 {
 	for(int i = 0 ; i < 4 ; i++)
 		Fractal_IStack[i] = NULL;
@@ -83,6 +91,9 @@ SceneThreadData::SceneThreadData(shared_ptr<SceneData> sd): sceneData(sd)
 	realTime = 0;
 
 	qualityFlags = QUALITY_9;
+
+	// TODO - seed the stochasticRandomGenerator
+	//stochasticRandomGenerator->Seed(...);
 
 	for(vector<LightSource *>::iterator it = sceneData->lightSources.begin(); it != sceneData->lightSources.end(); it++)
 		lightSources.push_back(static_cast<LightSource *> (Copy_Object(*it))) ;

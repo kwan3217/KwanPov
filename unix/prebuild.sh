@@ -5,8 +5,8 @@
 # Written by Nicolas Calimet and Christoph Hormann
 #
 # This prebuild.sh script prepares the Perforce source tree for building
-# the Unix/Linux version of POV-Ray.  Unlike the former versions, the
-# prebuild procedure does not change the directory structure, so that
+# the Unix/Linux version of UberPOV.
+# The prebuild procedure does not change the directory structure, so that
 # the overall layout of the UNIX source distribution remains consistent
 # with the other supported architectures (namely Windows and Macintosh).
 # Yet, some "standard" files such as configure, README, INSTALL, etc.
@@ -40,18 +40,47 @@
 #
 # Note that the 'clean' and 'doc(s)(clean)' options are mutually exclusive.
 #
-# $File: //depot/public/povray/3.x/unix/prebuild.sh $
-# $Revision: #1 $
-# $Change: 6069 $
-# $DateTime: 2013/11/06 11:59:40 $
-# $Author: chrisc $
+# ---------------------------------------------------------------------------
+# UberPOV Raytracer version 1.37.
+# Partial Copyright 2013 Christoph Lipka.
+#
+# UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+# subject to the same licensing terms and conditions.
+#---------------------------------------------------------------------------
+# Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+# Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
+#
+# POV-Ray is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# POV-Ray is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------
+# This program is based on the popular DKB raytracer version 2.12.
+# DKBTrace was originally written by David K. Buck.
+# DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
+#---------------------------------------------------------------------------
+# $File: //depot/clipka/upov/unix/prebuild.sh $
+# $Revision: #7 $
+# $Change: 6087 $
+# $DateTime: 2013/11/11 03:53:39 $
+# $Author: clipka $
 # $Log$
 ###############################################################################
 
 umask 022
 
+pov_branch="UberPOV"
+pov_binary="uberpov"
 pov_version_base=`cat ./VERSION | sed 's,\([0-9]*.[0-9]*\).*,\1,g'`
-pov_config_bugreport="POV-Ray Bugtracker http://bugs.povray.org/"
+pov_config_bugreport="Christoph Lipka (http://www.lipka-koeln.de/)"
 
 # documentation
 timestamp=`date +%Y-%m-%d`
@@ -68,7 +97,7 @@ required_automake="1.9"
 
 # Prevents running from another directory.
 if test x"`dirname $0`" != x"."; then
-  echo "$0: must ran from POV-Ray's unix/ directory"
+  echo "$0: must run from ${pov_branch}'s unix/ directory"
   exit 1
 fi
 
@@ -132,8 +161,8 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   # backward-compatible cleanup
   for file in \
     acinclude.m4 acx_pthread.m4 AUTHORS ChangeLog config/ configure.ac \
-    COPYING INSTALL NEWS README icons/ include/ ini/ povray.1 povray.conf \
-    povray.ini.in scenes/ scripts/ VERSION
+    COPYING INSTALL NEWS README icons/ include/ ini/ povray.1 $pov_binary.conf \
+    $pov_binary.ini.in scenes/ scripts/ VERSION
   do
     rm -r ../$file 2> /dev/null  &&  echo "Cleanup ../$file"
   done
@@ -326,12 +355,7 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   $cp_u -f      README.unix ../doc/
   chmod -R u+rw ../doc/
 
-  # [C.H.]
-  # povlegal.doc contains 0x99, which is a TM character under Windows.
-  # Converting to "[tm]".
   echo "Copy licence files in ../doc/"
-  perl -e 'while (<>) {s/\x99/[tm]/g; print;}' ../distribution/povlegal.doc \
-    > ../doc/povlegal.doc	|| echo "povlegal.doc not created !"
   $cp_u -f ../distribution/agpl-3.0.txt ../doc/ \
     || echo "agpl-3.0.txt not copied !"
 
@@ -352,8 +376,7 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   # (e.g. ../distribution/in*/).
   for file in \
     AUTHORS ChangeLog configure.ac COPYING NEWS README VERSION \
-    povray.1 povray.conf \
-    scripts/ \
+    povray.1 $pov_binary.conf \
     ../distribution/ini/ ../distribution/include/ ../distribution/scenes/
   do
     out=`basename $file`
@@ -412,14 +435,14 @@ case "$1" in
   cat Makefile.header > $makefile.am
   cat << pbEOF >> $makefile.am
 
-# Makefile.am for the source distribution of POV-Ray $pov_version_base for UNIX
+# Makefile.am for the source distribution of $pov_branch $pov_version_base for UNIX
 # Written by $pov_config_bugreport
 
 # Programs to build.
-bin_PROGRAMS = povray
+bin_PROGRAMS = ${pov_binary}
 
 # Source files.
-povray_SOURCES = \\
+${pov_binary}_SOURCES = \\
   disp.h \\
   disp_sdl.cpp disp_sdl.h \\
   disp_text.cpp disp_text.h
@@ -466,14 +489,25 @@ case "$1" in
   *)
     echo "Create $file"
     echo "#!/bin/sh
-# ==================================================================
-# POV-Ray $pov_version_base - Unix source version - KDE install script
-# ==================================================================
+###############################################################################
+# $pov_branch $pov_version_base - Unix source version - KDE install script
+# ---------------------------------------------------------------------------
 # written July 2003 - March 2004 by Christoph Hormann
 # Based on parts of the Linux binary version install script
-# This file is part of POV-Ray and subject to the POV-Ray licence
-# see POVLEGAL.DOC for details.
-# ==================================================================
+# ---------------------------------------------------------------------------
+# $pov_branch is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# $pov_branch is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
 
 " > "$file"
 
@@ -490,10 +524,10 @@ esac
 
 
 ###
-### ../povray.ini.in (template for ../povray.ini)
+### ../$pov_binary.ini.in (template for ../$pov_binary.ini)
 ###
 
-ini="../povray.ini"
+ini="../$pov_binary.ini"
 
 case "$1" in
   clean)
@@ -508,7 +542,7 @@ case "$1" in
   *)
   # __POVLIBDIR__ will be updated at make time.
   echo "Create $ini.in"
-  cat ../distribution/ini/povray.ini | sed \
+  cat ../distribution/ini/$pov_binary.ini | sed \
     's/C:.POVRAY3 drive and/__POVLIBDIR__/' > $ini.in
   cat << pbEOF >> $ini.in
 
@@ -551,13 +585,11 @@ case "$1" in
   ;;
 
   *)
-  scriptfiles=`find scripts -type f`
-
   echo "Create $makefile.am"
   cat Makefile.header > $makefile.am
   cat << pbEOF >> $makefile.am
 
-# Makefile.am for the source distribution of POV-Ray $pov_version_base for UNIX
+# Makefile.am for the source distribution of $pov_branch $pov_version_base for UNIX
 # Written by $pov_config_bugreport
 
 # Directories.
@@ -576,31 +608,28 @@ SUBDIRS = source vfe unix
 # Additional files to distribute.
 EXTRA_DIST = \\
   bootstrap kde_install.sh \\
-  doc icons include ini scenes scripts \\
-  povray.ini.in changes.txt revision.txt
+  doc icons include ini scenes \\
+  $pov_binary.ini.in changes.txt revision.txt
 
 # Additional files to clean with 'make distclean'.
-DISTCLEANFILES = \$(top_builddir)/povray.ini
+DISTCLEANFILES = \$(top_builddir)/$pov_binary.ini
 CONFIG_CLEAN_FILES = \$(top_builddir)/source/jversion.h
 
 # Render a test scene for 'make check'.
 # This is meant to run before 'make install'.
 check: all
-	\$(top_builddir)/unix/povray +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include
-
-# Install scripts in povlibdir.
-nobase_povlib_SCRIPTS = `echo $scriptfiles`
+	\$(top_builddir)/unix/${pov_binary} +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include
 
 # Install documentation in povdocdir.
 povdoc_DATA = AUTHORS ChangeLog NEWS
 
 # Install configuration and INI files in povconfdir.
-dist_povconf_DATA = povray.conf
-povray.conf:
+dist_povconf_DATA = $pov_binary.conf
+$pov_binary.conf:
 
-povconf_DATA = povray.ini
-povray.ini:
-	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(povlibdir),g" > \$(top_builddir)/povray.ini
+povconf_DATA = $pov_binary.ini
+$pov_binary.ini:
+	cat \$(top_srcdir)/$pov_binary.ini.in | sed "s,__POVLIBDIR__,\$(povlibdir),g" > \$(top_builddir)/$pov_binary.ini
 
 # Install man page.
 dist_man_MANS = povray.1
@@ -609,7 +638,6 @@ dist_man_MANS = povray.1
 # Make all files user read-writeable.
 dist-hook:
 	chmod -R u+rw \$(distdir)
-	chmod 755 \$(distdir)/scripts/*
 	rm -f    \`find \$(distdir) -name "*.h.in~"\`
 	rm -f -r \`find \$(distdir) -name autom4te.cache\`
 	rm -f -r \`find \$(distdir) -name .libs\`
@@ -647,21 +675,20 @@ install-data-local:
 	  \$(mkdir_p) \$\$p && chown \$(povowner) \$\$p && chgrp \$(povgroup) \$\$p && printf "%s\\n" "\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done
 	@echo "Copying user configuration and INI files..."; \\
-	for f in povray.conf povray.ini ; do \\
+	for f in $pov_binary.conf $pov_binary.ini ; do \\
 	  if test -f \$(povconfuser)/\$\$f; then \\
 	    echo "Creating backup of \$(povconfuser)/\$\$f"; \\
 	    mv -f \$(povconfuser)/\$\$f \$(povconfuser)/\$\$f.bak; \\
 	  fi; \\
 	done; \\
-	\$(INSTALL_DATA) \$(top_srcdir)/povray.conf \$(povconfuser)/povray.conf && chown \$(povowner) \$(povconfuser)/povray.conf && chgrp \$(povgroup) \$(povconfuser)/povray.conf  && echo "\$(povconfuser)/povray.conf" >> \$(povinstall); \\
-	\$(INSTALL_DATA) \$(top_builddir)/povray.ini \$(povconfuser)/povray.ini && chown \$(povowner) \$(povconfuser)/povray.ini && chgrp \$(povgroup) \$(povconfuser)/povray.ini  && echo "\$(povconfuser)/povray.ini" >> \$(povinstall)
+	\$(INSTALL_DATA) \$(top_srcdir)/$pov_binary.conf \$(povconfuser)/$pov_binary.conf && chown \$(povowner) \$(povconfuser)/$pov_binary.conf && chgrp \$(povgroup) \$(povconfuser)/$pov_binary.conf  && echo "\$(povconfuser)/$pov_binary.conf" >> \$(povinstall); \\
+	\$(INSTALL_DATA) \$(top_builddir)/$pov_binary.ini \$(povconfuser)/$pov_binary.ini && chown \$(povowner) \$(povconfuser)/$pov_binary.ini && chgrp \$(povgroup) \$(povconfuser)/$pov_binary.ini  && echo "\$(povconfuser)/$pov_binary.ini" >> \$(povinstall)
 
 # Remove data, config, and empty folders for 'make uninstall'.
 # Use 'hook' instead of 'local' so as to properly remove *empty* folders (e.g. scripts).
 # The last echo prevents getting error from failed rmdir command.
 uninstall-hook:
 	@if test -f \$(top_builddir)/install.log ; then \\
-	  rmdir \$(DESTDIR)\$(povlibdir)/scripts; \\
 	  echo "Using install info from \$(top_builddir)/install.log"; \\
 	  echo "Removing data, documentation, and configuration files..."; \\
 	  for f in \`cat \$(top_builddir)/install.log\` ; do \\
@@ -676,11 +703,11 @@ uninstall-hook:
 	  "Removing all data unconditionally"; \\
 	  rm -f -r \$(DESTDIR)\$(povlibdir); \\
 	  rm -f -r \$(DESTDIR)\$(povdocdir); \\
-	  rm -f    \$(DESTDIR)\$(povconfdir)/povray.ini; \\
+	  rm -f    \$(DESTDIR)\$(povconfdir)/$pov_binary.ini; \\
 	  rmdir    \$(DESTDIR)\$(povconfdir); \\
 	  rmdir    \$(DESTDIR)\$(sysconfdir)/@PACKAGE@; \\
-	  rm -f    \$(povconfuser)/povray.conf; \\
-	  rm -f    \$(povconfuser)/povray.ini; \\
+	  rm -f    \$(povconfuser)/$pov_binary.conf; \\
+	  rm -f    \$(povconfuser)/$pov_binary.ini; \\
 	  rmdir    \$(povconfuser); \\
 	  rmdir    \$(povuser); \\
 	fi; \\
@@ -711,7 +738,7 @@ case "$1" in
   cat << pbEOF > $bootstrap
 #!/bin/sh -x
 
-# bootstrap for the source distribution of POV-Ray $pov_version_base for UNIX
+# bootstrap for the source distribution of $pov_branch $pov_version_base for UNIX
 # Written by $pov_config_bugreport
 # Run this script if configure.ac or any Makefile.am has changed
 
@@ -778,7 +805,7 @@ case "$1" in
   cat Makefile.header > $makefile.am
   cat << pbEOF >> $makefile.am
 
-# Makefile.am for the source distribution of POV-Ray $pov_version_base for UNIX
+# Makefile.am for the source distribution of $pov_branch $pov_version_base for UNIX
 # Written by $pov_config_bugreport
 
 # Libraries to build.
@@ -1315,7 +1342,7 @@ case "$1" in
   cat Makefile.header > $makefile.am
   cat << pbEOF >> $makefile.am
 
-# Makefile.am for the source distribution of POV-Ray $pov_version_base for UNIX
+# Makefile.am for the source distribution of $pov_branch $pov_version_base for UNIX
 # Written by $pov_config_bugreport
 
 # Libraries to build.

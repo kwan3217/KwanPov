@@ -2,6 +2,12 @@
  * pov_err.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/base/pov_err.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/base/pov_err.cpp $
+ * $Revision: #3 $
+ * $Change: 5944 $
+ * $DateTime: 2013/07/22 09:27:03 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // configbase.h must always be the first POV file included within base *.cpp files
@@ -160,7 +166,7 @@ std::string Exception::lookup_code(int err, const char *file, unsigned int line)
 			return "Native operating-system exception.";
 
 		case kInternalLimitErr:
-			return "A POV-Ray internal nesting limit was reached.";
+			return "A " BRANCH_NAME " internal nesting limit was reached.";
 
 		case kUncategorizedError:
 			if (file == NULL)
@@ -169,7 +175,7 @@ std::string Exception::lookup_code(int err, const char *file, unsigned int line)
 			return std::string(str);
 
 		case kNumericalLimitErr:
-			return "A POV-Ray internal numerical limit was reached.";
+			return "A " BRANCH_NAME " internal numerical limit was reached.";
 	}
 
 	// default

@@ -2,6 +2,12 @@
  * randomsequences.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/support/randomsequences.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/support/randomsequences.h $
+ * $Revision: #3 $
+ * $Change: 5951 $
+ * $DateTime: 2013/07/23 09:45:49 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BACKEND_RANDOMSEQUENCES_H
@@ -190,7 +196,52 @@ typedef shared_ptr<IndexedNumberGenerator<Vector2d> const>  IndexedVector2dGener
 /**
  *  @}
  *
- ***************************************************************************************************************
+  ***************************************************************************************************************
+ *
+ *  @name Random Distribution Functions
+ *
+ *  The following global functions provide various distributions from a single uniform random number source.
+ *
+ *  @{
+ */
+
+/**
+ *  Gets a random point on the unit square with uniform distribution.
+ *
+ *  @param[in]  source          A generator for double-precision random numbers uniformly distributed in the range [0..1)
+ *  @return                     A random point on the unit square.
+ */
+Vector2d Uniform2dOnSquare(SequentialDoubleGeneratorPtr source);
+
+/**
+ *  Gets a random point on the unit disc with uniform distribution.
+ *
+ *  @param[in]  source          A generator for double-precision random numbers uniformly distributed in the range [0..1)
+ *  @return                     A random point on the unit disc.
+ */
+Vector2d Uniform2dOnDisc(SequentialDoubleGeneratorPtr source);
+
+/**
+ *  Gets a random point on the unit sphere surface with uniform distribution.
+ *
+ *  @param[in]  source          A generator for double-precision random numbers uniformly distributed in the range [0..1)
+ *  @return                     A random point on the unit sphere surface.
+ */
+Vector3d Uniform3dOnSphere(SequentialDoubleGeneratorPtr source);
+
+/**
+ *  Gets a random point on the unit hemisphere with cos-weighted distribution.
+ *  @note       The hemisphere is oriented towards positive Y.
+ *
+ *  @param[in]  source          A generator for double-precision random numbers uniformly distributed in the range [0..1)
+ *  @return                     A random point on the unit hemisphere.
+ */
+Vector3d CosWeighted3dOnHemisphere(SequentialDoubleGeneratorPtr source);
+
+/**
+ *  @}
+ *
+***************************************************************************************************************
  *
  *  @name Pseudo-Random Number Generator Factories
  *
@@ -233,7 +284,7 @@ SeedableDoubleGeneratorPtr GetRandomDoubleGenerator(double minval, double maxval
  *  @param[in]  count           Number of values to provide.
  *  @return                     A shared pointer to a corresponding number generator.
  */
-SequentialDoubleGeneratorPtr GetRandomDoubleGenerator(double minval, double maxval);
+SeedableDoubleGeneratorPtr GetRandomDoubleGenerator(double minval, double maxval);
 
 /**
  *  Gets a source for floating-point pseudo-random numbers satisfying the given properties.

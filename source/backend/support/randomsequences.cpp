@@ -2,6 +2,12 @@
  * randomsequences.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/support/randomsequences.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/support/randomsequences.cpp $
+ * $Revision: #3 $
+ * $Change: 5951 $
+ * $DateTime: 2013/07/23 09:45:49 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <cassert>
@@ -215,6 +221,45 @@ void RandomDoubleSequence::Generator::SetSeed(size_t seedindex)
 
 
 /**********************************************************************************
+ *  Random Distribution Functions
+ *********************************************************************************/
+
+
+Vector2d Uniform2dOnSquare(SequentialDoubleGeneratorPtr source)
+{
+	double x = (*source)();
+	double y = (*source)();
+	return Vector2d((*source)(), (*source)());
+}
+
+Vector2d Uniform2dOnDisc(SequentialDoubleGeneratorPtr source)
+{
+	double r = sqrt((*source)());
+	double theta = (*source)() * 2*M_PI;
+	double x = r * cos(theta);
+	double y = r * sin(theta);
+	return Vector2d(x, y);
+}
+
+Vector3d Uniform3dOnSphere(SequentialDoubleGeneratorPtr source)
+{
+	double x = (*source)() * 2 - 1.0;
+	double r = sqrt(1 - x*x);
+	double theta = (*source)() * 2*M_PI;
+	double y = r * cos(theta);
+	double z = r * sin(theta);
+	return Vector3d(x, y, z);
+}
+
+Vector3d CosWeighted3dOnHemisphere(SequentialDoubleGeneratorPtr source)
+{
+	Vector2d v = Uniform2dOnDisc(source);
+	double y = sqrt (1 - v.lengthSqr());
+	return Vector3d(v.x(), y, v.y());
+}
+
+
+/**********************************************************************************
  *  Local Types : Abstract Generators
  *********************************************************************************/
 
@@ -248,7 +293,7 @@ class HybridNumberGenerator : public SeedableNumberGenerator<Type>, public Index
  *  Template class representing a generator for uniformly distributed numbers in a given range.
  */
 template<class Type, class BoostGenerator, class UniformType, size_t CYCLE_LENGTH = SIZE_MAX>
-class UniformRandomNumberGenerator : public SequentialNumberGenerator<Type>
+class UniformRandomNumberGenerator : public SeedableNumberGenerator<Type>
 {
 	public:
 
@@ -262,6 +307,7 @@ class UniformRandomNumberGenerator : public SequentialNumberGenerator<Type>
 		UniformRandomNumberGenerator(Type minval, Type maxval);
 		virtual Type operator()();
 		virtual size_t CycleLength() const;
+		virtual void Seed(size_t seed);
 
 	protected:
 		variate_generator<BoostGenerator, UniformType> generator;
@@ -621,6 +667,12 @@ size_t UniformRandomNumberGenerator<Type,BoostGenerator,UniformType,CYCLE_LENGTH
 	return CYCLE_LENGTH;
 }
 
+template<class Type, class BoostGenerator, class UniformType, size_t CYCLE_LENGTH>
+void UniformRandomNumberGenerator<Type,BoostGenerator,UniformType,CYCLE_LENGTH>::Seed(size_t seed)
+{
+	generator.engine().seed((uint32_t)seed);
+}
+
 
 /**********************************************************************************
  *  HaltonGenerator implementation
@@ -928,10 +980,10 @@ SeedableDoubleGeneratorPtr GetRandomDoubleGenerator(double minval, double maxval
 	return generator;
 }
 
-SequentialDoubleGeneratorPtr GetRandomDoubleGenerator(double minval, double maxval)
+SeedableDoubleGeneratorPtr GetRandomDoubleGenerator(double minval, double maxval)
 {
 	Mt19937DoubleGenerator::ParameterStruct param(minval, maxval);
-	SequentialDoubleGeneratorPtr generator(new Mt19937DoubleGenerator(param));
+	SeedableDoubleGeneratorPtr generator(new Mt19937DoubleGenerator(param));
 	(void)(*generator)(); // legacy fix
 	return generator;
 }

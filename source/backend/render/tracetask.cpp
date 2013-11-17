@@ -2,6 +2,12 @@
  * tracetask.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/render/tracetask.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/render/tracetask.cpp $
+ * $Revision: #4 $
+ * $Change: 5969 $
+ * $DateTime: 2013/07/29 10:30:49 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <vector>
@@ -212,7 +218,7 @@ void TraceTask::SubdivisionBuffer::Clear()
 		*i = false;
 }
 
-TraceTask::TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr) :
+TraceTask::TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr) :
 	RenderTask(vd),
 	trace(vd, GetViewDataPtr(), vd->GetSceneData()->parsedMaxTraceLevel, vd->GetSceneData()->parsedAdcBailout,
 	      vd->GetQualityFeatureFlags(), cooperate, media, radiosity),
@@ -220,6 +226,7 @@ TraceTask::TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, unsigned in
 	tracingMethod(tm),
 	jitterScale(js),
 	aaThreshold(aat),
+	aaConfidence(aac),
 	aaDepth(aad),
 	aaGamma(aag),
 	previewSize(ps),
@@ -280,6 +287,9 @@ void TraceTask::Run()
 				break;
 			case 2:
 				AdaptiveSupersamplingM2();
+				break;
+			case 3:
+				StochasticSupersamplingM3();
 				break;
 		}
 
@@ -624,6 +634,186 @@ void TraceTask::AdaptiveSupersamplingM2()
 
 		GetViewDataPtr()->AfterTile();
 		GetViewData()->CompletedRectangle(rect, serial, pixels.GetPixels(), 1, finalTrace);
+
+		Cooperate();
+	}
+}
+
+void TraceTask::StochasticSupersamplingM3()
+{
+	POVRect rect;
+	vector<Colour> pixels;
+	vector<DblColour> pixelsSum;
+	vector<DblColour> pixelsSumSqr;
+	vector<unsigned int> pixelsSamples;
+	unsigned int serial;
+	bool sampleMore;
+
+	// Create list of thresholds for confidence test.
+	vector<double> confidenceFactor;
+	unsigned int minSamples = 1; // TODO currently hard-coded
+	unsigned int maxSamples = max(minSamples, 1u << (aaDepth*2));
+
+	confidenceFactor.reserve(maxSamples*5);
+	double threshold  = aaThreshold;
+	double confidence = aaConfidence;
+	if(maxSamples > 1)
+	{
+		for(int n = 1; n <= maxSamples*5; n++)
+			confidenceFactor.push_back(ndtri((1+confidence)/2) / sqrt((double)n));
+	}
+	else
+		confidenceFactor.push_back(0.0);
+
+	SequentialDoubleGeneratorPtr randgen(GetRandomDoubleGenerator(-0.5, 0.5, maxSamples*2));
+
+	while(GetViewData()->GetNextRectangle(rect, serial) == true)
+	{
+		radiosity.BeforeTile(highReproducibility? serial : 0);
+
+		pixels.clear();
+		pixelsSum.clear();
+		pixelsSumSqr.clear();
+		pixelsSamples.clear();
+		pixels.reserve(rect.GetArea());
+		pixelsSum.reserve(rect.GetArea());
+		pixelsSumSqr.reserve(rect.GetArea());
+		pixelsSamples.reserve(rect.GetArea());
+
+		do
+		{
+			sampleMore = false;
+			unsigned int index = 0;
+			for(DBL y = DBL(rect.top); y <= DBL(rect.bottom); y++)
+			{
+				for(DBL x = DBL(rect.left); x <= DBL(rect.right); x++)
+				{
+					DblColour neighborSum(0.0);
+					DblColour neighborSumSqr(0.0);
+					unsigned int neighborSamples(0);
+					unsigned int samples(0);
+					unsigned int index2;
+
+					if (index < pixelsSamples.size())
+					{
+						samples          = pixelsSamples [index];
+						neighborSum      = pixelsSum     [index];
+						neighborSumSqr   = pixelsSumSqr  [index];
+						neighborSamples  = pixelsSamples [index];
+					}
+
+					// TODO - we should obtain information about the neighboring render blocks as well
+					index2 = index - 1;
+					if ((x > rect.left) && (index2 < pixelsSamples.size()))
+					{
+						neighborSum     += pixelsSum     [index2];
+						neighborSumSqr  += pixelsSumSqr  [index2];
+						neighborSamples += pixelsSamples [index2];
+					}
+					index2 = index - rect.GetWidth();
+					if ((y > rect.top) && (index2 < pixelsSamples.size()))
+					{
+						neighborSum     += pixelsSum     [index2];
+						neighborSumSqr  += pixelsSumSqr  [index2];
+						neighborSamples += pixelsSamples [index2];
+					}
+					index2 = index + 1;
+					if ((x < rect.right) && (index2 < pixelsSamples.size()))
+					{
+						neighborSum     += pixelsSum     [index2];
+						neighborSumSqr  += pixelsSumSqr  [index2];
+						neighborSamples += pixelsSamples [index2];
+					}
+					index2 = index + rect.GetWidth();
+					if ((y > rect.bottom) && (index2 < pixelsSamples.size()))
+					{
+						neighborSum     += pixelsSum     [index2];
+						neighborSumSqr  += pixelsSumSqr  [index2];
+						neighborSamples += pixelsSamples [index2];
+					}
+
+					while(true)
+					{
+						if (samples >= minSamples)
+						{
+							if (samples >= maxSamples)
+								break;
+
+							DblColour variance = (neighborSumSqr - Sqr(neighborSum)/neighborSamples) / (neighborSamples-1);
+							double cf = confidenceFactor[neighborSamples-1];
+							DblColour sqrtvar = sqrt(variance);
+							DblColour confidenceDelta = sqrtvar * cf;
+							if ((confidenceDelta.red()    <= threshold) &&
+								(confidenceDelta.green()  <= threshold) &&
+								(confidenceDelta.blue()   <= threshold) &&
+								(confidenceDelta.transm() <= threshold))
+								break;
+						}
+
+						Colour colTemp;
+						DblColour col, colSqr;
+
+						Vector2d jitter = Uniform2dOnSquare(GetViewDataPtr()->stochasticRandomGenerator) - 0.5;
+						trace(x + jitter.x(), y + jitter.y(), GetViewData()->GetWidth(), GetViewData()->GetHeight(), colTemp, max(samples, minSamples));
+
+						pixels.push_back(colTemp);
+						col = DblColour(GammaCurve::Encode(aaGamma, colTemp));
+						colSqr = col*col;
+
+						if (index >= pixelsSamples.size())
+						{
+							GetViewDataPtr()->Stats()[Number_Of_Pixels]++;
+
+							pixelsSum.push_back(col);
+							pixelsSumSqr.push_back(colSqr);
+							pixelsSamples.push_back(1);
+						}
+						else
+						{
+							pixels [index] += colTemp;
+
+							pixelsSum [index] += col;
+							pixelsSumSqr [index] += colSqr;
+							pixelsSamples [index] ++;
+						}
+
+						neighborSum     += col;
+						neighborSumSqr  += colSqr;
+						neighborSamples ++;
+
+						samples         ++;
+
+						// Whenever one or more pixels are re-sampled, neighborhood variance constraints may require us to also re-sample others.
+						sampleMore = true;
+
+						Cooperate();
+						
+						if (samples >= minSamples) // TODO
+							break;
+					}
+
+					index ++;
+				}
+			}
+		}
+		while (sampleMore);
+
+		// So far we've just accumulated the samples for any pixel;
+		// now compute the actual average.
+		unsigned int index = 0;
+		for(DBL y = DBL(rect.top); y <= DBL(rect.bottom); y++)
+		{
+			for(DBL x = DBL(rect.left); x <= DBL(rect.right); x++)
+			{
+				pixels [index] /= pixelsSamples[index];
+				index ++;
+			}
+		}
+
+		radiosity.AfterTile();
+
+		GetViewDataPtr()->AfterTile();
+		GetViewData()->CompletedRectangle(rect, serial, pixels, 1, finalTrace);
 
 		Cooperate();
 	}

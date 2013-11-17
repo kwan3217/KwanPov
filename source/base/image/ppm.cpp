@@ -4,6 +4,12 @@
  * This module contains the code to read and write the PPM file format.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -24,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/base/image/ppm.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/base/image/ppm.cpp $
+ * $Revision: #2 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 /****************************************************************************
@@ -152,7 +158,7 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 			}
 			else
 			{
-				GetEncodedRGBValue (image, x, y, gamma, mask, rval, gval, bval, *dither) ;
+				GetEncodedRGBValue (image, x, y, gamma, mask, rval, gval, bval, *dither, options.glareDesaturation) ;
 
 				if (bpcc > 8)
 				{

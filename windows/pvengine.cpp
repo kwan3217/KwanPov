@@ -6,6 +6,12 @@
  * Primary author: Christopher J. Cason.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/windows/pvengine.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/windows/pvengine.cpp $
+ * $Revision: #7 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 /*****************************************************************************/
@@ -1273,8 +1279,8 @@ bool checkRegKey (void)
   if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\" REGKEY "\\CurrentVersion\\Windows", 0, KEY_READ | KEY_WRITE, &key) == ERROR_SUCCESS)
   {
     len = sizeof (str) ;
-    if (RegQueryValueEx (key, VERSIONVAL, 0, NULL, (BYTE *) str, &len) != 0 || strcmp (str, POV_RAY_VERSION) != 0)
-        RegSetValueEx (key, VERSIONVAL, 0, REG_SZ, (BYTE *) POV_RAY_VERSION, (int) strlen (POV_RAY_VERSION) + 1) ;
+    if (RegQueryValueEx (key, VERSIONVAL, 0, NULL, (BYTE *) str, &len) != 0 || strcmp (str, BRANCH_VERSION) != 0)
+        RegSetValueEx (key, VERSIONVAL, 0, REG_SZ, (BYTE *) BRANCH_VERSION, (int) strlen (BRANCH_VERSION) + 1) ;
     RegCloseKey (key) ;
   }
 
@@ -1463,7 +1469,7 @@ bool CloneOptions (void)
       reg_printf (true, "Software\\" REGKEY "\\CurrentVersion\\Windows", "Home", "%s", BinariesPath) ;
   }
 
-  reg_printf (true, "Software\\" REGKEY "\\CurrentVersion\\Windows", VERSIONVAL, "%s", POV_RAY_VERSION) ;
+  reg_printf (true, "Software\\" REGKEY "\\CurrentVersion\\Windows", VERSIONVAL, "%s", BRANCH_VERSION) ;
 
   cond_reg_printf ("Software\\" REGKEY "\\" REGVERKEY "\\POV-Edit\\Open",   "Open0",   "%sChanges.txt,1,1,0,0,8,2",                   DocumentsPath) ;
   cond_reg_printf ("Software\\" REGKEY "\\" REGVERKEY "\\POV-Edit\\Recent", "Recent0", "%sChanges.txt,1,1,0,0,8,2",                   DocumentsPath) ;
@@ -1548,7 +1554,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
     {
       if (!quiet)
         MessageBox (NULL, "Could not get current directory - cannot infer home path. Please supply it on the command-line",
-                          "POV-Ray for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
+                          BRANCH_NAME " for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
       return 5 ;
     }
     if (strlen (base) < 3 || (strlen (base) == 3 && base [1] == ':' && isPathSeparator(base [2])))
@@ -1556,7 +1562,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
       if (!quiet)
       {
         sprintf (str, "Current dir '%s' is root - cannot infer home path. Please supply it on the command-line.", base) ;
-        MessageBox (NULL, str, "POV-Ray for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
+        MessageBox (NULL, str, BRANCH_NAME " for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
       }
       return 10 ;
     }
@@ -1565,7 +1571,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
     {
       if (!quiet)
         MessageBox (NULL, "Cannot infer home path. Please supply it on the command-line.",
-                          "POV-Ray for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
+                          BRANCH_NAME " for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
       return 15 ;
     }
   }
@@ -1577,7 +1583,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
     if (GetFullPathName (s, sizeof (base), base, NULL) == 0)
     {
       sprintf (str, "GetFullPathName() for '%s' failed [0x%08x]", s, GetLastError ()) ;
-      MessageBox (NULL, str, "POV-Ray for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
+      MessageBox (NULL, str, BRANCH_NAME " for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
     }
   }
   if (!dirExists (base))
@@ -1585,7 +1591,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
     if (!quiet)
     {
       sprintf (str, "Could not stat directory '%s'", base) ;
-      MessageBox (NULL, str, "POV-Ray for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
+      MessageBox (NULL, str, BRANCH_NAME " for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
     }
     return 20 ;
   }
@@ -1599,7 +1605,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
       // created. note that we do auto-create the path if possible (i.e. the parent
       // directory exists and is writable by the user who launches POV-Ray).
       if (!quiet)
-        if (MessageBox (NULL, "Could not verify supplied user files path: use it anyway?\n(Selecting NO will exit.)", "POV-Ray for Windows - running INSTALL option", MB_YESNO | MB_ICONEXCLAMATION) == IDNO)
+        if (MessageBox (NULL, "Could not verify supplied user files path: use it anyway?\n(Selecting NO will exit.)", BRANCH_NAME " for Windows - running INSTALL option", MB_YESNO | MB_ICONEXCLAMATION) == IDNO)
           return 30;
     }
     reg_printf (true, "Software\\" REGKEY "\\" REGVERKEY "\\Windows", "DocPath", "%s\\", docpath);
@@ -1608,7 +1614,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
   if (!reg_printf (true, "Software\\" REGKEY "\\" REGVERKEY "\\Windows", "Home", "%s\\", base))
   {
     if (!quiet)
-      MessageBox (NULL, "Failed to write to HKCU in registry", "POV-Ray for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
+      MessageBox (NULL, "Failed to write to HKCU in registry", BRANCH_NAME " for Windows - running INSTALL option", MB_OK | MB_ICONSTOP) ;
     return 35 ;
   }
 
@@ -1618,7 +1624,7 @@ int InstallSettings (char *binpath, char *docpath, bool quiet)
   if (!quiet)
   {
     sprintf (str, "[Home path is %s]\n\nSuccess!", base) ;
-    MessageBox (NULL, str, "POV-Ray for Windows - running INSTALL option", MB_OK | MB_ICONINFORMATION) ;
+    MessageBox (NULL, str, BRANCH_NAME " for Windows - running INSTALL option", MB_OK | MB_ICONINFORMATION) ;
   }
   return (0) ;
 }
@@ -1709,7 +1715,7 @@ LONG WINAPI ExceptionHandler(struct _EXCEPTION_POINTERS* ExceptionInfo)
   if (desc == NULL)
     desc = "an" ;
   sprintf (str,
-           "Unfortunately, it appears that %s at address 0x%p has caused this unofficial POV-Ray build to crash. "
+           "Unfortunately, it appears that %s at address 0x%p has caused " BRANCH_NAME " to crash. "
            "This dialog will allow you to choose whether or not a dump file (useful for diagnostics) is written.\n\n"
            "NOTE: If you were running a render, you should be able to recover the part that had already been generated. "
            "See the 'Continue' (+c) option in the documentation for more information about this.\n\n"
@@ -1720,21 +1726,21 @@ LONG WINAPI ExceptionHandler(struct _EXCEPTION_POINTERS* ExceptionInfo)
 #else
            c->Eip);
 #endif
-  DWORD result = MessageBox (NULL, str, "POV-Ray for Windows", MB_ICONSTOP | MB_TOPMOST | MB_TASKMODAL | MB_YESNO | MB_DEFBUTTON1 | MB_SETFOREGROUND) ;
+  DWORD result = MessageBox (NULL, str, BRANCH_NAME " for Windows", MB_ICONSTOP | MB_TOPMOST | MB_TASKMODAL | MB_YESNO | MB_DEFBUTTON1 | MB_SETFOREGROUND) ;
   if (result == IDYES)
   {
     // write a full dump first, then a minidump. it's no big deal if the full dump write fails.
     WriteDump(ExceptionInfo, true, timestamp);
     if ((s = WriteDump(ExceptionInfo, false, timestamp)) != NULL)
     {
-      MessageBox (main_window, "The dump was successfully saved.", "POV-Ray for Windows", MB_OK) ;
+      MessageBox (main_window, "The dump was successfully saved.", BRANCH_NAME " for Windows", MB_OK) ;
       sprintf(str, "/select,%s", s);
       ShellExecute (NULL, NULL, "explorer.exe", str, NULL, SW_SHOWNORMAL) ;
       ExitProcess (1) ;
     }
   }
   else
-    MessageBox (main_window, "POV-Ray will now exit.", "POV-Ray for Windows", MB_OK) ;
+    MessageBox (main_window, BRANCH_NAME " will now exit.", BRANCH_NAME " for Windows", MB_OK) ;
   ExitProcess (1) ;
   return (EXCEPTION_CONTINUE_SEARCH) ; // make compiler happy
 }
@@ -1925,7 +1931,7 @@ void setRunOnce (void)
                       &result) == ERROR_SUCCESS)
   {
     GetModuleFileName (hInstance, str, sizeof (str)) ;
-    RegSetValueEx (key, "POV-Ray for Windows", 0, REG_SZ, (BYTE *) str, (int) strlen (str) + 1) ;
+    RegSetValueEx (key, BRANCH_NAME " for Windows", 0, REG_SZ, (BYTE *) str, (int) strlen (str) + 1) ;
     RegCloseKey (key) ;
   }
 #endif
@@ -1985,7 +1991,7 @@ bool start_rendering (bool ignore_source_file)
 
   if (Session.BackendFailed())
   {
-    MessageBox (main_window, "The render backend has shut down due to an error: please re-start POV-Ray", "Error", MB_OK | MB_ICONSTOP) ;
+    MessageBox (main_window, "The render backend has shut down due to an error: please re-start " BRANCH_NAME, "Error", MB_OK | MB_ICONSTOP) ;
     return false;
   }
 
@@ -2109,7 +2115,7 @@ bool start_rendering (bool ignore_source_file)
                 break ;
 
             default :
-                message_printf ("POV-Ray for Windows doesn't recognize this file type ; assuming POV source.\n") ;
+                message_printf (BRANCH_NAME " for Windows doesn't recognize this file type ; assuming POV source.\n") ;
                 opts.SetSourceFile (source_file_name);
                 break ;
           }
@@ -2244,7 +2250,7 @@ bool start_rendering (bool ignore_source_file)
       PlaySound (parse_error_sound, NULL, SND_NOWAIT | SND_ASYNC | SND_NODEFAULT) ;
       if (!running_demo && !demo_mode && !benchmark_mode)
         FeatureNotify ("ParserErrorSound",
-                        "POV-Ray - Parse Error Sound",
+                        BRANCH_NAME " - Parse Error Sound",
                         "You can change the sound played upon parse errors "
                         "from the Render Menu.\n\n"
                         "Click Help for more information.",
@@ -2308,11 +2314,11 @@ void render_stopped (void)
   s = EditGetFilename(true) ;
   if (s != NULL && *s != '\0')
   {
-    sprintf (str, "POV-Ray - %s", s) ;
+    sprintf (str, BRANCH_NAME " - %s", s) ;
     SetCaption (str) ;
   }
   else
-    SetCaption ("POV-Ray for Windows") ;
+    SetCaption (BRANCH_NAME " for Windows") ;
 
   if ((!success || ErrorOccurred) && povray_return_code == 0)
     povray_return_code = -1 ;
@@ -2353,7 +2359,7 @@ void render_stopped (void)
       PostQuitMessage (0) ;
     if (demo_mode)
     {
-      PovMessageBox ("Demonstration completed. POV-Ray will now exit.", "Finished test run") ;
+      PovMessageBox ("Demonstration completed. " BRANCH_NAME " will now exit.", "Finished test run") ;
       PostQuitMessage (0) ;
     }
   }
@@ -2370,13 +2376,13 @@ void render_stopped (void)
   WinDisplay *rw = GetRenderWindow();
   if (rw != NULL)
   {
-    rw->SetCaption ("POV-Ray Render Window");
+    rw->SetCaption (BRANCH_NAME " Render Window");
     rw->SetRenderState (false);
     if (render_auto_close)
       rw->Hide();
   }
   if (main_window_hidden)
-    TaskBarModifyIcon (main_window, 0, "POV-Ray (Restore: DblClk ; Menu: Mouse2)") ;
+    TaskBarModifyIcon (main_window, 0, BRANCH_NAME " (Restore: DblClk ; Menu: Mouse2)") ;
   InvalidateRect (statuspanel, NULL, false) ;
 
   if (success == true && ErrorOccurred == false)
@@ -2386,9 +2392,9 @@ void render_stopped (void)
       PlaySound (render_complete_sound, NULL, SND_ASYNC | SND_NODEFAULT) ;
       if (!running_demo && !demo_mode && !benchmark_mode)
         FeatureNotify ("RenderCompleteSound",
-                      "POV-Ray - Render Complete Sound",
+                      BRANCH_NAME " - Render Complete Sound",
                       "You can change the sound played upon completion of rendering "
-                      "from the Render Menu.\n\nIt is also possible to tell POV-Ray "
+                      "from the Render Menu.\n\nIt is also possible to tell " BRANCH_NAME " "
                       "for Windows to do other things when a render stops (such as "
                       "display a message or exit.)",
                       "sounds", false) ;
@@ -2403,7 +2409,7 @@ void render_stopped (void)
            break ;
 
       case CM_COMPLETION_MESSAGE :
-           PovMessageBox ("Render completed", "Message from POV-Ray for Windows") ;
+           PovMessageBox ("Render completed", "Message from " BRANCH_NAME " for Windows") ;
            break ;
     }
     if (!running_demo && !demo_mode && !benchmark_mode && !rendering_insert_menu && !running_benchmark && !was_insert_render)
@@ -2418,7 +2424,7 @@ void render_stopped (void)
                       "  %s\n\n"
                       "Press F1 to learn more about how to control where files are written.",
                       ofn.c_str ()) ;
-        FeatureNotify ("OutputFileLocation", "POV-Ray - Output File Notification", str, "Output_File_Name", false) ;
+        FeatureNotify ("OutputFileLocation", BRANCH_NAME " - Output File Notification", str, "Output_File_Name", false) ;
         PutHKCU("LastRender", "OutputFile", ofn.c_str ()) ;
       }
       else
@@ -2426,7 +2432,7 @@ void render_stopped (void)
         if (!running_benchmark)
         {
             FeatureNotify ("OutputFileOff",
-                           "POV-Ray - No Output File",
+                           BRANCH_NAME " - No Output File",
                            "A render has completed but file output was turned off. No file "
                            "was written.\n\nPress F1 for help on output file control.",
                            "Output_To_File",
@@ -2452,7 +2458,7 @@ void render_stopped (void)
         PlaySound (render_error_sound, NULL, SND_ASYNC | SND_NODEFAULT) ;
         if (!running_demo && !demo_mode && !benchmark_mode)
           FeatureNotify ("RenderErrorSound",
-                        "POV-Ray - Render Stopped Sound",
+                        BRANCH_NAME " - Render Stopped Sound",
                         "You can change the sound played upon render errors/cancellation "
                         "from the Render Menu.",
                         "sounds", false) ;
@@ -2465,7 +2471,7 @@ void render_stopped (void)
         PlaySound (parse_error_sound, NULL, SND_NOWAIT | SND_ASYNC | SND_NODEFAULT) ;
         if (!running_demo && !demo_mode && !benchmark_mode)
           FeatureNotify ("ParserErrorSound",
-                        "POV-Ray - Parse Error Sound",
+                        BRANCH_NAME " - Parse Error Sound",
                         "You can change the sound played upon parse errors "
                         "from the Render Menu.\n\n"
                         "Click Help for more information.",
@@ -2698,11 +2704,11 @@ void DragFunction (HDROP handle)
   if (calc)
     CalculateClientWindows (true) ;
   FeatureNotify ("DropFiles",
-                 "POV-Ray - Drag and Drop",
-                 "POV-Ray can do one of several things when you drop files onto it, "
+                 BRANCH_NAME " - Drag and Drop",
+                 BRANCH_NAME " can do one of several things when you drop files onto it, "
                  "depending on the state of the 'Drop to Editor' option and the type "
                  "of file dropped. For example if the file is a .POV or .INI you can "
-                 "chose whether POV-Ray opens it or renders it.\n\nPress F1 for more "
+                 "chose whether " BRANCH_NAME " opens it or renders it.\n\nPress F1 for more "
                  "information.",
                  "drag and drop",
                  true) ;
@@ -2997,18 +3003,18 @@ bool handle_main_command (WPARAM wParam, LPARAM lParam)
              s = EditGetFilename(true) ;
              if (s != NULL && *s != '\0')
              {
-               sprintf (str, rendersleep ? "POV-Ray (paused) - %s" : "POV-Ray - %s", s) ;
+               sprintf (str, rendersleep ? BRANCH_NAME " (paused) - %s" : BRANCH_NAME " - %s", s) ;
                SetCaption (str) ;
              }
              else
-               SetCaption (rendersleep ? "POV-Ray for Windows (paused)" : "POV-Ray for Windows") ;
+               SetCaption (rendersleep ? BRANCH_NAME " for Windows (paused)" : BRANCH_NAME " for Windows") ;
            }
            else
            {
              build_main_menu (hMainMenu, true) ;
              PVEnableMenuItem (CM_FILESAVE, MF_GRAYED) ;
              PVEnableMenuItem (CM_FILECLOSE, MF_GRAYED) ;
-             SetCaption (rendersleep ? "POV-Ray for Windows (paused)" : "POV-Ray for Windows") ;
+             SetCaption (rendersleep ? BRANCH_NAME " for Windows (paused)" : BRANCH_NAME " for Windows") ;
            }
            break ;
 
@@ -3017,16 +3023,16 @@ bool handle_main_command (WPARAM wParam, LPARAM lParam)
            s = EditGetFilename(true) ;
            if (s != NULL && *s != '\0')
            {
-             sprintf (str, rendersleep ? "POV-Ray (paused) - %s" : "POV-Ray - %s", s) ;
+             sprintf (str, rendersleep ? BRANCH_NAME " (paused) - %s" : BRANCH_NAME " - %s", s) ;
              SetCaption (str) ;
            }
            else
-             SetCaption (rendersleep ? "POV-Ray for Windows (paused)" : "POV-Ray for Windows") ;
+             SetCaption (rendersleep ? BRANCH_NAME " for Windows (paused)" : BRANCH_NAME " for Windows") ;
            break ;
 
       case NotifyFocusSaveModified :
            FeatureNotify ("FocusSaveModified",
-                          "POV-Ray - Modified Files Auto-Saved",
+                          BRANCH_NAME " - Modified Files Auto-Saved",
                           "Your modified files were automatically saved when you switched to another "
                           "application. This is necessary for the Auto-Reload feature to work. If you "
                           "do not want this to happen, turn auto-reload off via the Editor menu.\n\n"
@@ -3061,9 +3067,9 @@ bool handle_main_command (WPARAM wParam, LPARAM lParam)
          {
            if (ListenMode)
            {
-             char *s = "POV-Ray is in network listen mode. Press OK to continue listening or "
+             char *s = BRANCH_NAME " is in network listen mode. Press OK to continue listening or "
                        "CANCEL to shut down and exit." ;
-             if (MessageBox (main_window, s, "POV-Ray - Network Listen Mode", MB_OKCANCEL) == IDOK)
+             if (MessageBox (main_window, s, BRANCH_NAME " - Network Listen Mode", MB_OKCANCEL) == IDOK)
                return (0) ;
              TaskBarDeleteIcon (main_window, 0) ;
              DestroyWindow (main_window) ;
@@ -3082,9 +3088,9 @@ bool handle_main_command (WPARAM wParam, LPARAM lParam)
          {
            if (use_taskbar)
            {
-             char *s = "POV-Ray (Restore: DblClk ; Menu: Mouse Btn 2)" ;
+             char *s = BRANCH_NAME " (Restore: DblClk ; Menu: Mouse Btn 2)" ;
              if (ListenMode)
-               s = "POV-Ray: Network Listen Mode - DblClick for Options" ;
+               s = BRANCH_NAME ": Network Listen Mode - DblClick for Options" ;
              if (TaskBarAddIcon (main_window, 0, ourIcon, s))
              {
                ShowWindow (main_window, SW_MINIMIZE) ;
@@ -3124,7 +3130,7 @@ bool handle_main_command (WPARAM wParam, LPARAM lParam)
          {
            if (Session.Resume())
            {
-             SetCaption ("POV-Ray for Windows") ;
+             SetCaption (BRANCH_NAME " for Windows") ;
              FlashWindow (main_window, 0) ;
              SleepTimeEnd = clock () ;
              SleepTimeTotal += SleepTimeEnd - SleepTimeStart ;
@@ -3193,7 +3199,7 @@ bool handle_main_command (WPARAM wParam, LPARAM lParam)
          if (rendering)
          {
            if (MessageBox (main_window,
-                           "POV-Ray is currently rendering - do you want to stop ?",
+                           BRANCH_NAME " is currently rendering - do you want to stop ?",
                            "Stop rendering ?",
                            MB_ICONQUESTION | MB_YESNO) == IDYES)
            {
@@ -3307,9 +3313,9 @@ bool handle_main_command (WPARAM wParam, LPARAM lParam)
          if (editors_enabled == use_editors)
            return true;
          if (MessageBox (main_window,
-                        "POV-Ray for Windows needs to re-start for this to take effect immediately.\n\n"
-                        "Re-start POV-Ray ?",
-                        "Re-start POV-Ray for Windows ?",
+                        BRANCH_NAME " for Windows needs to re-start for this to take effect immediately.\n\n"
+                        "Re-start " BRANCH_NAME " ?",
+                        "Re-start " BRANCH_NAME " for Windows ?",
                         MB_ICONEXCLAMATION | MB_YESNO) == IDYES)
          {
            GetModuleFileName (hInstance, filename, sizeof (filename) - 1) ;
@@ -3789,9 +3795,9 @@ LRESULT CALLBACK PovMainWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM 
          {
            if (ListenMode)
            {
-             char *s = "POV-Ray is in network listen mode. Press OK to continue listening or "
+             char *s = BRANCH_NAME " is in network listen mode. Press OK to continue listening or "
                        "CANCEL to shut down and exit." ;
-             if (MessageBox (main_window, s, "POV-Ray - Network Listen Mode", MB_OKCANCEL | MB_SYSTEMMODAL) == IDOK)
+             if (MessageBox (main_window, s, BRANCH_NAME " - Network Listen Mode", MB_OKCANCEL | MB_SYSTEMMODAL) == IDOK)
                return (0) ;
              TaskBarDeleteIcon (main_window, 0) ;
              DestroyWindow (main_window) ;
@@ -4036,7 +4042,7 @@ LRESULT CALLBACK PovMainWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM 
     case WM_QUERYENDSESSION :
          if (rendering)
          {
-           if (MessageBox (main_window, "POV-Ray is currently rendering - do you want to stop ?", "Stop rendering ?", MB_ICONQUESTION | MB_YESNO) != IDYES)
+           if (MessageBox (main_window, BRANCH_NAME " is currently rendering - do you want to stop ?", "Stop rendering ?", MB_ICONQUESTION | MB_YESNO) != IDYES)
              return (false) ;
            if (!EditCanClose (true))
              return (false) ;
@@ -4134,9 +4140,9 @@ LRESULT CALLBACK PovMainWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM 
              SendMessage (toolbar_window, TB_HIDEBUTTON, (WPARAM) CM_FILERENDER, MAKELONG (0, 0)) ;
              SendMessage (toolbar_window, TB_HIDEBUTTON, (WPARAM) CM_STOPRENDER, MAKELONG (0, 0)) ;
              status_buffer [0] = '\0' ;
-             say_status_message (StatusMessage, "Render backend Failed - please re-start POV-Ray");
+             say_status_message (StatusMessage, "Render backend Failed - please re-start " BRANCH_NAME);
              delay_next_status = 2500;
-             buffer_message (mFatal, "Render backend Failed - please re-start POV-Ray\n") ;
+             buffer_message (mFatal, "Render backend Failed - please re-start " BRANCH_NAME "\n") ;
              if (render_complete_sound_enabled)
                PlaySound (render_error_sound, NULL, SND_ASYNC | SND_NODEFAULT) ;
            }
@@ -4151,7 +4157,7 @@ LRESULT CALLBACK PovMainWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM 
            }
            if (main_window_hidden)
            {
-             sprintf (str, "POV-Ray [%d%% complete] (Restore: DblClk ; Menu: Mouse2)", LastRenderPercentage) ;
+             sprintf (str, BRANCH_NAME " [%d%% complete] (Restore: DblClk ; Menu: Mouse2)", LastRenderPercentage) ;
              TaskBarModifyIcon (main_window, 0, str) ;
            }
            SendMessage (StatusPanelItems [IDC_STATUS_PROGRESS].hwnd, PBM_SETPOS, (WPARAM) LastRenderPercentage, 0) ;
@@ -4275,7 +4281,7 @@ LRESULT CALLBACK PovMainWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM 
          switch (wParam)
          {
            case SIZE_MINIMIZED :
-                SetCaption (rendersleep ? "POV-Ray for Windows (paused)" : "POV-Ray for Windows") ;
+                SetCaption (rendersleep ? BRANCH_NAME " for Windows (paused)" : BRANCH_NAME " for Windows") ;
                 if (GetRenderWindow() != NULL)
                   if (RenderwinIsChild == false && HideRenderWithMain == true)
                     GetRenderWindow()->Hide();
@@ -4287,11 +4293,11 @@ LRESULT CALLBACK PovMainWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                 s = EditGetFilename(true) ;
                 if (s != NULL && *s != '\0')
                 {
-                  sprintf (str, rendersleep ? "POV-Ray (paused) - %s" : "POV-Ray - %s", s) ;
+                  sprintf (str, rendersleep ? BRANCH_NAME " (paused) - %s" : BRANCH_NAME " - %s", s) ;
                   SetCaption (str) ;
                 }
                 else
-                  SetCaption (rendersleep ? "POV-Ray for Windows (paused)" : "POV-Ray for Windows") ;
+                  SetCaption (rendersleep ? BRANCH_NAME " for Windows (paused)" : BRANCH_NAME " for Windows") ;
                 // ***** fall through *****
 
            case SIZE_MAXIMIZED :
@@ -4387,7 +4393,7 @@ LRESULT CALLBACK PovMainWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM 
          if (rendering && !quit)
          {
            if (MessageBox (main_window,
-                           "POV-Ray is currently rendering - do you want to stop ?",
+                           BRANCH_NAME " is currently rendering - do you want to stop ?",
                            "Stop rendering",
                            MB_ICONQUESTION | MB_YESNO) == IDNO)
            {
@@ -4499,7 +4505,7 @@ LRESULT CALLBACK PovMessageWndProc (HWND hwnd, UINT message, WPARAM wParam, LPAR
            hh_aklink.pszKeywords = "text streams" ;
            MessageBox (hwnd,
                        "You may use the Edit menu to copy the contents of this message pane to the clipboard\n\n"
-                       "Press Help to learn how to direct the POV-Ray text output streams to a file",
+                       "Press Help to learn how to direct the " BRANCH_NAME " text output streams to a file",
                        "Text Selection Not Supported In This Window",
                        MB_OK | MB_ICONINFORMATION | MB_HELP) ;
          }
@@ -4878,7 +4884,7 @@ void ShowAboutBox (void)
   int         oldMode ;
   MSG         msg ;
   HDC         hdcMemory ;
-  char        *s = POV_RAY_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ;
+  char        *s = BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ;
   SIZE        size ;
   HFONT       oldFont ;
   BITMAP      bm ;
@@ -4898,7 +4904,8 @@ void ShowAboutBox (void)
     hdcMemory = CreateCompatibleDC (NULL) ;
     oldFont = (HFONT) SelectObject (hdcMemory, about_font) ;
     oldMode = SetBkMode (hdcMemory, TRANSPARENT) ;
-    oldColour = SetTextColor (hdcMemory, RGB (0x96, 0xD3, 0xFF)) ;
+    //oldColour = SetTextColor (hdcMemory, RGB (0x96, 0xD3, 0xFF)) ;
+    oldColour = SetTextColor (hdcMemory, RGB (0xFF, 0x00, 0x00)) ;
     oldBmp = (HBITMAP) SelectObject (hdcMemory, hBmpAbout) ;
     GetTextExtentPoint (hdcMemory, s, (int) strlen (s), &size) ;
     ExtTextOut (hdcMemory, 387, 14, 0, NULL, s, (int) strlen (s), NULL) ;
@@ -4910,7 +4917,7 @@ void ShowAboutBox (void)
 
     about_window = CreateWindowEx (0,//WS_EX_TOOLWINDOW,
                                    PovAboutWinClass,
-                                   "POV-Ray",
+                                   BRANCH_NAME,
                                    WS_POPUP,
                                    (screen_width - about_width) / 2,
                                    (screen_height - about_height) / 2,
@@ -5100,7 +5107,7 @@ void GenerateDumpMeta(bool brief)
     {
       GetSystemTime (&system_time) ;
       if (SystemTimeToFileTime (&system_time, &file_time))
-        reg_printf (true, "Software\\POV-Ray", INSTALLTIMEKEY, "%I64u", ((__int64) file_time.dwHighDateTime << 32) | file_time.dwLowDateTime) ;
+      reg_printf (true, "Software\\" REGKEY, INSTALLTIMEKEY, "%I64u", ((__int64) file_time.dwHighDateTime << 32) | file_time.dwLowDateTime) ;
       if ((InstalledOn = GetInstallTime ()) == NULL)
         InstalledOn = "Unknown" ;
     }
@@ -5177,6 +5184,10 @@ bool WriteDumpMeta(struct _EXCEPTION_POINTERS *ExceptionInfo, const char *filena
   fprintf(f, "faultaddress=%u\n", ExceptionInfo->ContextRecord->Eip);
   fprintf(f, "faultplatform=win32\n");
 #endif
+#if POV_RAY_IS_BRANCH == 1
+  fprintf(f, "branchname=%s\n", BRANCH_NAME) ;
+  fprintf(f, "branchversion=%s\n", BRANCH_VERSION) ;
+#endif
   fprintf(f, "povversion=%s\n", POV_RAY_VERSION) ;
   fprintf(f, "compilerversion=%s\n", COMPILER_VER) ;
   fprintf(f, "platformversion=%s\n", PVENGINE_VER) ;
@@ -5221,9 +5232,9 @@ char *WriteDump(struct _EXCEPTION_POINTERS *pExceptionInfo, bool full, long time
       static char szDumpPath[_MAX_PATH];
 
       if (full)
-        sprintf(szScratch, "POV-Ray-" POV_RAY_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.dmp", timestamp);
+        sprintf(szScratch, BRANCH_NAME "-" BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.dmp", timestamp);
       else
-        sprintf(szScratch, "POV-Ray-" POV_RAY_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.minidump", timestamp);
+        sprintf(szScratch, BRANCH_NAME "-" BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.minidump", timestamp);
 
       // work out a good place for the dump file
       if (!GetTempPath( _MAX_PATH - 64, szDumpPath))
@@ -5253,23 +5264,23 @@ char *WriteDump(struct _EXCEPTION_POINTERS *pExceptionInfo, bool full, long time
         {
           if (!WriteDumpMeta(pExceptionInfo, szDumpPath))
           {
-            MessageBox (main_window, "Failed to save dump metadata file", "POV-Ray for Windows", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox (main_window, "Failed to save dump metadata file", BRANCH_NAME " for Windows", MB_OK | MB_ICONEXCLAMATION);
             return NULL;
           }
           return szDumpPath;
         }
         sprintf( szScratch, "Failed to save dump file to '%s' (error %d)", szDumpPath, GetLastError() );
-        MessageBox (main_window, szScratch, "POV-Ray for Windows", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox (main_window, szScratch, BRANCH_NAME " for Windows", MB_OK | MB_ICONEXCLAMATION);
         return NULL;
       }
       sprintf( szScratch, "Failed to create dump file '%s' (error %d)", szDumpPath, GetLastError() );
-      MessageBox (main_window, szScratch, "POV-Ray for Windows", MB_OK | MB_ICONEXCLAMATION);
+      MessageBox (main_window, szScratch, BRANCH_NAME " for Windows", MB_OK | MB_ICONEXCLAMATION);
       return NULL;
     }
-    MessageBox (main_window, "Sorry, DBGHELP.DLL is too old - cannot create dump.", "POV-Ray for Windows", MB_OK | MB_ICONEXCLAMATION);
+    MessageBox (main_window, "Sorry, DBGHELP.DLL is too old - cannot create dump.", BRANCH_NAME " for Windows", MB_OK | MB_ICONEXCLAMATION);
     return NULL;
   }
-  MessageBox (main_window, "Sorry, we can't locate DBGHELP.DLL - cannot create dump.", "POV-Ray for Windows", MB_OK | MB_ICONEXCLAMATION);
+  MessageBox (main_window, "Sorry, we can't locate DBGHELP.DLL - cannot create dump.", BRANCH_NAME " for Windows", MB_OK | MB_ICONEXCLAMATION);
   return NULL;
 }
 
@@ -5277,9 +5288,9 @@ char *WriteDump(struct _EXCEPTION_POINTERS *pExceptionInfo, bool full, long time
 void NoSSE2 (void)
 {
   MessageBox (NULL,
-              "This build of POV-Ray requires that your processor provides SSE2 support.\n"
-              "Please use the standard non-SSE2 version of POV-Ray on this computer.",
-              "POV-Ray for Windows",
+              "This build of " BRANCH_NAME " requires that your processor provides SSE2 support.\n"
+              "Please use the standard non-SSE2 version of " BRANCH_NAME " on this computer.",
+              BRANCH_NAME " for Windows",
               MB_ICONSTOP | MB_OK) ;
   exit (-1) ;
 }
@@ -5355,7 +5366,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   catch (pov_base::Exception& e)
   {
     sprintf (str, "Failed to initialize frontend: %s", e.what()) ;
-    MessageBox (NULL, str, "POV-Ray Critical Error", MB_ICONSTOP) ;
+    MessageBox (NULL, str, BRANCH_NAME " Critical Error", MB_ICONSTOP) ;
     return (1) ;
   }
 
@@ -5394,10 +5405,10 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
       MessageBox (NULL,
                   "ERROR : Cannot find Home entry in registry (and cannot infer it).\n\n"
                   "This entry should have been set by the installation program.\n\n"
-                  "POV-Ray can usually infer the installation path but that requires a\n"
+                  BRANCH_NAME " can usually infer the installation path but that requires a\n"
                   "standard layout of directories, which also seems to be absent.\n\n"
                   "If you did not install using the correct installation procedure, please\n"
-                  "do this before running POV-Ray for Windows. You can also try running\n"
+                  "do this before running " BRANCH_NAME " for Windows. You can also try running\n"
                   "with the '/INSTALL' or '/INSTALL <bindir> [<docdir>]' option.",
                   "Critical Error",
                   MB_ICONSTOP) ;
@@ -5412,18 +5423,18 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
       MessageBox (NULL,
                   "ERROR : Cannot find DocPath entry in registry (and cannot infer it).\n\n"
                   "This entry should have been set by the installation program.\n\n"
-                  "POV-Ray can usually infer the installation path but that requires a\n"
+                  BRANCH_NAME " can usually infer the installation path but that requires a\n"
                   "standard layout of directories, which also seems to be absent.\n\n"
                   "If you did not install using the correct installation procedure, please\n"
-                  "do this before running POV-Ray for Windows. You can also try running\n"
+                  "do this before running " BRANCH_NAME " for Windows. You can also try running\n"
                   "with the '/INSTALL' or '/INSTALL <bindir> <docdir>' option.",
                   "Critical Error",
                   MB_ICONSTOP) ;
     }
-    strcat(DocumentsPath, "\\" REGKEY);
+    strcat(DocumentsPath, "\\" PATHKEY);
     if (!dirExists(DocumentsPath))
       CreateDirectory(DocumentsPath, NULL);
-    strcat(DocumentsPath, "\\" REGVERKEY);
+    strcat(DocumentsPath, "\\" PATHVERKEY);
     if (!dirExists(DocumentsPath))
       CreateDirectory(DocumentsPath, NULL);
   }
@@ -5439,7 +5450,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 
   if (checkRegKey () == false || FreshInstall == true)
     if (!CloneOptions())
-      MessageBox (NULL, "ERROR : Could not clone options - POV-Ray may not work correctly for this user.", "Critical Error", MB_ICONERROR) ;
+      MessageBox (NULL, "ERROR : Could not clone options - " BRANCH_NAME " may not work correctly for this user.", "Critical Error", MB_ICONERROR) ;
 
 #ifdef POVRAY_IS_BETA
   if (FreshInstall)
@@ -5490,10 +5501,10 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   {
     if (_stricmp (LastInferredHome, BinariesPath) != 0)
     {
-      sprintf (str, "POV-Ray for Windows did not find the expected registry entries present.\n"
+      sprintf (str, BRANCH_NAME " for Windows did not find the expected registry entries present.\n"
                     "This typically means that it has not been installed via the installation program.\n"
                     "You can correct this by running with the '/INSTALL' or '/INSTALL <installdir>' option.\n\n"
-                    "POV-Ray has inferred the installation path to be the following:\n\n"
+                    BRANCH_NAME " has inferred the installation path to be the following:\n\n"
                     "\t%s\n\n"
                     "This message will be displayed each time the inferred path changes.",
                     BinariesPath) ;
@@ -5513,7 +5524,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   memset (&hh_aklink, 0, sizeof (hh_aklink)) ;
   hh_aklink.cbStruct = sizeof (hh_aklink) ;
   hh_aklink.fIndexOnFail = true ;
-  hh_aklink.pszWindow = "POV-Ray Help" ;
+  hh_aklink.pszWindow = BRANCH_NAME " Help" ;
 
   SHGetFolderPath (NULL, CSIDL_FONTS, NULL, SHGFP_TYPE_CURRENT, FontPath) ;
 
@@ -5526,8 +5537,8 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
         ShowWindow (hwnd, SW_RESTORE) ;
       SetForegroundWindow (hwnd) ;
       FeatureNotify ("OneInstanceSet",
-                     "POV-Ray - 'Keep Single Instance' Feature",
-                     "You have started POV-Ray for Windows while another copy is running, "
+                     BRANCH_NAME " - 'Keep Single Instance' Feature",
+                     "You have started " BRANCH_NAME " for Windows while another copy is running, "
                      "and the 'Keep Single Instance' option is turned on (see Options menu). "
                      "In this case the other copy is activated rather than starting a new "
                      "instance of the program.\n\nClick &Help for information on this feature.",
@@ -5547,7 +5558,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
         if (fileExists(str))
         {
           FeatureNotify ("EditByDefault",
-                          "POV-Ray - Filename passed on command-line",
+                          BRANCH_NAME " - Filename passed on command-line",
                           "Quoted filenames which are the sole command-line parameter are now "
                           "opened in the editor by default. If you wish to render them instead "
                           "please pass the /RENDER switch, provide more than one parameter, or "
@@ -5631,8 +5642,8 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
       // one_instance isn't set. we should continue as per normal.
       // however see if we need to notify the user about this.
       FeatureNotify ("OneInstanceUnset",
-                     "POV-Ray - 'Keep Single Instance' Feature",
-                     "You have started POV-Ray for Windows while another copy is running, "
+                     BRANCH_NAME " - 'Keep Single Instance' Feature",
+                     "You have started " BRANCH_NAME " for Windows while another copy is running, "
                      "and the 'Keep Single Instance' option is turned off (see Options menu). "
                      "In this case a new instance of the program is started rather than "
                      "activating the existing instance of the program.\n\nClick &Help for more "
@@ -5726,7 +5737,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     if (fileExists(str))
     {
       FeatureNotify ("EditByDefault",
-                      "POV-Ray - Filename passed on command-line",
+                      BRANCH_NAME " - Filename passed on command-line",
                       "Quoted filenames which are the sole command-line parameter are now "
                       "opened in the editor by default. If you wish to render them instead "
                       "please pass the /RENDER switch (or provide more than one parameter).\n\n"
@@ -5776,9 +5787,9 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 
   GetHKCU("General", VERSIONVAL, "[unknown]", str, (DWORD) strlen (str)) ;
   if (debugging)
-    debug_output("Registry records version %s, and we are %s\n", str, POV_RAY_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER) ;
+    debug_output("Registry records version %s, and we are %s\n", str, BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER) ;
 
-  if (strcmp (str, POV_RAY_VERSION COMPILER_VER "." PVENGINE_VER) != 0)
+  if (strcmp (str, BRANCH_VERSION COMPILER_VER "." PVENGINE_VER) != 0)
   {
     // we don't want to set the newVersion flag if the only thing that changed
     // was the compiler used to generate the binary. in this case we add an
@@ -5793,7 +5804,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     if (s)
       while (isdigit (*s))
         strcpy (s, s + 1) ;
-    if (strcmp (str, POV_RAY_VERSION "." PVENGINE_VER) != 0)
+    if (strcmp (str, BRANCH_VERSION "." PVENGINE_VER) != 0)
       newVersion = true ;
   }
 
@@ -5802,7 +5813,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     if (screen_depth < 8)
     {
       MessageBox (NULL,
-                  "NOTE : POV-Ray for Windows was not designed to run in 16-color mode. "
+                  "NOTE : " BRANCH_NAME " for Windows was not designed to run in 16-color mode. "
                   "While the program will operate, it is recommended that you use a minimum "
                   "graphics mode of 800x600x256.",
                   "Warning - running in 16-color mode",
@@ -5812,7 +5823,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     if (screen_width < 800)
     {
       MessageBox (NULL,
-                  "NOTE : POV-Ray for Windows was not designed to run at less than 800x600.\n\n"
+                  "NOTE : " BRANCH_NAME " for Windows was not designed to run at less than 800x600.\n\n"
                   "While the program will operate, it is recommended that you use a minimum "
                   "graphics mode of 800x600x256.",
                   "Warning - running at less than 800x600",
@@ -5835,7 +5846,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     h = screen_height - 75 ;
   main_window = CreateWindowEx (0,
                                 PovMainWinClass,
-                                "POV-Ray for Windows",
+                                BRANCH_NAME " for Windows",
                                 WS_OVERLAPPEDWINDOW,
                                 mainwin_placement.rcNormalPosition.left,
                                 mainwin_placement.rcNormalPosition.top,
@@ -6089,10 +6100,19 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     }
   }
 
-  buffer_message (mIDE, "Persistence of Vision Raytracer(tm) for Windows.\n") ;
-  buffer_message (mIDE, "POV-Ray for Windows is part of the POV-Ray(tm) suite of programs.\n") ;
-  buffer_message (mIDE, "  This is version " POV_RAY_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ".\n") ;
+  buffer_message (mIDE, BRANCH_FULL_NAME " for Windows.\n") ;
+#if POV_RAY_IS_BRANCH == 1
+  buffer_message (mIDE, BRANCH_NAME " for Windows is based on the POV-Ray(tm) suite of programs.\n") ;
+#else
+  buffer_message (mIDE, BRANCH_NAME " for Windows is part of the POV-Ray(tm) suite of programs.\n") ;
+#endif
+  buffer_message (mIDE, "  This is version " BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ".\n") ;
+#if POV_RAY_IS_BRANCH == 1
+  buffer_message (mIDE, BRANCH_COPYRIGHT ".\n") ;
+  buffer_message (mIDE, "Portions Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.\n") ;
+#else
   buffer_message (mIDE, "Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.\n") ;
+#endif
   buffer_message (mIDE, "  " DISCLAIMER_MESSAGE_1 "\n") ;
   buffer_message (mIDE, "  " DISCLAIMER_MESSAGE_2 "\n") ;
   buffer_message (mIDE, "  Select Help|About (or press Alt+B) for more information and a copy of the license.\n") ;
@@ -6108,10 +6128,6 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   buffer_message (mIDE, "\n") ;
   strcpy (tool_commands [0], "notepad.exe \"%ipovray.ini\"") ;
 
-#if POV_RAY_IS_OFFICIAL != 1
-  WIN_PrintOtherCredits () ;
-  buffer_message (mIDE, "This unofficial build is derived from the POV-Ray for Windows source code.\n") ;
-#endif
   buffer_message (mDivider, "\n") ;
 
 #if defined(USE_AVX_FMA4_FOR_NOISE)
@@ -6156,9 +6172,9 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
       char temp[2048];
       sprintf(temp,
               "WARNING : Cannot find COLORS.INC in expected location:\n\n%s\n\n"
-              "This file is important for the normal operation of POV-Ray. It is included "
+              "This file is important for the normal operation of " BRANCH_NAME ". It is included "
               "with the POV-Ray for Windows distribution. If you did not install using the "
-              "correct installation procedure please attend to this before running POV-Ray "
+              "correct installation procedure please attend to this before running " BRANCH_NAME " "
               "for Windows.\n\nIf, however, you have chosen to change the location of this file "
               "or do not need it, you may ignore this warning as long as you have updated "
               "POVRAY.INI to the new path, or do not use any standard scenes that require it.\n\n"
@@ -6347,7 +6363,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     sprintf (str, "Caught exception: %s", e.what()) ;
     if (debugging)
       debug_output ("%s\n", str) ;
-    MessageBox (NULL, str, "POV-Ray Critical Error", MB_ICONSTOP) ;
+    MessageBox (NULL, str, BRANCH_NAME " Critical Error", MB_ICONSTOP) ;
     exit(1);
   }
 
@@ -6371,7 +6387,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     sprintf (str, "Caught exception: %s", e.what()) ;
     if (debugging)
       debug_output ("%s\n", str) ;
-    MessageBox (NULL, str, "POV-Ray Critical Error", MB_ICONSTOP) ;
+    MessageBox (NULL, str, BRANCH_NAME " Critical Error", MB_ICONSTOP) ;
   }
 
   _fcloseall () ;

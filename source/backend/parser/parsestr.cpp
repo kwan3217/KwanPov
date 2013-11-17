@@ -4,6 +4,12 @@
  * This module implements parsing and conversion of string expressions.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -24,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/parser/parsestr.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/parser/parsestr.cpp $
+ * $Revision: #3 $
+ * $Change: 5944 $
+ * $DateTime: 2013/07/22 09:27:03 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <stdlib.h>
@@ -101,14 +107,19 @@ const unsigned int gUTF8Offsets[6] =
  *
 ******************************************************************************/
 
-char *Parser::Parse_C_String(bool pathname)
+char *Parser::Parse_C_String(bool pathname, bool require)
 {
-	UCS2 *str = Parse_String(pathname);
-	char *New = UCS2_To_String(str, pathname);
+	UCS2 *str = Parse_String(pathname, require);
+	if (str)
+	{
+		char *New = UCS2_To_String(str, pathname);
 
-	POV_FREE(str);
+		POV_FREE(str);
 
-	return New;
+		return New;
+	}
+	else
+		return NULL;
 }
 
 
@@ -485,7 +496,7 @@ UCS2 *Parser::Parse_Datetime(bool pathname)
 		CASE(RIGHT_PAREN_TOKEN)
 			CallFree = false;
 			// we use GMT as some platforms (e.g. windows) have different ideas of what to print when handling '%z'.
-			FormatStr = (char *)"%Y-%m-%d %H:%M:%SZ";
+			FormatStr = "%Y-%m-%d %H:%M:%SZ";
 			EXIT
 		END_CASE
 
@@ -493,7 +504,7 @@ UCS2 *Parser::Parse_Datetime(bool pathname)
 			UNGET
 			CallFree = true;
 			FormatStr = Parse_C_String(pathname);
-			if (FormatStr[0] == '\0')
+			if (strlen(FormatStr) == 0)
 			{
 				POV_FREE(FormatStr);
 				Error("Empty format string.");
@@ -529,7 +540,7 @@ UCS2 *Parser::Parse_Datetime(bool pathname)
 			throw;
 		vlen = 0;
 	}
-	if (vlen == PARSE_NOW_VAL_LENGTH) // on error: max for libc 4.4.1 & before
+	if ((vlen == PARSE_NOW_VAL_LENGTH)) // on error: max for libc 4.4.1 & before
 		vlen = 0; // return an empty string on error (content of val[] is undefined)
 	val[vlen]='\0'; // whatever, that operation is now safe (and superflous except for error)
 

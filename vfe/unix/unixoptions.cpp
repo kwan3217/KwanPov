@@ -28,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/vfe/unix/unixoptions.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/vfe/unix/unixoptions.cpp $
+ * $Revision: #2 $
+ * $Change: 5955 $
+ * $DateTime: 2013/07/26 21:08:54 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include "unixoptions.h"
@@ -72,13 +72,13 @@ namespace vfePlatform
 
 		// system configuration file
 		m_conf    = "";
-		m_sysconf = POVCONFDIR "/povray.conf";
+		m_sysconf = POVCONFDIR "/" PACKAGE" .conf";
 
 		// user configuration file
 		if (m_home.length() > 0)
 		{
 			m_user_dir = m_home + "/." PACKAGE "/" VERSION_BASE;
-			m_userconf = m_home + "/." PACKAGE "/" VERSION_BASE "/povray.conf";
+			m_userconf = m_home + "/." PACKAGE "/" VERSION_BASE "/" PACKAGE ".conf";
 		}
 		else
 		{
@@ -87,17 +87,17 @@ namespace vfePlatform
 		}
 
 		// system ini file
-		m_sysini     = POVCONFDIR "/povray.ini";
-		m_sysini_old = POVCONFDIR_BACKWARD "/povray.ini";
+		m_sysini     = POVCONFDIR "/" PACKAGE ".ini";
+		m_sysini_old = POVCONFDIR_BACKWARD "/" PACKAGE ".ini";
 
 		// user ini file
 		if (m_home.length() > 0)
-			m_userini = m_home + "/." PACKAGE "/" VERSION_BASE "/povray.ini";
+			m_userini = m_home + "/." PACKAGE "/" VERSION_BASE "/" PACKAGE ".ini";
 		else
 			m_userini = "";
 
 		if (m_home.length() > 0)
-			m_userini_old = m_home + "/.povrayrc";
+			m_userini_old = m_home + "/." PACKAGE "rc";
 		else
 			m_userini_old = "";
 
@@ -1082,7 +1082,7 @@ namespace vfePlatform
 		}
 
 		// try any INI file in the current directory
-		povini = "./povray.ini";
+		povini = "./" PACKAGE ".ini";
 		if (file_exist(povini))
 		{
 			opts.AddINI(povini);

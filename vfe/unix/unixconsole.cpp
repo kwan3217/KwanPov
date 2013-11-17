@@ -4,6 +4,12 @@
  * Adapted from vfe/win/console/winconsole.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -24,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/vfe/unix/unixconsole.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/vfe/unix/unixconsole.cpp $
+ * $Revision: #3 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <signal.h>
@@ -59,7 +65,7 @@ enum DispMode
 	DISP_MODE_SDL
 };
 
-static DispMode gDisplayMode;
+DispMode gDisplayMode;
 
 enum ReturnValue
 {
@@ -68,14 +74,14 @@ enum ReturnValue
 	RETURN_USER_ABORT
 };
 
-static bool gCancelRender = false;
+bool gCancelRender = false;
 
 // for handling asynchronous (external) signals
-static int gSignalNumber = 0;
-static boost::mutex gSignalMutex;
+int gSignalNumber = 0;
+boost::mutex gSignalMutex;
 
 
-static void SignalHandler (void)
+void SignalHandler (void)
 {
 	sigset_t sigset;
 	int      signum;
@@ -90,7 +96,7 @@ static void SignalHandler (void)
 }
 
 
-static void ProcessSignal (void)
+void ProcessSignal (void)
 {
 	boost::mutex::scoped_lock lock(gSignalMutex);
 
@@ -134,7 +140,7 @@ static void ProcessSignal (void)
 	gSignalNumber = 0;
 }
 
-static vfeDisplay *UnixDisplayCreator (unsigned int width, unsigned int height, GammaCurvePtr gamma, vfeSession *session, bool visible)
+vfeDisplay *UnixDisplayCreator (unsigned int width, unsigned int height, GammaCurvePtr gamma, float glareDesaturation, vfeSession *session, bool visible)
 {
 	UnixDisplay *display = GetRenderWindow () ;
 	switch (gDisplayMode)
@@ -143,23 +149,23 @@ static vfeDisplay *UnixDisplayCreator (unsigned int width, unsigned int height, 
 		case DISP_MODE_SDL:
 			if (display != NULL && display->GetWidth() == width && display->GetHeight() == height)
 			{
-				UnixDisplay *p = new UnixSDLDisplay (width, height, gamma, session, false) ;
+				UnixDisplay *p = new UnixSDLDisplay (width, height, gamma, glareDesaturation, session, false) ;
 				if (p->TakeOver (display))
 					return p;
 				delete p;
 			}
-			return new UnixSDLDisplay (width, height, gamma, session, visible) ;
+			return new UnixSDLDisplay (width, height, gamma, glareDesaturation, session, visible) ;
 			break;
 #endif
 		case DISP_MODE_TEXT:
-			return new UnixTextDisplay (width, height, gamma, session, visible) ;
+			return new UnixTextDisplay (width, height, gamma, glareDesaturation, session, visible) ;
 			break;
 		default:
 			return NULL;
 	}
 }
 
-static void PrintStatus (vfeSession *session)
+void PrintStatus (vfeSession *session)
 {
 	string str;
 	vfeSession::MessageType type;
@@ -179,7 +185,7 @@ static void PrintStatus (vfeSession *session)
 	}
 }
 
-static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
+void PrintStatusChanged (vfeSession *session, State force = kUnknown)
 {
 	if (force == kUnknown)
 		force = session->GetBackendState();
@@ -197,7 +203,7 @@ static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
 	}
 }
 
-static void PrintVersion(void)
+void PrintVersion(void)
 {
 	fprintf(stderr,
 		"%s %s\n\n"
@@ -226,7 +232,7 @@ static void PrintVersion(void)
 	);
 }
 
-static void ErrorExit(vfeSession *session)
+void ErrorExit(vfeSession *session)
 {
 	fprintf(stderr, "%s\n", session->GetErrorString());
 	session->Shutdown();
@@ -234,7 +240,7 @@ static void ErrorExit(vfeSession *session)
 	exit(RETURN_ERROR);
 }
 
-static void CancelRender(vfeSession *session)
+void CancelRender(vfeSession *session)
 {
 	session->CancelRender();  // request the backend to cancel
 	PrintStatus (session);
@@ -243,7 +249,7 @@ static void CancelRender(vfeSession *session)
 	PrintStatus (session);
 }
 
-static void PauseWhenDone(vfeSession *session)
+void PauseWhenDone(vfeSession *session)
 {
 	GetRenderWindow()->UpdateScreen(true);
 	GetRenderWindow()->PauseWhenDoneNotifyStart();
@@ -258,7 +264,7 @@ static void PauseWhenDone(vfeSession *session)
 	GetRenderWindow()->PauseWhenDoneNotifyEnd();
 }
 
-static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts, string& ini, string& pov, int argc, char **argv)
+ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts, string& ini, string& pov, int argc, char **argv)
 {
 	// parse command-line options
 	while (*++argv)
@@ -345,7 +351,7 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
 	return RETURN_OK;
 }
 
-static void CleanupBenchmark(vfeUnixSession *session, string& ini, string& pov)
+void CleanupBenchmark(vfeUnixSession *session, string& ini, string& pov)
 {
 	fprintf(stderr, "%s: removing %s\n", PACKAGE, ini.c_str());
 	session->DeleteTemporaryFile(ASCIItoUCS2String(ini.c_str()));

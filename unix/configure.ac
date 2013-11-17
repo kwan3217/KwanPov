@@ -4,6 +4,12 @@
 # Process this file with autoconf to produce the configure script.
 #
 # ---------------------------------------------------------------------------
+# UberPOV Raytracer version 1.37.
+# Partial Copyright 2013 Christoph Lipka.
+#
+# UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+# subject to the same licensing terms and conditions.
+#---------------------------------------------------------------------------
 # Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
 # Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
 #
@@ -24,18 +30,21 @@
 # DKBTrace was originally written by David K. Buck.
 # DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 #---------------------------------------------------------------------------
-# $File: //depot/public/povray/3.x/unix/configure.ac $
-# $Revision: #1 $
-# $Change: 6069 $
-# $DateTime: 2013/11/06 11:59:40 $
-# $Author: chrisc $
+# $File: //depot/clipka/upov/unix/configure.ac $
+# $Revision: #6 $
+# $Change: 6087 $
+# $DateTime: 2013/11/11 03:53:39 $
+# $Author: clipka $
 # $Log$
 ##############################################################################
 
 # configure.ac for the source distribution of POV-Ray 3.7 for UNIX
-# Written by Nicolas Calimet <nicolas.calimet@povray.org>
-# Report bugs via http://bugs.povray.org/
-# Based on configure.ac from POV-Ray 3.6
+# Originally written by Nicolas Calimet <nicolas.calimet@povray.org>
+# Adapted for UberPOV by Christoph Lipka
+# Report bugs via the POV-Ray unofficial patches mailing list at
+# news://news.povray.org/povray.unofficial.patches or
+# http://news.povray.org/povray.unofficial.patches
+# Based on configure.ac from POV-Ray 3.7
 
 # Required autoconf version.
 AC_PREREQ(2.59)
@@ -43,7 +52,7 @@ AC_PREREQ(2.59)
 # Inits.
 
 # The file VERSION must contain only the version string MAJOR.MINOR(.PATCHLEVEL)
-AC_INIT([POV-Ray], m4_normalize(m4_include([VERSION])), [unix-bugreports-2011@povray.org], [povray])
+AC_INIT([UberPOV], m4_normalize(m4_include([VERSION])), [http://www.lipka-koeln.de], [uberpov])
 
 # VERSION_BASE is then defined as MAJOR.MINOR
 VERSION_BASE=`echo $PACKAGE_VERSION | sed 's,\([[0-9]]*.[[0-9]]*\).*,\1,g'`
@@ -74,7 +83,7 @@ m4_include([unix/config/ax_x86_arch.m4])
 
 # Required versions of the support libraries.
 # Must be declared after AC_INIT.
-required_libboost_version="1.37"
+required_libboost_version="1.38"
 required_libz_version="1.2.1"
 required_libpng_version="1.2.5"
 required_libjpeg_version="6b"
@@ -92,7 +101,7 @@ AX_ARG_ENABLE([--disable-optimiz-arch],    [disable architecture-specific compil
 AX_ARG_ENABLE([--disable-pipe],            [disable usage of pipes during compilation (use temporary files instead)])
 AX_ARG_ENABLE([--disable-strip],           [disable stripping all symbols from the object files (larger binary)])
 AX_ARG_ENABLE([--disable-shared],          [disable linking with shared libraries (same as --enable-static)])
-AX_ARG_ENABLE([--disable-io-restrictions], [disable POV-Ray's mechanism for control of I/O operations])
+AX_ARG_ENABLE([--disable-io-restrictions], [disable $PACKAGE_NAME's mechanism for control of I/O operations])
 
 AX_ARG_WITH([--without-cygwin-dll], [],    [don't link with the Cygwin DLL (MinGW required)])
 AX_ARG_WITH([--with-zlib],          [DIR], [use the ZLIB library (in directory DIR)])
@@ -110,8 +119,8 @@ AC_ARG_VAR([C99_COMPATIBLE_RADIOSITY], [adapt radiosity code to non-IEEE 754 flo
 
 ###############################################################################
 
-# Remove povray.ini unconditionally.
-rm -f ./povray.ini
+# Remove $PACKAGE.ini unconditionally.
+rm -f ./$PACKAGE.ini
 
 
 # Instruction message.
@@ -1024,7 +1033,7 @@ if test x"$pov_warn_path" != x""; then
 specified by the following environment variable(s)
  $pov_warn_path
 erroneously contain the "." directory, which may cause a build failure.
-In order to build POV-Ray successfully, the package has been configured
+In order to build $PACKAGE_NAME successfully, the package has been configured
 with all "." directory entries removed from the variables above.  You're
 strongly advised to correct your configuration accordingly.
 ])

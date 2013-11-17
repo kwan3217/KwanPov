@@ -2,6 +2,12 @@
  * trace.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/render/trace.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/render/trace.cpp $
+ * $Revision: #4 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <boost/thread.hpp>
@@ -77,9 +83,9 @@ Trace::Trace(shared_ptr<SceneData> sd, TraceThreadData *td, unsigned int qf,
 	crandRandomNumberGenerator(0),
 	randomNumbers(0.0, 1.0, 32768),
 	randomNumberGenerator(&randomNumbers),
-	ssltUniformDirectionGenerator(),
-	ssltUniformNumberGenerator(),
-	ssltCosWeightedDirectionGenerator(),
+	ssltUniformDirectionGenerator(GetSubRandomDirectionGenerator(0)),
+	stochasticDirectionGenerator(),
+	stochasticRandomGenerator(GetRandomDoubleGenerator(0.0, 1.0)),
 	cooperate(cf),
 	media(mf),
 	radiosity(rf),
@@ -809,7 +815,7 @@ void Trace::ComputeLightedTexture(Colour& resultcolour, const TEXTURE *texture, 
 		else
 		{
 			// Store vital information for later reflection.
-			listWNRX->push_back(WNRX(new_Weight, layNormal, RGBColour(), layer->Finish->Reflect_Exp));
+			listWNRX->push_back(WNRX(new_Weight, layNormal, RGBColour(), layer->Finish->Reflect_Exp, layer->Finish->Reflect_Blur, layer->Finish->Reflect_Count));
 
 			// angle-dependent reflectivity
 			cos_Angle_Incidence = -dot(Vector3d(ray.Direction), layNormal);
@@ -1065,7 +1071,35 @@ void Trace::ComputeLightedTexture(Colour& resultcolour, const TEXTURE *texture, 
 					Vector3d tmpIPoint(isect.IPoint);
 
 					rflCol.clear();
-					ComputeReflection(layer->Finish, tmpIPoint, ray, (*listWNRX)[i].normal, rawnormal, rflCol, (*listWNRX)[i].weight, ticket);
+
+					if ((*listWNRX)[i].blur != 0.0)
+					{
+						Colour tempCol;
+						unsigned int n = (*listWNRX)[i].blurCount;
+						unsigned int saveStochasticCount = ticket.stochasticCount;
+						if (ticket.stochasticCount > 0)
+						{
+							n = ((n-1) / ticket.stochasticCount) + 1;
+							ticket.stochasticCount *= n;
+						}
+						else
+							ticket.stochasticCount = n;
+
+						ticket.stochasticDepth ++;
+						for (int j = 0; j < n; j ++)
+						{
+							tempCol.clear();
+							ComputeReflection(layer->Finish, tmpIPoint, ray, (*listWNRX)[i].normal, rawnormal, tempCol, (*listWNRX)[i].weight, ticket, (*listWNRX)[i].blur);
+							rflCol += tempCol;
+						}
+						ticket.stochasticDepth --;
+						ticket.stochasticCount = saveStochasticCount;
+						rflCol /= n;
+					}
+					else
+					{
+						ComputeReflection(layer->Finish, tmpIPoint, ray, (*listWNRX)[i].normal, rawnormal, rflCol, (*listWNRX)[i].weight, ticket);
+					}
 
 					if((*listWNRX)[i].reflex != 1.0)
 					{
@@ -1186,16 +1220,32 @@ void Trace::ComputeShadowTexture(Colour& filtercolour, const TEXTURE *texture, v
 #endif
 }
 
-void Trace::ComputeReflection(const FINISH* finish, const Vector3d& ipoint, const Ray& ray, const Vector3d& normal, const Vector3d& rawnormal, Colour& colour, COLC weight, TraceTicket& ticket)
+void Trace::ComputeReflection(const FINISH* finish, const Vector3d& ipoint, const Ray& ray, const Vector3d& normal, const Vector3d& rawnormal, Colour& colour, COLC weight, TraceTicket& ticket, double blur)
 {
 	Ray nray(ray);
 	double n, n2;
 
+	Vector3d norm(normal);
+	double u, v;
+	if (blur != 0.0)
+	{
+		Vector3d uAxis(norm.orthogonal());
+		Vector3d vAxis(cross(norm,uAxis));
+		double x = (*stochasticRandomGenerator)();
+		double blurExp = 1.0/(blur + 1);
+		double cosTheta = pow(x, blurExp);
+		double sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+		double phi = (*stochasticRandomGenerator)() * 2*M_PI;
+		u = sin(phi) * sinTheta;
+		v = cos(phi) * sinTheta;
+		norm = norm * cosTheta + uAxis * u + vAxis * v;
+	}
+
 	nray.SetFlags(Ray::ReflectionRay, ray);
 
 	// The rest of this is essentally what was originally here, with small changes.
-	n = -2.0 * dot(Vector3d(ray.Direction), normal);
-	VAddScaled(nray.Direction, ray.Direction, n, *normal);
+	n = -2.0 * dot(Vector3d(ray.Direction), norm);
+	VAddScaled(nray.Direction, ray.Direction, n, *norm);
 
 	// Nathan Kopp & CEY 1998 - Reflection bugfix
 	// if the new ray is going the opposite direction as raw normal, we
@@ -1205,13 +1255,26 @@ void Trace::ComputeReflection(const FINISH* finish, const Vector3d& ipoint, cons
 	if(n < 0.0)
 	{
 		// It needs fixing. Which kind?
-		n2 = dot(Vector3d(nray.Direction), normal);
+		n2 = dot(Vector3d(nray.Direction), norm);
 
 		if(n2 < 0.0)
 		{
+			norm = rawnormal;
+
 			// reflected inside rear virtual surface. Reflect Ray using Raw_Normal
-			n = -2.0 * dot(Vector3d(ray.Direction), rawnormal);
-			VAddScaled(nray.Direction, ray.Direction, n, *rawnormal);
+			n = -2.0 * dot(Vector3d(ray.Direction), norm);
+			VAddScaled(nray.Direction, ray.Direction, n, *norm);
+
+			if (blur != 0.0)
+			{
+				// We're doing slightly different blur math here,
+				// so that the reflected ray is guaranteed to not point away from the normal.
+				Vector3d uAxis(norm.orthogonal());
+				Vector3d vAxis(cross(norm,uAxis));
+				VNormalizeEq(nray.Direction);
+				VAddScaledEq(nray.Direction, 2*u, *uAxis);
+				VAddScaledEq(nray.Direction, 2*v, *vAxis);
+			}
 		}
 		else
 		{
@@ -1628,7 +1691,7 @@ void Trace::ComputeOneDiffuseLight(const LightSource &lightsource, const Vector3
 			ComputeFullAreaDiffuseLight(lightsource, reye, finish, ipoint, eye,
 				layer_normal, layer_pigment_colour, colour, attenuation,
 				lightsourcedepth, lightsourceray, lightcolour,
-				Test_Flag(object, DOUBLE_ILLUMINATE_FLAG));
+				Test_Flag(object, DOUBLE_ILLUMINATE_FLAG), ticket);
 			return;
 		}
 
@@ -1663,7 +1726,7 @@ void Trace::ComputeOneDiffuseLight(const LightSource &lightsource, const Vector3
 // JN2007: Full area lighting:
 void Trace::ComputeFullAreaDiffuseLight(const LightSource &lightsource, const Vector3d& reye, const FINISH *finish, const Vector3d& ipoint, const Ray& eye,
                                         const Vector3d& layer_normal, const RGBColour& layer_pigment_colour, RGBColour& colour, double attenuation,
-                                        double lightsourcedepth, Ray& lightsourceray, const RGBColour& lightcolour, bool isDoubleIlluminated)
+                                        double lightsourcedepth, Ray& lightsourceray, const RGBColour& lightcolour, bool isDoubleIlluminated, TraceTicket& ticket)
 {
 	Vector3d temp;
 	Vector3d axis1Temp, axis2Temp;
@@ -1699,64 +1762,28 @@ void Trace::ComputeFullAreaDiffuseLight(const LightSource &lightsource, const Ve
 		axis2Temp *= axis1_Length;
 	}
 
-	RGBColour sampleLightcolour = lightcolour / (lightsource.Area_Size1 * lightsource.Area_Size2);
-	RGBColour attenuatedLightcolour;
-
-	for(int v = 0; v < lightsource.Area_Size2; ++v)
+	if (ticket.stochasticCount > 0)
 	{
-		for(int u = 0; u < lightsource.Area_Size1; ++u)
+		unsigned int sampleCount = lightsource.Area_Size2 * lightsource.Area_Size1;
+		sampleCount = (sampleCount-1)/ticket.stochasticCount + 1;
+
+		RGBColour sampleLightcolour = lightcolour / sampleCount;
+		RGBColour attenuatedLightcolour;
+		Vector2d uv;
+
+		for (unsigned int i = 0; i < sampleCount; ++i)
 		{
-			Vector3d jitterAxis1, jitterAxis2;
+			if (lightsource.Circular)
+				uv = Uniform2dOnDisc(stochasticRandomGenerator) * 0.5;
+			else
+				uv = Uniform2dOnSquare(stochasticRandomGenerator) - 0.5;
+
 			Ray lsr(lightsourceray);
-			double jitter_u = (double)u;
-			double jitter_v = (double)v;
 			bool backside = false;
 			RGBColour tmpCol;
 
-			if(lightsource.Jitter)
-			{
-				jitter_u += randomNumberGenerator() - 0.5;
-				jitter_v += randomNumberGenerator() - 0.5;
-			}
-
-			// Create circular are lights [ENB 9/97]
-			// First, make jitter_u and jitter_v be numbers from -1 to 1
-			// Second, set scaleFactor to the abs max (jitter_u,jitter_v) (for shells)
-			// Third, divide scaleFactor by the length of <jitter_u,jitter_v>
-			// Fourth, scale jitter_u & jitter_v by scaleFactor
-			// Finally scale Axis1 by jitter_u & Axis2 by jitter_v
-			if(lightsource.Circular == true)
-			{
-				jitter_u = jitter_u / (lightsource.Area_Size1 - 1) - 0.5 + 0.001;
-				jitter_v = jitter_v / (lightsource.Area_Size2 - 1) - 0.5 + 0.001;
-				double scaleFactor = ((fabs(jitter_u) > fabs(jitter_v)) ? fabs(jitter_u) : fabs(jitter_v));
-				scaleFactor /= sqrt(jitter_u * jitter_u + jitter_v * jitter_v);
-				jitter_u *= scaleFactor;
-				jitter_v *= scaleFactor;
-				jitterAxis1 = axis1Temp * jitter_u;
-				jitterAxis2 = axis2Temp * jitter_v;
-			}
-			else
-			{
-				if(lightsource.Area_Size1 > 1)
-				{
-					double scaleFactor = jitter_u / (double)(lightsource.Area_Size1 - 1) - 0.5;
-					jitterAxis1 = axis1Temp * scaleFactor;
-				}
-				else
-					jitterAxis1 = Vector3d(0.0, 0.0, 0.0);
-
-				if(lightsource.Area_Size2 > 1)
-				{
-					double scaleFactor = jitter_v / (double)(lightsource.Area_Size2 - 1) - 0.5;
-					jitterAxis2 = axis2Temp * scaleFactor;
-				}
-				else
-					jitterAxis2 = Vector3d(0.0, 0.0, 0.0);
-			}
-
 			// Recalculate the light source ray but not the colour
-			ComputeOneWhiteLightRay(lightsource, lightsourcedepth, lsr, ipoint, jitterAxis1 + jitterAxis2);
+			ComputeOneWhiteLightRay(lightsource, lightsourcedepth, lsr, ipoint, axis1Temp * uv.x() + axis2Temp * uv.y());
 			// Calculate distance- and angle-based light attenuation
 			attenuatedLightcolour = sampleLightcolour * Attenuate_Light(&lightsource, lsr, lightsourcedepth);
 
@@ -1769,7 +1796,7 @@ void Trace::ComputeFullAreaDiffuseLight(const LightSource &lightsource, const Ve
 					if (finish->DiffuseBack != 0.0)
 						backside = true;
 					else
-						continue;
+						return;
 				}
 			}
 
@@ -1798,6 +1825,110 @@ void Trace::ComputeFullAreaDiffuseLight(const LightSource &lightsource, const Ve
 				ComputeIridColour(finish, Vector3d(lightsourceray.Direction), Vector3d(eye.Direction), layer_normal, ipoint, tmpCol);
 
 			colour += tmpCol;
+		}
+	}
+	else
+	{
+		RGBColour sampleLightcolour = lightcolour / (lightsource.Area_Size1 * lightsource.Area_Size2);
+		RGBColour attenuatedLightcolour;
+
+		for(int v = 0; v < lightsource.Area_Size2; ++v)
+		{
+			for(int u = 0; u < lightsource.Area_Size1; ++u)
+			{
+				Vector3d jitterAxis1, jitterAxis2;
+				Ray lsr(lightsourceray);
+				double jitter_u = (double)u;
+				double jitter_v = (double)v;
+				bool backside = false;
+				RGBColour tmpCol;
+
+				if(lightsource.Jitter)
+				{
+					jitter_u += randomNumberGenerator() - 0.5;
+					jitter_v += randomNumberGenerator() - 0.5;
+				}
+
+				// Create circular are lights [ENB 9/97]
+				// First, make jitter_u and jitter_v be numbers from -1 to 1
+				// Second, set scaleFactor to the abs max (jitter_u,jitter_v) (for shells)
+				// Third, divide scaleFactor by the length of <jitter_u,jitter_v>
+				// Fourth, scale jitter_u & jitter_v by scaleFactor
+				// Finally scale Axis1 by jitter_u & Axis2 by jitter_v
+				if(lightsource.Circular == true)
+				{
+					jitter_u = jitter_u / (lightsource.Area_Size1 - 1) - 0.5 + 0.001;
+					jitter_v = jitter_v / (lightsource.Area_Size2 - 1) - 0.5 + 0.001;
+					double scaleFactor = ((fabs(jitter_u) > fabs(jitter_v)) ? fabs(jitter_u) : fabs(jitter_v));
+					scaleFactor /= sqrt(jitter_u * jitter_u + jitter_v * jitter_v);
+					jitter_u *= scaleFactor;
+					jitter_v *= scaleFactor;
+					jitterAxis1 = axis1Temp * jitter_u;
+					jitterAxis2 = axis2Temp * jitter_v;
+				}
+				else
+				{
+					if(lightsource.Area_Size1 > 1)
+					{
+						double scaleFactor = jitter_u / (double)(lightsource.Area_Size1 - 1) - 0.5;
+						jitterAxis1 = axis1Temp * scaleFactor;
+					}
+					else
+						jitterAxis1 = Vector3d(0.0, 0.0, 0.0);
+
+					if(lightsource.Area_Size2 > 1)
+					{
+						double scaleFactor = jitter_v / (double)(lightsource.Area_Size2 - 1) - 0.5;
+						jitterAxis2 = axis2Temp * scaleFactor;
+					}
+					else
+						jitterAxis2 = Vector3d(0.0, 0.0, 0.0);
+				}
+
+				// Recalculate the light source ray but not the colour
+				ComputeOneWhiteLightRay(lightsource, lightsourcedepth, lsr, ipoint, jitterAxis1 + jitterAxis2);
+				// Calculate distance- and angle-based light attenuation
+				attenuatedLightcolour = sampleLightcolour * Attenuate_Light(&lightsource, lsr, lightsourcedepth);
+
+				// If not double-illuminated, check if the normal is pointing away:
+				if(!isDoubleIlluminated)
+				{
+					cos_shadow_angle = dot(layer_normal, Vector3d(lsr.Direction));
+					if(cos_shadow_angle < EPSILON)
+					{
+						if (finish->DiffuseBack != 0.0)
+							backside = true;
+						else
+							continue;
+					}
+				}
+
+				if(!(sceneData->useSubsurface && finish->UseSubsurface))
+					// (Diffuse contribution is not supported in combination with BSSRDF, to emphasize the fact that the BSSRDF
+					// model is intended to provide for all the diffuse term by default. If users want to add some additional
+					// surface-only diffuse term, they should use layered textures.
+					ComputeDiffuseColour(finish, lsr, layer_normal, tmpCol, attenuatedLightcolour, layer_pigment_colour, attenuation, backside);
+
+				// NK rad - don't compute highlights for radiosity gather rays, since this causes
+				// problems with colors being far too bright
+				// don't compute highlights for diffuse backside illumination
+				if((lightsource.Light_Type != FILL_LIGHT_SOURCE) && !eye.IsRadiosityRay() && !backside) // TODO FIXME radiosity - is this really the right way to do it (speaking of realism)?
+				{
+					if(finish->Phong > 0.0)
+					{
+						Vector3d ed(eye.Direction);
+						ComputePhongColour(finish, lsr, ed, layer_normal, tmpCol, attenuatedLightcolour, layer_pigment_colour);
+					}
+
+					if(finish->Specular > 0.0)
+						ComputeSpecularColour(finish, lsr, reye, layer_normal, tmpCol, attenuatedLightcolour, layer_pigment_colour);
+				}
+
+				if(finish->Irid > 0.0)
+					ComputeIridColour(finish, Vector3d(lsr.Direction), Vector3d(eye.Direction), layer_normal, ipoint, tmpCol);
+
+				colour += tmpCol;
+			}
 		}
 	}
 }
@@ -2063,11 +2194,37 @@ void Trace::TraceAreaLightShadowRay(const LightSource &lightsource, double& ligh
 		axis2Temp *= axis1_Length;
 	}
 
-	TraceAreaLightSubsetShadowRay(lightsource, lightsourcedepth, lightsourceray, ipoint, lightcolour, 0, 0, lightsource.Area_Size1 - 1, lightsource.Area_Size2 - 1, 0, axis1Temp, axis2Temp, ticket);
+	if (ticket.stochasticCount > 0)
+	{
+		unsigned int sampleCount = 1u << (2*lightsource.Adaptive_Level); // TODO - this might not be the best solution
+		sampleCount = (sampleCount-1)/ticket.stochasticCount + 1;
+		Vector2d uv;
+		RGBColour colourSum;
+
+		for (unsigned int i = 0; i < sampleCount; ++i)
+		{
+			if (lightsource.Circular)
+				uv = Uniform2dOnDisc(stochasticRandomGenerator);
+			else
+				uv = Uniform2dOnSquare(stochasticRandomGenerator);
+
+			Ray lsr(lightsourceray);
+
+			ComputeOneWhiteLightRay(lightsource, lightsourcedepth, lsr, ipoint, axis1Temp * uv.x() + axis2Temp * uv.y());
+			RGBColour tempColour(lightcolour);
+			TracePointLightShadowRay(lightsource, lightsourcedepth, lsr, tempColour, ticket);
+			colourSum += tempColour;
+		}
+		lightcolour = colourSum / sampleCount;
+	}
+	else
+	{
+		TraceAreaLightSubsetShadowRay(lightsource, lightsourcedepth, lightsourceray, ipoint, lightcolour, 0, 0, lightsource.Area_Size1 - 1, lightsource.Area_Size2 - 1, 0, axis1Temp, axis2Temp, ticket);
+	}
 }
 
 void Trace::TraceAreaLightSubsetShadowRay(const LightSource &lightsource, double& lightsourcedepth, Ray& lightsourceray,
-                                    const Vector3d& ipoint, RGBColour& lightcolour, int u1, int  v1, int  u2, int  v2, int level, const Vector3d& axis1, const Vector3d& axis2, TraceTicket& ticket)
+                                          const Vector3d& ipoint, RGBColour& lightcolour, int u1, int  v1, int  u2, int  v2, int level, const Vector3d& axis1, const Vector3d& axis2, TraceTicket& ticket)
 {
 	RGBColour sample_Colour[4];
 	int i, u, v, new_u1, new_v1, new_u2, new_v2;
@@ -3261,9 +3418,11 @@ void Trace::ComputeDiffuseSamplePoint(const Vector3d& basePoint, Intersection& i
 {
 	// generate a vector in a random direction
 	// TODO FIXME - a suitably weighted distribution (oriented according to the surface normal) would possibly be better
-	while (ssltUniformDirectionGenerator.size() <= ticket.subsurfaceRecursionDepth)
-		ssltUniformDirectionGenerator.push_back(GetSubRandomDirectionGenerator(0, 32767));
-	Vector3d v = (*(ssltUniformDirectionGenerator[ticket.subsurfaceRecursionDepth]))();
+	Vector3d v;
+	if (ticket.stochasticDepth == 1)
+		v = (*ssltUniformDirectionGenerator)();
+	else
+		v = Uniform3dOnSphere(stochasticRandomGenerator);
 
 	Ray ray(*basePoint, *v, Ray::SubsurfaceRay);
 	bool found = FindIntersection(in, ray);
@@ -3422,9 +3581,7 @@ void Trace::ComputeSingleScatteringContribution(const Intersection& out, double 
 	// TODO FIXME - a significant deal of this only needs to be computed once for any intersection point!
 
 	// calculate s_prime_out
-	while (ssltUniformNumberGenerator.size() <= ticket.subsurfaceRecursionDepth)
-		ssltUniformNumberGenerator.push_back(GetRandomDoubleGenerator(0.0, 1.0, 32767));
-	epsilon = (*(ssltUniformNumberGenerator[ticket.subsurfaceRecursionDepth]))(); // epsilon is a random floating point value in the range [0,1) {including 0, not including 1}
+	epsilon = (*stochasticRandomGenerator)(); // epsilon is a random floating point value in the range [0,1) {including 0, not including 1}
 	s_prime_out = fabs(log(epsilon)) / sigma_t_xo;
 
 	if (s_prime_out >= dist)
@@ -3604,7 +3761,7 @@ void Trace::ComputeDiffuseAmbientContribution1(const Intersection& out, const Ve
 	Vector3d axisU, axisV;
 	ComputeSurfaceTangents(Vector3d(in.INormal), axisU, axisV);
 	while (ssltCosWeightedDirectionGenerator.size() <= ticket.subsurfaceRecursionDepth)
-		ssltCosWeightedDirectionGenerator.push_back(GetSubRandomCosWeightedDirectionGenerator(2, 32767));
+		ssltCosWeightedDirectionGenerator.push_back(GetSubRandomCosWeightedDirectionGenerator(2));
 	Vector3d direction = (*(ssltCosWeightedDirectionGenerator[ticket.subsurfaceRecursionDepth]))();
 	double cos_in = direction.y(); // cosine of angle between normal and random vector
 	Vector3d vIn = Vector3d(in.INormal)*cos_in + axisU*direction.x() + axisV*direction.z();
@@ -3665,15 +3822,14 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 	// TODO FIXME - this is hard-coded for now
 	if (ticket.subsurfaceRecursionDepth >= 2)
 		return;
-	else if (ticket.subsurfaceRecursionDepth == 1)
+	else if (ticket.stochasticCount > 0)
 	{
-		NumSamplesDiffuse = 1;
-		NumSamplesSingle  = 1;
-		//NumSamplesDiffuse = (int)ceil(sqrt(NumSamplesDiffuse));
-		//NumSamplesSingle  = (int)ceil(sqrt(NumSamplesSingle));
+		NumSamplesDiffuse = (NumSamplesDiffuse-1) / ticket.stochasticCount + 1;
+		NumSamplesSingle  = (NumSamplesSingle -1) / ticket.stochasticCount + 1;
 	}
 
-	ticket.subsurfaceRecursionDepth++;
+	ticket.subsurfaceRecursionDepth ++;
+	ticket.stochasticDepth ++;
 
 	LightSource Light_Source;
 
@@ -3687,7 +3843,7 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 
 #if 0
 	// user setting specifies mean free path
-	DblRGBColour   alpha_prime      = object->interior->subsurface->GetReducedAlbedo(layer_pigment_colour * Finish->Diffuse);
+	DblRGBColour   alpha_prime      = object->interior->subsurface->GetReducedAlbedo(layer_pigment_colour * Finish->RawDiffuse);
 	DblRGBColour   sigma_tr         = DblRGBColour(1.0) / DblRGBColour(Finish->SubsurfaceTranslucency);
 
 	DblRGBColour   sigma_prime_t    = sigma_tr / sqrt(3*(RGBColour(1.0)-alpha_prime));
@@ -3729,6 +3885,8 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 
 	weightSum = 0.0;
 	trueNumSamples = 0;
+
+	ticket.stochasticCount *= NumSamplesDiffuse;
 
 	for (int i = 0; i < NumSamplesDiffuse; i++)
 	{
@@ -3772,6 +3930,8 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 	if (trueNumSamples > 0)
 		Total_Colour /= trueNumSamples;
 
+	ticket.stochasticCount /= NumSamplesDiffuse;
+
 #endif
 
 	Vector3d refractedEye;
@@ -3796,6 +3956,8 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 
 		// colour dependent single scattering contribution
 
+		ticket.stochasticCount *= NumSamplesSingle;
+
 		for (int i = 0; i < NumSamplesSingle; i++)
 		{
 			for (int j = 0; j < 3; j ++)
@@ -3805,6 +3967,8 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 				Total_Colour[j] += temp[j] / NumSamplesSingle;
 			}
 		}
+
+		ticket.stochasticCount /= NumSamplesSingle;
 
 #endif
 
@@ -3852,7 +4016,8 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 
 	Final_Colour += Total_Colour;
 
-	ticket.subsurfaceRecursionDepth--;
+	ticket.subsurfaceRecursionDepth --;
+	ticket.stochasticDepth --;
 }
 
 } // end of namespace

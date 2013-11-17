@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/windows/pvupdate.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/windows/pvupdate.cpp $
+ * $Revision: #3 $
+ * $Change: 5944 $
+ * $DateTime: 2013/07/22 09:27:03 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #define POVWIN_FILE
@@ -77,7 +83,7 @@ static char *GetInstallTime (void)
   static char str [64] ;
 
   len = sizeof (str) ;
-  if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\POV-Ray", 0, KEY_READ, &key) == ERROR_SUCCESS)
+  if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\" REGKEY, 0, KEY_READ, &key) == ERROR_SUCCESS)
   {
     if (RegQueryValueEx (key, INSTALLTIMEKEY, 0, NULL, (BYTE *) str, &len) == ERROR_SUCCESS)
     {
@@ -125,7 +131,7 @@ int IsUpdateAvailable (bool SendSysinfo, char *CurrentVersion, string& NewVersio
   {
     GetSystemTime (&system_time) ;
     if (SystemTimeToFileTime (&system_time, &file_time))
-      reg_printf (true, "Software\\POV-Ray", INSTALLTIMEKEY, "%I64u", ((__int64) file_time.dwHighDateTime << 32) | file_time.dwLowDateTime) ;
+      reg_printf (true, "Software\\" REGKEY, INSTALLTIMEKEY, "%I64u", ((__int64) file_time.dwHighDateTime << 32) | file_time.dwLowDateTime) ;
     if ((InstalledOn = GetInstallTime ()) == NULL)
       InstalledOn = "Unknown" ;
   }

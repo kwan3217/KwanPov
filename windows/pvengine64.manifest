@@ -3,10 +3,10 @@
 <assemblyIdentity 
   version="1.0.0.0" 
   processorArchitecture="AMD64" 
-  name="PersistenceOfVisionRaytracer.POV-Ray.PVEngine" 
+  name="UberPOV.POV-Ray.PVEngine" 
   type="win32" 
 /> 
-<description>The Persistence of Vision Raytracer</description>
+<description>UberPOV Raytracer</description>
 <dependency> 
 <dependentAssembly> 
 <assemblyIdentity 

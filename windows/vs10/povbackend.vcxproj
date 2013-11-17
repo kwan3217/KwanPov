@@ -342,6 +342,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\source\backend\parser\patch.cpp" />
     <ClCompile Include="..\..\source\lightgrp.cpp" />
     <ClCompile Include="..\..\source\optout.cpp" />
     <ClCompile Include="..\..\source\pov_mem.cpp" />
@@ -447,6 +448,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\source\backend\parser\patch.h" />
     <ClInclude Include="..\..\source\backend\texture\avxfma4check.h" />
     <ClInclude Include="..\..\source\lightgrp.h" />
     <ClInclude Include="..\..\source\pov_mem.h" />

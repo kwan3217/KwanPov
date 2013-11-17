@@ -5,6 +5,12 @@
  * globally-accessible types and constants.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -25,11 +31,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/frame.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/frame.h $
+ * $Revision: #2 $
+ * $Change: 5953 $
+ * $DateTime: 2013/07/23 17:33:05 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef FRAME_H
@@ -682,6 +688,20 @@ class Vector3d
 			// no else
 		}
 
+		// returns an arbitrary unit-length vector perpendicular to this one
+		Vector3d orthogonal()
+		{
+			if ((abs(vect[X]) < abs(vect[Y])) && (abs(vect[X]) < abs(vect[Z])))
+				// x component is smallest; compute cross product with X axis (which boils down to the following formula)
+				return Vector3d(0,vect[Z],-vect[Y]).normalized();
+			else if ((abs(vect[Y]) < abs(vect[X])) && (abs(vect[Y]) < abs(vect[Z])))
+				// y component is smallest; compute cross product with Y axis (which boils down to the following formula)
+				return Vector3d(-vect[Z],0,vect[X]).normalized();
+			else
+				// z component is smallest (or all are of same length); compute cross product with Z axis (which boils down to the following formula)
+				return Vector3d(vect[Y],-vect[X],0).normalized();
+		}
+
 	private:
 		DBL vect[3];
 };
@@ -1189,7 +1209,8 @@ struct Finish_Struct
 	SNGL Specular, Roughness;
 	SNGL Phong, Phong_Size;
 	SNGL Irid, Irid_Film_Thickness, Irid_Turb;
-	SNGL Temp_Caustics, Temp_IOR, Temp_Dispersion, Temp_Refract, Reflect_Exp;
+	SNGL Temp_Caustics, Temp_IOR, Temp_Dispersion, Temp_Refract, Reflect_Exp, Reflect_Blur;
+	unsigned int Reflect_Count;
 	SNGL Crand, Metallic;
 	RGBColour Ambient, Emission, Reflection_Max, Reflection_Min;
 	RGBColour SubsurfaceTranslucency, SubsurfaceAnisotropy;

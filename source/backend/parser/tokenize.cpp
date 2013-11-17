@@ -10,6 +10,12 @@
  * the token.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -30,17 +36,18 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/parser/tokenize.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/parser/tokenize.cpp $
+ * $Revision: #7 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <ctype.h>
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
+#include "backend/parser/patch.h"
 #include "base/povmsgid.h"
 #include "base/stringutilities.h"
 #include "backend/parser/parse.h"
@@ -108,7 +115,7 @@ void Parser::Initialize_Tokenizer()
 
 	/* Init conditional stack. */
 
-	Cond_Stack = (CS_ENTRY*)POV_MALLOC(sizeof(CS_ENTRY) * COND_STACK_SIZE, "conditional stack");
+	Cond_Stack = reinterpret_cast<CS_ENTRY*>(POV_MALLOC(sizeof(CS_ENTRY) * COND_STACK_SIZE, "conditional stack"));
 
 	Cond_Stack[0].Cond_Type    = ROOT_COND;
 	Cond_Stack[0].Switch_Value = 0.0;
@@ -811,7 +818,7 @@ inline void Parser::Begin_String()
 	if((String != NULL) && (String != String_Fast_Buffer))
 		POV_FREE(String);
 
-	String = (char *)POV_MALLOC(256, "C String");
+	String = reinterpret_cast<char *>(POV_MALLOC(256, "C String"));
 	String_Buffer_Free = 256;
 	String_Index = 0;
 }
@@ -842,7 +849,7 @@ inline void Parser::Stuff_Character(int chr)
 	{
 		Error("String too long.");
 // This caused too many problems with buffer overflows [trf]
-//		String = (char *)POV_REALLOC(String, String_Index + 256, "String Literal Buffer");
+//		String = reinterpret_cast<char *>(POV_REALLOC(String, String_Index + 256, "String Literal Buffer"));
 //		String_Buffer_Free += 256;
 	}
 
@@ -876,7 +883,7 @@ inline void Parser::End_String()
 	Stuff_Character(0);
 
 	if(String_Buffer_Free > 0)
-		String = (char *)POV_REALLOC(String, String_Index, "String Literal Buffer");
+		String = reinterpret_cast<char *>(POV_REALLOC(String, String_Index, "String Literal Buffer"));
 
 	String_Buffer_Free = 0;
 }
@@ -1353,7 +1360,7 @@ void Parser::Read_Symbol()
 							break;
 						}
 
-						a = (POV_ARRAY *)(*(Token.DataPtr));
+						a = reinterpret_cast<POV_ARRAY *>(*(Token.DataPtr));
 						j = 0;
 
 						for (i=0; i <= a->Dims; i++)
@@ -1387,7 +1394,7 @@ void Parser::Read_Symbol()
 					}
 					else
 					{
-						Par             = (POV_PARAM *)(Temp_Entry->Data);
+						Par             = reinterpret_cast<POV_PARAM *>(Temp_Entry->Data);
 						Token.Token_Id  = *(Par->NumberPtr);
 						Token.is_array_elem = false;
 						Token.NumberPtr = Par->NumberPtr;
@@ -1489,7 +1496,7 @@ char *Parser::Get_Reserved_Words (const char *additional_words)
 
 	length += (int)strlen (additional_words) ;
 
-	char *result = (char *) POV_MALLOC (++length, "Keyword List") ;
+	char *result = reinterpret_cast<char *>(POV_MALLOC (++length, "Keyword List")) ;
 	strcpy (result, additional_words) ;
 	char *s = result + strlen (additional_words) ;
 
@@ -2077,7 +2084,7 @@ void Parser::Parse_Directive(int After_Hash)
 						if ((Entry == NULL) || (Entry->Token_Number != FLOAT_ID_TOKEN))
 							Error ("#for loop variable must remain defined and numerical during loop.");
 
-						DBL* CurrentPtr = (DBL*)Entry->Data;
+						DBL* CurrentPtr = reinterpret_cast<DBL*>(Entry->Data);
 						DBL  End        = Cond_Stack[CS_Index].For_Loop_End;
 						DBL  Step       = Cond_Stack[CS_Index].For_Loop_Step;
 
@@ -2177,8 +2184,11 @@ void Parser::Parse_Directive(int After_Hash)
 							Get_Token();
 							Error("This file was created for an unofficial version and\ncannot work as-is with this official version.");
 #else
-							// PATCH AUTHORS - you should not enable any extra features unless the
-							// 'unofficial' keyword is set in the scene file.
+							Get_Token();
+							if (pov_stricmp(Token.Token_String, "patch") != 0)
+							{
+								Error("This file was created for unofficial version '%s' and cannot work as-is with " BRANCH_NAME, Token.Token_String);
+							}
 #endif
 						}
 						else
@@ -2222,6 +2232,49 @@ void Parser::Parse_Directive(int After_Hash)
 						else
 						{
 							EXIT
+						}
+						break;
+
+					case PATCH_TOKEN:
+						{
+							char* patchName = Parse_C_String(false, false);
+							int requiredVersion = (int)(Parse_Float() * 100 + 0.5);
+							int haveVersion = GetPatchVersion(patchName);
+							if (patchName == NULL)
+							{
+								if (haveVersion < requiredVersion)
+								{
+									Error("Your scene file requires version %0.2f of the 'patch' interface, but this branch only supports version %0.2f.",
+									      requiredVersion / 100.0, haveVersion / 100.0);
+								}
+								else if ((haveVersion / 100) != (requiredVersion / 100))
+								{
+									Warning(0, "Your scene file was designed for version %0.2f of the 'patch' interface, but this branch is at version %0.2f; "
+									           "backward compatibility may not be guaranteed.",
+									           requiredVersion / 100.0, haveVersion / 100.0);
+								}
+								POV_FREE(patchName);
+							}
+							else
+							{
+								if (haveVersion <= 0)
+								{
+									Error("Your scene file requires the '%s' patch, which is not supported by this branch.", patchName);
+								}
+								else if (haveVersion < requiredVersion)
+								{
+									Error("Your scene file requires version %0.2f of the '%s' patch, but this branch only supports version %0.2f.",
+									      requiredVersion / 100.0, patchName, haveVersion / 100.0);
+								}
+								else if ((haveVersion / 100) != (requiredVersion / 100))
+								{
+									Warning(0, "Your scene file was designed for version %0.2f of the '%s' patch, but this branch is at version %0.2f; "
+									           "backward compatibility may not be guaranteed.",
+									           requiredVersion / 100.0, patchName, haveVersion / 100.0);
+								}
+								POV_FREE(patchName);
+							}
+							Parse_Semi_Colon(false);
 						}
 						break;
 
@@ -2708,7 +2761,7 @@ void Parser::Add_Sym_Table()
 		Error("Too many nested symbol tables");
 	}
 
-	Tables[Table_Index]=New=(SYM_TABLE *)POV_MALLOC(sizeof(SYM_TABLE),"symbol table");
+	Tables[Table_Index]=New=reinterpret_cast<SYM_TABLE *>(POV_MALLOC(sizeof(SYM_TABLE),"symbol table"));
 
 	for (i = 0; i < SYM_TABLE_SIZE; i++)
 	{
@@ -2743,7 +2796,7 @@ SYM_ENTRY *Parser::Create_Entry (int Index,const char *Name,TOKEN Number)
 {
 	SYM_ENTRY *New;
 
-	New = (SYM_ENTRY *)POV_MALLOC(sizeof(SYM_ENTRY), "symbol table entry");
+	New = reinterpret_cast<SYM_ENTRY *>(POV_MALLOC(sizeof(SYM_ENTRY), "symbol table entry"));
 
 	New->Token_Number        = Number;
 	New->Data                = NULL;
@@ -2943,9 +2996,9 @@ Parser::POV_MACRO *Parser::Parse_Macro()
 		END_CASE
 	END_EXPECT
 
-	New=(POV_MACRO *)POV_MALLOC(sizeof(POV_MACRO),"macro");
+	New=reinterpret_cast<POV_MACRO *>(POV_MALLOC(sizeof(POV_MACRO),"macro"));
 
-	Table_Entry->Data=(void *)New;
+	Table_Entry->Data=reinterpret_cast<void *>(New);
 
 	New->Macro_Filename = NULL;
 	New->Num_Of_Pars=0;
@@ -3031,14 +3084,14 @@ Parser::POV_MACRO *Parser::Parse_Macro()
 
 void Parser::Invoke_Macro()
 {
-	POV_MACRO *PMac=(POV_MACRO *)Token.Data;
+	POV_MACRO *PMac=reinterpret_cast<POV_MACRO *>(Token.Data);
 	SYM_ENTRY **Table_Entries=NULL;
 	int i,Local_Index;
 
 	if(PMac == NULL)
 	{
 		if(Token.DataPtr!=NULL)
-			PMac = (POV_MACRO*)(*(Token.DataPtr));
+			PMac = reinterpret_cast<POV_MACRO*>(*(Token.DataPtr));
 		else
 			Error("Error in Invoke_Macro");
 	}
@@ -3049,7 +3102,7 @@ void Parser::Invoke_Macro()
 
 	if (PMac->Num_Of_Pars > 0)
 	{
-		Table_Entries = (SYM_ENTRY **)POV_MALLOC(sizeof(SYM_ENTRY *)*PMac->Num_Of_Pars,"parameters");
+		Table_Entries = reinterpret_cast<SYM_ENTRY **>(POV_MALLOC(sizeof(SYM_ENTRY *)*PMac->Num_Of_Pars,"parameters"));
 
 		/* We must parse all parameters before adding new symbol table
 		   or adding entries.  Otherwise recursion won't always work.
@@ -3179,7 +3232,7 @@ Parser::POV_ARRAY *Parser::Parse_Array_Declare (void)
 	POV_ARRAY *New;
 	int i,j;
 
-	New=(POV_ARRAY *)POV_MALLOC(sizeof(POV_ARRAY),"array");
+	New=reinterpret_cast<POV_ARRAY *>(POV_MALLOC(sizeof(POV_ARRAY),"array"));
 
 	i=0;
 	j=1;
@@ -3214,7 +3267,7 @@ Parser::POV_ARRAY *Parser::Parse_Array_Declare (void)
 	New->Dims     = i-1;
 	New->Total    = j;
 	New->Type     = EMPTY_ARRAY_TOKEN;
-	New->DataPtrs = (void **)POV_MALLOC(sizeof(void *)*j,"array");
+	New->DataPtrs = reinterpret_cast<void **>(POV_MALLOC(sizeof(void *)*j,"array"));
 
 	j = 1;
 
@@ -3284,13 +3337,13 @@ void Parser::Parse_Fopen(void)
 	UCS2String ign;
 	SYM_ENTRY *Entry;
 
-	New=(DATA_FILE *)POV_MALLOC(sizeof(DATA_FILE),"user file");
+	New=reinterpret_cast<DATA_FILE *>(POV_MALLOC(sizeof(DATA_FILE),"user file"));
 	New->In_File=NULL;
 	New->Out_File=NULL;
 
 	GET(IDENTIFIER_TOKEN)
 	Entry = Add_Symbol (1,Token.Token_String,FILE_ID_TOKEN);
-	Entry->Data=(void *)New;
+	Entry->Data=reinterpret_cast<void *>(New);
 
 	asciitemp = Parse_C_String(true);
 	temp = ASCIItoUCS2String(asciitemp);
@@ -3348,7 +3401,7 @@ void Parser::Parse_Fclose(void)
 
 	EXPECT
 		CASE(FILE_ID_TOKEN)
-			Data=(DATA_FILE *)Token.Data;
+			Data=reinterpret_cast<DATA_FILE *>(Token.Data);
 			if(Data->In_File != NULL)
 				delete Data->In_File;
 			if(Data->Out_File != NULL)
@@ -3372,11 +3425,12 @@ void Parser::Parse_Read()
 	SYM_ENTRY *Temp_Entry;
 	int End_File=false;
 	char *File_Id;
+	bool csv = true;
 
 	GET(LEFT_PAREN_TOKEN)
 
 	GET(FILE_ID_TOKEN)
-	User_File=(DATA_FILE *)Token.Data;
+	User_File=reinterpret_cast<DATA_FILE *>(Token.Data);
 	File_Id=POV_STRDUP(Token.Token_String);
 	if(User_File->In_File == NULL)
 		Error("Cannot read from file %s because the file is open for writing only.", UCS2toASCIIString(UCS2String(User_File->Out_File->name())).c_str());
@@ -3386,22 +3440,31 @@ void Parser::Parse_Read()
 	LValue_Ok = true;
 
 	EXPECT
+		CASE (TEXT_TOKEN)
+			csv = false;
+			Parse_Comma();
+		END_CASE
+
 		CASE (IDENTIFIER_TOKEN)
 			if (!End_File)
 			{
 				Temp_Entry = Add_Symbol (1,Token.Token_String,IDENTIFIER_TOKEN);
-				End_File=Parse_Read_Value (User_File,Token.Token_Id, &(Temp_Entry->Token_Number), &(Temp_Entry->Data));
+				End_File=Parse_Read_Value (User_File,Token.Token_Id, &(Temp_Entry->Token_Number), &(Temp_Entry->Data), csv);
 				Token.is_array_elem = false;
-				Parse_Comma(); /* Scene file comma between 2 idents */
+				if (csv)
+					Parse_Comma(); /* Scene file comma between 2 idents */
+				csv = true;
 			}
 		END_CASE
 
 		CASE (STRING_ID_TOKEN)
 			if (!End_File)
 			{
-				End_File=Parse_Read_Value (User_File,Token.Token_Id,Token.NumberPtr,Token.DataPtr);
+				End_File=Parse_Read_Value (User_File,Token.Token_Id,Token.NumberPtr,Token.DataPtr, csv);
 				Token.is_array_elem = false;
-				Parse_Comma(); /* Scene file comma between 2 idents */
+				if (csv)
+					Parse_Comma(); /* Scene file comma between 2 idents */
+				csv = true;
 			}
 		END_CASE
 
@@ -3412,8 +3475,10 @@ void Parser::Parse_Read()
 				case FLOAT_ID_TOKEN:
 					if (!End_File)
 					{
-						End_File=Parse_Read_Value (User_File,Token.Function_Id,Token.NumberPtr,Token.DataPtr);
-						Parse_Comma(); /* Scene file comma between 2 idents */
+						End_File=Parse_Read_Value (User_File,Token.Function_Id,Token.NumberPtr,Token.DataPtr, csv);
+						if (csv)
+							Parse_Comma(); /* Scene file comma between 2 idents */
+						csv = true;
 					}
 					break;
 
@@ -3451,7 +3516,7 @@ void Parser::Parse_Read()
 	POV_FREE(File_Id);
 }
 
-int Parser::Parse_Read_Value(DATA_FILE *User_File,int Previous,int *NumberPtr,void **DataPtr)
+int Parser::Parse_Read_Value(DATA_FILE *User_File,int Previous,int *NumberPtr,void **DataPtr, bool csv)
 {
 	pov_base::ITextStream *Temp;
 	bool Temp_R_Flag;
@@ -3470,93 +3535,114 @@ int Parser::Parse_Read_Value(DATA_FILE *User_File,int Previous,int *NumberPtr,vo
 
 	try
 	{
-		EXPECT
-			CASE3 (PLUS_TOKEN,DASH_TOKEN,FLOAT_FUNCT_TOKEN)
-				UNGET
-				Val=Parse_Signed_Float();
-				*NumberPtr = FLOAT_ID_TOKEN;
-				Test_Redefine(Previous,NumberPtr,*DataPtr);
-				*DataPtr   = (void *) Create_Float();
-				*((DBL *)*DataPtr) = Val;
-				Parse_Comma(); /* data file comma between 2 data items  */
-				EXIT
-			END_CASE
+		if (csv)
+		{
 
-			CASE (LEFT_ANGLE_TOKEN)
-				i=1;
-				Express[X]=Parse_Signed_Float();  Parse_Comma();
-				Express[Y]=Parse_Signed_Float();  Parse_Comma();
+			EXPECT
+				CASE3 (PLUS_TOKEN,DASH_TOKEN,FLOAT_FUNCT_TOKEN)
+					UNGET
+					Val=Parse_Signed_Float();
+					*NumberPtr = FLOAT_ID_TOKEN;
+					Test_Redefine(Previous,NumberPtr,*DataPtr);
+					*DataPtr   = reinterpret_cast<void *>(Create_Float());
+					*(reinterpret_cast<DBL *>(*DataPtr)) = Val;
+					Parse_Comma(); /* data file comma between 2 data items  */
+					EXIT
+				END_CASE
 
-				EXPECT
-					CASE3 (PLUS_TOKEN,DASH_TOKEN,FLOAT_FUNCT_TOKEN)
-						UNGET
-						if (++i>4)
-						{
-							Error("Vector data too long");
-						}
-						Express[i]=Parse_Signed_Float(); Parse_Comma();
-					END_CASE
+				CASE (LEFT_ANGLE_TOKEN)
+					i=1;
+					Express[X]=Parse_Signed_Float();  Parse_Comma();
+					Express[Y]=Parse_Signed_Float();  Parse_Comma();
 
-					CASE (RIGHT_ANGLE_TOKEN)
-						EXIT
-					END_CASE
+					EXPECT
+						CASE3 (PLUS_TOKEN,DASH_TOKEN,FLOAT_FUNCT_TOKEN)
+							UNGET
+							if (++i>4)
+							{
+								Error("Vector data too long");
+							}
+							Express[i]=Parse_Signed_Float(); Parse_Comma();
+						END_CASE
 
-					OTHERWISE
-						Expectation_Error("vector");
-					END_CASE
-				END_EXPECT
+						CASE (RIGHT_ANGLE_TOKEN)
+							EXIT
+						END_CASE
 
-				switch(i)
-				{
-					case 1:
-						*NumberPtr = UV_ID_TOKEN;
-						Test_Redefine(Previous,NumberPtr,*DataPtr);
-						*DataPtr   = (void *) Create_UV_Vect();
-						Assign_UV_Vect((DBL *)*DataPtr, Express);
-						break;
+						OTHERWISE
+							Expectation_Error("vector");
+						END_CASE
+					END_EXPECT
 
-					case 2:
-						*NumberPtr = VECTOR_ID_TOKEN;
-						Test_Redefine(Previous,NumberPtr,*DataPtr);
-						*DataPtr   = (void *) Create_Vector();
-						Assign_Vector((DBL *)*DataPtr, Express);
-						break;
+					switch(i)
+					{
+						case 1:
+							*NumberPtr = UV_ID_TOKEN;
+							Test_Redefine(Previous,NumberPtr,*DataPtr);
+							*DataPtr   = reinterpret_cast<void *>(Create_UV_Vect());
+							Assign_UV_Vect(reinterpret_cast<DBL *>(*DataPtr), Express);
+							break;
 
-					case 3:
-						*NumberPtr = VECTOR_4D_ID_TOKEN;
-						Test_Redefine(Previous,NumberPtr,*DataPtr);
-						*DataPtr   = (void *) Create_Vector_4D();
-						Assign_Vector_4D((DBL *)*DataPtr, Express);
-						break;
+						case 2:
+							*NumberPtr = VECTOR_ID_TOKEN;
+							Test_Redefine(Previous,NumberPtr,*DataPtr);
+							*DataPtr   = reinterpret_cast<void *>(Create_Vector());
+							Assign_Vector(reinterpret_cast<DBL *>(*DataPtr), Express);
+							break;
 
-					case 4:
-						*NumberPtr    = COLOUR_ID_TOKEN;
-						Test_Redefine(Previous,NumberPtr,*DataPtr);
-						*DataPtr      = (void *) Create_Colour();
-						Assign_Colour_Express((COLC*)(*DataPtr), Express); /* NK fix assign_colour bug */
-						break;
-				}
+						case 3:
+							*NumberPtr = VECTOR_4D_ID_TOKEN;
+							Test_Redefine(Previous,NumberPtr,*DataPtr);
+							*DataPtr   = reinterpret_cast<void *>(Create_Vector_4D());
+							Assign_Vector_4D(reinterpret_cast<DBL *>(*DataPtr), Express);
+							break;
 
-				Parse_Comma(); // data file comma between 2 data items
-				EXIT
-			END_CASE
+						case 4:
+							*NumberPtr    = COLOUR_ID_TOKEN;
+							Test_Redefine(Previous,NumberPtr,*DataPtr);
+							*DataPtr      = reinterpret_cast<void *>(Create_Colour());
+							Assign_Colour_Express(reinterpret_cast<COLC *>(*DataPtr), Express); /* NK fix assign_colour bug */
+							break;
+					}
 
-			CASE(STRING_LITERAL_TOKEN)
-				*NumberPtr = STRING_ID_TOKEN;
-				Test_Redefine(Previous,NumberPtr,*DataPtr);
-				*DataPtr   = String_To_UCS2(Token.Token_String, false);
-				Parse_Comma(); // data file comma between 2 data items
-				EXIT
-			END_CASE
+					Parse_Comma(); // data file comma between 2 data items
+					EXIT
+				END_CASE
 
-			CASE (END_OF_FILE_TOKEN)
-				EXIT
-			END_CASE
+				CASE(STRING_LITERAL_TOKEN)
+					*NumberPtr = STRING_ID_TOKEN;
+					Test_Redefine(Previous,NumberPtr,*DataPtr);
+					*DataPtr   = String_To_UCS2(Token.Token_String, false);
+					Parse_Comma(); // data file comma between 2 data items
+					EXIT
+				END_CASE
 
-			OTHERWISE
-				Expectation_Error ("float, vector, or string literal");
-			END_CASE
-		END_EXPECT
+				CASE (END_OF_FILE_TOKEN)
+					EXIT
+				END_CASE
+
+				OTHERWISE
+					Expectation_Error ("float, vector, or string literal");
+				END_CASE
+			END_EXPECT
+
+			if (Token.Token_Id==END_OF_FILE_TOKEN)
+				End_File = true;
+		}
+		else // i.e. plain text (non-csv)
+		{
+			*NumberPtr = STRING_ID_TOKEN;
+			Test_Redefine(Previous,NumberPtr,*DataPtr);
+			string s = "";
+			int c = Input_File->In_File->getchar();
+			while ((c != EOF) && (c != '\n')) // NB: our version of getchar automatically translates any line endings to '\n'
+			{
+				s += c;
+				c = Input_File->In_File->getchar();
+			}
+			*DataPtr = String_To_UCS2(s.c_str(), true);
+			End_File = (c == EOF);
+		}
 	}
 	catch (...)
 	{
@@ -3566,9 +3652,6 @@ int Parser::Parse_Read_Value(DATA_FILE *User_File,int Previous,int *NumberPtr,vo
 		Input_File->R_Flag = Temp_R_Flag;
 		throw;
 	}
-
-	if (Token.Token_Id==END_OF_FILE_TOKEN)
-		End_File = true;
 
 	Token.End_Of_File = false;
 	Token.Unget_Token = false;
@@ -3590,7 +3673,7 @@ void Parser::Parse_Write(void)
 	GET(LEFT_PAREN_TOKEN)
 	GET(FILE_ID_TOKEN)
 
-	User_File=(DATA_FILE *)Token.Data;
+	User_File=reinterpret_cast<DATA_FILE *>(Token.Data);
 	if(User_File->Out_File == NULL)
 		Error("Cannot write to file %s because the file is open for reading only.", UCS2toASCIIString(UCS2String(User_File->In_File->name())).c_str());
 
@@ -3785,8 +3868,8 @@ int Parser::Parse_Ifdef_Param (void)
 
 			if ( Token.Token_Id == PARAMETER_ID_TOKEN )
 			{
-				Token.NumberPtr = ((POV_PARAM *)(Entry->Data))->NumberPtr;
-				Token.DataPtr   = ((POV_PARAM *)(Entry->Data))->DataPtr;
+				Token.NumberPtr = (reinterpret_cast<POV_PARAM *>(Entry->Data))->NumberPtr;
+				Token.DataPtr   = (reinterpret_cast<POV_PARAM *>(Entry->Data))->DataPtr;
 			}
 
 			if (Token.NumberPtr && *(Token.NumberPtr)==ARRAY_ID_TOKEN)
@@ -3801,7 +3884,7 @@ int Parser::Parse_Ifdef_Param (void)
 					break;
 				}
 
-				a = (POV_ARRAY *)(*(Token.DataPtr));
+				a = reinterpret_cast<POV_ARRAY *>(*(Token.DataPtr));
 				j = 0;
 
 				for (i=0; i <= a->Dims; i++)
@@ -3936,11 +4019,11 @@ int Parser::Parse_For_Param (char** IdentifierPtr, DBL* EndPtr, DBL* StepPtr)
 
 	*Token.NumberPtr = FLOAT_ID_TOKEN;
 	Test_Redefine(Previous,Token.NumberPtr,*Token.DataPtr, true);
-	*Token.DataPtr   = (void *) Create_Float();
-	DBL* CurrentPtr = ((DBL *)*Token.DataPtr);
+	*Token.DataPtr   = reinterpret_cast<void *>(Create_Float());
+	DBL* CurrentPtr = (reinterpret_cast<DBL *>(*Token.DataPtr));
 
 	size_t len = strlen(Token.Token_String)+1;
-	*IdentifierPtr = (char*)POV_MALLOC(len, "loop identifier");
+	*IdentifierPtr = reinterpret_cast<char *>(POV_MALLOC(len, "loop identifier"));
 	memcpy(*IdentifierPtr, Token.Token_String, len);
 
 	Parse_Comma();

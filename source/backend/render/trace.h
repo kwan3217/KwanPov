@@ -2,6 +2,12 @@
  * trace.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/render/trace.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/render/trace.h $
+ * $Revision: #4 $
+ * $Change: 5953 $
+ * $DateTime: 2013/07/23 17:33:05 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BACKEND_TRACE_H
@@ -174,9 +180,14 @@ class Trace
 			/// something the subsurface scattering algorithm needs
 			unsigned int subsurfaceRecursionDepth;
 
+			/// number of blurry bounces
+			unsigned int stochasticDepth;
+			/// number of "sibling rays" (including this one)
+			unsigned int stochasticCount;
+
 			TraceTicket(unsigned int mtl, double adcb, bool ab = true, unsigned int rrd = 0, unsigned int ssrd = 0, float riq = -1.0, float rq = 1.0):
 				traceLevel(0), maxAllowedTraceLevel(mtl), maxFoundTraceLevel(0), adcBailout(adcb), alphaBackground(ab), radiosityRecursionDepth(rrd), subsurfaceRecursionDepth(ssrd),
-				radiosityImportanceQueried(riq), radiosityImportanceFound(-1.0), radiosityQuality(rq) {}
+				radiosityImportanceQueried(riq), radiosityImportanceFound(-1.0), radiosityQuality(rq), stochasticDepth(0), stochasticCount(0) {}
 		};
 
 		class CooperateFunctor
@@ -236,9 +247,11 @@ class Trace
 			Vector3d normal;
 			RGBColour reflec;
 			SNGL reflex;
+			SNGL blur;
+			unsigned int blurCount;
 
-			WNRX(DBL w, const Vector3d& n, const RGBColour& r, SNGL x) :
-				weight(w), normal(n), reflec(r), reflex(x) { }
+			WNRX(DBL w, const Vector3d& n, const RGBColour& r, SNGL x, SNGL b, unsigned int bc) :
+				weight(w), normal(n), reflec(r), reflex(x), blur(b), blurCount(bc) { }
 		};
 
 		typedef vector<const TEXTURE *> TextureVectorData;
@@ -298,17 +311,19 @@ class Trace
 		/// pseudo-random number generator based on random number sequence
 		RandomDoubleSequence::Generator randomNumberGenerator;
 		/// sub-random uniform 3d points on sphere sequence
-		vector<SequentialVectorGeneratorPtr> ssltUniformDirectionGenerator;
-		/// sub-random uniform numbers sequence
-		vector<SequentialDoubleGeneratorPtr> ssltUniformNumberGenerator;
-		/// sub-random cos-weighted 3d points on hemisphere sequence
-		vector<SequentialVectorGeneratorPtr> ssltCosWeightedDirectionGenerator;
+		SequentialVectorGeneratorPtr ssltUniformDirectionGenerator;
+		/// sub-random 2d points on disc sequence
+		vector<SequentialVector2dGeneratorPtr> stochasticDirectionGenerator;
+		/// sub-random 2d points on disc sequence
+		SequentialDoubleGeneratorPtr stochasticRandomGenerator;
 		/// thread data
 		TraceThreadData *threadData;
 
 		CooperateFunctor& cooperate;
 		MediaFunctor& media;
 		RadiosityFunctor& radiosity;
+
+		SequentialVector2dGeneratorPtr GetStochasticDirectionGenerator(unsigned int depth);
 
 	/**
 	 ***************************************************************************************************************
@@ -443,7 +458,7 @@ class Trace
 	 *  @{
 	 */
 
-		void ComputeReflection(const FINISH* finish, const Vector3d& ipoint, const Ray& ray, const Vector3d& normal, const Vector3d& rawnormal, Colour& colour, COLC weight, TraceTicket& ticket);
+		void ComputeReflection(const FINISH* finish, const Vector3d& ipoint, const Ray& ray, const Vector3d& normal, const Vector3d& rawnormal, Colour& colour, COLC weight, TraceTicket& ticket, double blur = 0.0);
 		bool ComputeRefraction(const FINISH* finish, Interior *interior, const Vector3d& ipoint, const Ray& ray, const Vector3d& normal, const Vector3d& rawnormal, Colour& colour, COLC weight, TraceTicket& ticket);
 		bool TraceRefractionRay(const FINISH* finish, const Vector3d& ipoint, const Ray& ray, Ray& nray, double ior, double n, const Vector3d& normal, const Vector3d& rawnormal, const Vector3d& localnormal, Colour& colour, COLC weight, TraceTicket& ticket);
 
@@ -469,7 +484,7 @@ class Trace
 		void ComputeFullAreaDiffuseLight(const LightSource &lightsource, const Vector3d& reye, const FINISH *finish, const Vector3d& ipoint, const Ray& eye,
 		                                 const Vector3d& layer_normal, const RGBColour& layer_pigment_colour, RGBColour& colour, double attenuation,
 		                                 double lightsourcedepth, Ray& lightsourceray, const RGBColour& lightcolour,
-		                                 bool isDoubleIlluminated); // JN2007: Full area lighting
+		                                 bool isDoubleIlluminated, TraceTicket& ticket); // JN2007: Full area lighting
 
 		/**
 		 *  Compute the direction, distance and unshadowed brightness of an unshadowed light source.

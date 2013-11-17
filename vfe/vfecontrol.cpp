@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/vfe/vfecontrol.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/vfe/vfecontrol.cpp $
+ * $Revision: #3 $
+ * $Change: 5944 $
+ * $DateTime: 2013/07/22 09:27:03 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <cstring>
@@ -48,7 +54,7 @@ namespace pov_frontend
   extern struct ProcessRenderOptions::Output_FileType_Table FileTypeTable[];
 }
 
-static struct pov_base::ProcessOptions::INI_Parser_Table *GetPT(const char *OptionName)
+struct pov_base::ProcessOptions::INI_Parser_Table *GetPT(const char *OptionName)
 {
   for (struct pov_base::ProcessOptions::INI_Parser_Table *op = pov_frontend::RenderOptions_INI_Table; op->keyword != NULL; op++)
     if (strcmp(op->keyword, OptionName) == 0)
@@ -172,7 +178,7 @@ void vfeSession::RenderStopped (void)
   // before writing to the streams
   if (m_Succeeded)
   {
-    AppendStreamMessage (vfeSession::mUnclassified, "POV-Ray finished");
+    AppendStreamMessage (vfeSession::mUnclassified, BRANCH_NAME " finished");
     AppendStreamMessage (vfeSession::mDivider, "");
   }
   else

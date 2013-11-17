@@ -2,6 +2,12 @@
  * threaddata.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/scene/threaddata.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/scene/threaddata.h $
+ * $Revision: #2 $
+ * $Change: 5948 $
+ * $DateTime: 2013/07/22 20:36:31 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BACKEND_THREADDATA_H
@@ -41,6 +47,7 @@
 #include "backend/support/statistics.h"
 #include "backend/shape/mesh.h"
 #include "backend/pattern/pattern.h"
+#include "backend/support/randomsequences.h"
 
 namespace pov
 {
@@ -95,6 +102,9 @@ class SceneThreadData : public Task::TaskData
 		int Facets_Last_Seed;
 		int Facets_CVC;
 		VECTOR Facets_Cube[81];
+
+		/// Common random number generator for all stochastic stuff
+		SeedableDoubleGeneratorPtr stochasticRandomGenerator;
 
 		// TODO FIXME - thread-local copy of lightsources. we need this
 		// because various parts of the lighting code seem to make changes

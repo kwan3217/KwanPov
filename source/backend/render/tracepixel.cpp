@@ -7,6 +7,12 @@
  * as this is part of camera and ray setup.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -27,11 +33,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/render/tracepixel.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/render/tracepixel.cpp $
+ * $Revision: #4 $
+ * $Change: 5953 $
+ * $DateTime: 2013/07/23 17:33:05 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <vector>
@@ -255,7 +261,7 @@ void TracePixel::SetupCamera(const Camera& cam)
 		focalBlurData = new FocalBlurData(camera, threadData);
 }
 
-void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour)
+void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour, unsigned int siblingRays)
 {
 	if(useFocalBlur == false)
 	{
@@ -270,6 +276,11 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour)
 				Colour col;
 
 				Trace::TraceTicket ticket(maxTraceLevel, adcBailout, sceneData->outputAlpha);
+				if (siblingRays > 0)
+				{
+					ticket.stochasticCount = siblingRays;
+					ticket.stochasticDepth = 1;
+				}
 				TraceRay(ray, col, 1.0, ticket, false, camera.Max_Ray_Distance);
 				colour += col;
 				numTraced++;
@@ -281,7 +292,7 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour)
 			colour.transm() = 1.0;
 	}
 	else
-		TraceRayWithFocalBlur(colour, x, y, width, height);
+		TraceRayWithFocalBlur(colour, x, y, width, height, siblingRays);
 }
 
 bool TracePixel::CreateCameraRay(Ray& ray, DBL x, DBL y, DBL width, DBL height, size_t ray_number)
@@ -934,7 +945,7 @@ void TracePixel::InitRayContainerStateTree(Ray& ray, BBOX_TREE *node)
 	}
 }
 
-void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, DBL height)
+void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, DBL height, unsigned int siblingRays)
 {
 	int nr;     // Number of current samples.
 	int level;  // Index into number of samples list.
@@ -943,7 +954,9 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 	int i;
 	DBL dx, dy, n, randx, randy;
 	Colour C, V1, S1, S2;
+	int minSamples, maxSamples;
 	int seed = int(x * 313.0 + 11.0) + int(y * 311.0 + 17.0);
+	int seed2;
 	Ray ray;
 
 	colour.clear();
@@ -953,6 +966,19 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 
 	nr = 0;
 	level = 0;
+
+	if (siblingRays > 0)
+	{
+		minSamples = (camera.Blur_Samples_Min-1) / siblingRays + 1;
+		maxSamples = (camera.Blur_Samples    -1) / siblingRays + 1;
+		seed2 = (int)((*threadData->stochasticRandomGenerator)() * camera.Blur_Samples);
+	}
+	else
+	{
+		minSamples = camera.Blur_Samples_Min;
+		maxSamples = camera.Blur_Samples;
+		seed2 = 0;
+	}
 
 	do
 	{
@@ -968,11 +994,11 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 			}
 		}
 
-		for(i = 0; (i < max_s) && (nr < camera.Blur_Samples); i++)
+		for(i = 0; (i < max_s) && (nr < maxSamples); i++)
 		{
 			// Choose sub-pixel location.
-			dxi = PseudoRandom(seed + nr) % SUB_PIXEL_GRID_SIZE;
-			dyi = PseudoRandom(seed + nr + 1) % SUB_PIXEL_GRID_SIZE;
+			dxi = PseudoRandom(seed + seed2) % SUB_PIXEL_GRID_SIZE;
+			dyi = PseudoRandom(seed + seed2 + 1) % SUB_PIXEL_GRID_SIZE;
 
 			dx = (DBL)(2 * dxi + 1) / (DBL)(2 * SUB_PIXEL_GRID_SIZE) - 0.5;
 			dy = (DBL)(2 * dyi + 1) / (DBL)(2 * SUB_PIXEL_GRID_SIZE) - 0.5;
@@ -987,12 +1013,19 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 			ray.ClearInteriors();
 
 			// Create and trace ray.
-			if(CreateCameraRay(ray, x + dx, y + dy, width, height, nr))
+			if(CreateCameraRay(ray, x + dx, y + dy, width, height, seed2))
 			{
 				// Increase_Counter(stats[Number_Of_Samples]);
 
 				C.clear();
 				Trace::TraceTicket ticket(maxTraceLevel, adcBailout, sceneData->outputAlpha);
+				ticket.stochasticCount = max(1, minSamples);
+				ticket.stochasticDepth = 1;
+				if (siblingRays > 0)
+				{
+					ticket.stochasticCount *= siblingRays;
+					ticket.stochasticDepth ++;
+				}
 				TraceRay(ray, C, 1.0, ticket, false, camera.Max_Ray_Distance);
 
 				colour += C;
@@ -1014,26 +1047,36 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 			S2[pBLUE]   += Sqr(C[pBLUE]);
 			S2[pTRANSM] += Sqr(C[pTRANSM]);
 
-			nr++;
+			nr ++;
+			seed2 ++;
 		}
 
 		// Get variance of samples.
 
 		n = (DBL)nr;
 
-		V1[pRED]    = (S2[pRED]    / n - Sqr(S1[pRED]    / n)) / n;
-		V1[pGREEN]  = (S2[pGREEN]  / n - Sqr(S1[pGREEN]  / n)) / n;
-		V1[pBLUE]   = (S2[pBLUE]   / n - Sqr(S1[pBLUE]   / n)) / n;
-		V1[pTRANSM] = (S2[pTRANSM] / n - Sqr(S1[pTRANSM] / n)) / n;
+		V1[pRED]    = (S2[pRED]    - Sqr(S1[pRED])    / n) / Sqr(n);
+		V1[pGREEN]  = (S2[pGREEN]  - Sqr(S1[pGREEN])  / n) / Sqr(n);
+		V1[pBLUE]   = (S2[pBLUE]   - Sqr(S1[pBLUE])   / n) / Sqr(n);
+		V1[pTRANSM] = (S2[pTRANSM] - Sqr(S1[pTRANSM]) / n) / Sqr(n);
+		// TODO - the above is *not* actually the variance; the proper formula for that would be:
+		// V1[...]  = (S2[...]     - Sqr(S1[...])     / n) / (n-1);
+		// There might be something fishy here.
 
 		// Exit if samples are likely too be good enough.
 
-		if((nr >= camera.Blur_Samples_Min) &&
-		   (V1[pRED]  < focalBlurData->Sample_Threshold[nr - 1]) && (V1[pGREEN]  < focalBlurData->Sample_Threshold[nr - 1]) &&
-		   (V1[pBLUE] < focalBlurData->Sample_Threshold[nr - 1]) && (V1[pTRANSM] < focalBlurData->Sample_Threshold[nr - 1]))
+		double threshold  = focalBlurData->Sample_Threshold[nr - 1];
+		double brightness = S1.greyscale() / n;
+		if (brightness > 1.0)
+			// for pixels with excessive brightness, use a relative threshold rather than an absolute one
+			threshold = threshold * Sqr(brightness);
+
+		if((nr >= minSamples) &&
+		   (V1[pRED]  < threshold) && (V1[pGREEN]  < threshold) &&
+		   (V1[pBLUE] < threshold) && (V1[pTRANSM] < threshold))
 			break;
 	}
-	while(nr < camera.Blur_Samples);
+	while(nr < maxSamples);
 
 	colour /= (DBL)nr;
 }

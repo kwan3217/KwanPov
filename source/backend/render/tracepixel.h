@@ -2,6 +2,12 @@
  * tracepixel.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/render/tracepixel.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/render/tracepixel.h $
+ * $Revision: #3 $
+ * $Change: 5951 $
+ * $DateTime: 2013/07/23 09:45:49 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BACKEND_TRACEPIXEL_H
@@ -207,7 +213,7 @@ class TracePixel : public Trace
 		virtual ~TracePixel();
 		void SetupCamera(const Camera& cam);
 
-		void operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour);
+		void operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour, unsigned int siblingRays = 0);
 	private:
 		// Focal blur data
 		class FocalBlurData
@@ -266,7 +272,7 @@ class TracePixel : public Trace
 		void InitRayContainerState(Ray& ray, bool compute = false);
 		void InitRayContainerStateTree(Ray& ray, BBOX_TREE *node);
 
-		void TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, DBL height);
+		void TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, DBL height, unsigned int siblingRays = 0);
 		void JitterCameraRay(Ray& ray, DBL x, DBL y, size_t ray_number);
 };
 

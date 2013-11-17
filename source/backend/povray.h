@@ -8,6 +8,12 @@
  * files.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -28,11 +34,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/povray.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/povray.h $
+ * $Revision: #7 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BACKEND_POVRAY_H
@@ -42,6 +48,7 @@
 // file into SKIP_COMPLEX_OPTOUT_H sections like the one below! [trf]
 #ifndef SKIP_COMPLEX_OPTOUT_H
 
+#include "base/branch.h"
 #include "base/povms.h"
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
@@ -85,15 +92,45 @@ bool povray_terminated();
 #define OFFICIAL_VERSION_NUMBER 370
 #define OFFICIAL_VERSION_NUMBER_HEX 0x0370
 
+
+#ifdef BRANCH_NAME
+
+#undef POV_RAY_IS_OFFICIAL
+#define POV_RAY_IS_OFFICIAL 0
+#define POV_RAY_IS_BRANCH   1
+
+#else
+
+#define BRANCH_NAME                 "POV-Ray"
+#define BRANCH_FULL_NAME            "Persistence of Vision Raytracer(tm)"
+#define BRANCH_MAINTAINER           "the POV-Ray Team"
+#define BRANCH_CONTACT              "http://www.povray.org"
+#define BRANCH_VERSION              POV_RAY_VERSION
+#define BRANCH_COPYRIGHT            POV_RAY_COPYRIGHT
+#define BRANCH_BUILD_IS_OFFICIAL    POV_RAY_IS_OFFICIAL
+#define POV_RAY_IS_BRANCH           0
+
+#endif
+
+
 #if POV_RAY_IS_OFFICIAL == 1
 
 #ifdef DISTRIBUTION_MESSAGE_2
 #undef DISTRIBUTION_MESSAGE_2
 #endif
-
 #define DISTRIBUTION_MESSAGE_1 "This is an official version prepared by the POV-Ray Team. See the"
-#define DISTRIBUTION_MESSAGE_2 " documentation on how to contact the authors or visit us on the"
-#define DISTRIBUTION_MESSAGE_3 " internet at http://www.povray.org/\n"
+#define DISTRIBUTION_MESSAGE_2 "documentation on how to contact the authors or visit us on the"
+#define DISTRIBUTION_MESSAGE_3 "internet at http://www.povray.org/\n"
+
+#elif BRANCH_BUILD_IS_OFFICIAL == 1
+
+#ifdef DISTRIBUTION_MESSAGE_2
+#undef DISTRIBUTION_MESSAGE_2
+#endif
+
+#define DISTRIBUTION_MESSAGE_1 "This is a branch of POV-Ray " POV_RAY_VERSION " maintained by "
+#define DISTRIBUTION_MESSAGE_2 BRANCH_MAINTAINER " (" BRANCH_CONTACT ")."
+#define DISTRIBUTION_MESSAGE_3 "The POV-Ray Team(tm) is not responsible for supporting this version.\n"
 
 #else
 
@@ -102,9 +139,9 @@ bool povray_terminated();
 #define DISTRIBUTION_MESSAGE_1 "This is an unofficial version compiled by:"
 #ifndef DISTRIBUTION_MESSAGE_2
 #error Please complete the following DISTRIBUTION_MESSAGE_2 definition
-#define DISTRIBUTION_MESSAGE_2 " FILL IN NAME HERE........................."
+#define DISTRIBUTION_MESSAGE_2 "FILL IN NAME HERE........................."
 #endif
-#define DISTRIBUTION_MESSAGE_3 " The POV-Ray Team is not responsible for supporting this version.\n"
+#define DISTRIBUTION_MESSAGE_3 "The POV-Ray Team is not responsible for supporting this version.\n"
 
 #endif
 

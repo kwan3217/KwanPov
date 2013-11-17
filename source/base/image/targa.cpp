@@ -5,6 +5,12 @@
  * format.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -25,11 +31,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/base/image/targa.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/base/image/targa.cpp $
+ * $Revision: #2 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 
@@ -105,13 +111,13 @@ typedef char Targa_extension[495];
 #define EXT_GAMMA_OFF 478
 #define EXT_PIXRATIO_OFF 474
 
-static Pixel *GetPix (const Image *image, int x, int y, Pixel *pixel, const GammaCurvePtr& gamma, DitherHandler& dither, bool premul)
+Pixel *GetPix (const Image *image, int x, int y, Pixel *pixel, const GammaCurvePtr& gamma, DitherHandler& dither, float glareDesaturation, bool premul)
 {
-	GetEncodedRGBAValue (image, x, y, gamma, 255, pixel->r, pixel->g, pixel->b, pixel->a, dither, premul);
+	GetEncodedRGBAValue (image, x, y, gamma, 255, pixel->r, pixel->g, pixel->b, pixel->a, dither, glareDesaturation, premul);
 	return (pixel);
 }
 
-static void PutPix (vector<unsigned char>& line, const pix *pixel, bool opaque)
+void PutPix (vector<unsigned char>& line, const pix *pixel, bool opaque)
 {
 	line.push_back (pixel->b);
 	line.push_back (pixel->g);
@@ -191,7 +197,7 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 		{
 			line.clear ();
 			for (int col = 0; col < w; col++)
-				PutPix (line, GetPix (image, col, row, &pixel, gamma, *dither, premul), opaque);
+				PutPix (line, GetPix (image, col, row, &pixel, gamma, *dither, options.glareDesaturation, premul), opaque);
 			if (!file->write (&line[0], line.size()))
 				throw POV_EXCEPTION(kFileDataErr, "row write failed for targa file") ;
 		}
@@ -210,11 +216,11 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 			int ptype = 0;
 			bool writenow = false;
 
-			GetPix (image, 0, row, &current, gamma, *dither, premul);
+			GetPix (image, 0, row, &current, gamma, *dither, options.glareDesaturation, premul);
 			while (true)
 			{
 				if (startx + cnt < llen)
-					GetPix (image, startx + cnt, row, &next, gamma, *dither, premul);
+					GetPix (image, startx + cnt, row, &next, gamma, *dither, options.glareDesaturation, premul);
 				else
 					next = current;
 				if (memcmp (&current, &next, sizeof (pix)) == 0)
@@ -261,7 +267,7 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 					{
 						line.push_back ((unsigned char) cnt - 1);
 						for (int x = 0; x < cnt; x++)
-							PutPix (line, GetPix (image, startx + x, row, &pixel, gamma, *dither, premul), opaque);
+							PutPix (line, GetPix (image, startx + x, row, &pixel, gamma, *dither, options.glareDesaturation, premul), opaque);
 					}
 					startx += cnt;
 					writenow = false;
@@ -346,7 +352,7 @@ void Write (OStream *file, const Image *image, const Image::WriteOptions& option
 	file->write(foo,sizeof(foo));
 }
 
-static void ConvertColor (Pixel *pixel, unsigned pixelsize, const unsigned char *bytes)
+void ConvertColor (Pixel *pixel, unsigned pixelsize, const unsigned char *bytes)
 {
 	unsigned char r;
 	unsigned char g;
@@ -395,7 +401,7 @@ static void ConvertColor (Pixel *pixel, unsigned pixelsize, const unsigned char 
 	pixel->a = a;
 }
 
-static void ConvertColor (Image::RGBAMapEntry *pixel, unsigned pixelsize, const unsigned char *bytes, const GammaCurvePtr& gamma)
+void ConvertColor (Image::RGBAMapEntry *pixel, unsigned pixelsize, const unsigned char *bytes, const GammaCurvePtr& gamma)
 {
 	unsigned char r;
 	unsigned char g;

@@ -5,6 +5,12 @@
  * colours in scene description files.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -25,11 +31,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/parser/express.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/parser/express.cpp $
+ * $Revision: #4 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <ctype.h>
@@ -38,6 +44,7 @@
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/parser/parse.h"
+#include "backend/parser/patch.h"
 #include "backend/math/vector.h"
 #include "backend/colour/colour.h"
 #include "backend/math/splines.h"
@@ -234,7 +241,7 @@ void Parser::Parse_Trace(VECTOR Res)
 
 	EXPECT
 		CASE (OBJECT_ID_TOKEN)
-			Object = (ObjectPtr )Token.Data;
+			Object = reinterpret_cast<ObjectPtr>(Token.Data);
 			EXIT
 		END_CASE
 
@@ -281,7 +288,7 @@ void Parser::Parse_Trace(VECTOR Res)
 			/* All of these functions return a VECTOR result */
 			if(Token.Function_Id == VECTOR_ID_TOKEN)
 			{
-				Assign_Vector((DBL *)Token.Data, Local_Normal);
+				Assign_Vector(reinterpret_cast<DBL *>(Token.Data), Local_Normal);
 			}
 			else
 			{
@@ -328,7 +335,7 @@ int Parser::Parse_Inside()
 
 	EXPECT
 		CASE (OBJECT_ID_TOKEN)
-			Object = (ObjectPtr )Token.Data;
+			Object = reinterpret_cast<ObjectPtr>(Token.Data);
 			EXIT
 		END_CASE
 
@@ -571,7 +578,7 @@ void Parser::Parse_Vector_Function_Call(EXPRESS Express, int *Terms)
 
 void Parser::Parse_Spline_Call(EXPRESS Express, int *Terms)
 {
-	SPLINE *spline = (SPLINE*)(Token.Data);
+	SPLINE *spline = reinterpret_cast<SPLINE*>(Token.Data);
 	DBL Val;
 
 	// NB while parsing the call parameters, the parser may drop out of the current scope (macro or include file)
@@ -805,7 +812,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 					break;
 
 				case FLOAT_ID_TOKEN:
-					Val = *((DBL *) Token.Data);
+					Val = *(reinterpret_cast<DBL *>(Token.Data));
 					break;
 
 				case FLOAT_TOKEN:
@@ -1034,6 +1041,14 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 					Val = sceneData->languageVersion / 100.0;
 					break;
 
+				case PATCH_TOKEN:
+					GET (LEFT_PAREN_TOKEN);
+					Local_C_String=Parse_C_String(false, false);
+					Val = GetPatchVersion(Local_C_String) / 100.0;
+					POV_FREE(Local_C_String);
+					GET (RIGHT_PAREN_TOKEN);
+					break;
+
 				case TRUE_TOKEN:
 				case YES_TOKEN:
 				case ON_TOKEN:
@@ -1060,7 +1075,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 				case DIMENSIONS_TOKEN:
 					GET(LEFT_PAREN_TOKEN)
 					GET(ARRAY_ID_TOKEN)
-					a = (POV_ARRAY *)(*(Token.DataPtr));
+					a = reinterpret_cast<POV_ARRAY *>(*(Token.DataPtr));
 					Val = a->Dims+1;
 					GET(RIGHT_PAREN_TOKEN)
 					break;
@@ -1069,7 +1084,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 					GET(LEFT_PAREN_TOKEN)
 					GET(ARRAY_ID_TOKEN)
 					Parse_Comma();
-					a = (POV_ARRAY *)(*(Token.DataPtr));
+					a = reinterpret_cast<POV_ARRAY *>(*(Token.DataPtr));
 					i = (int)Parse_Float()-1.0;
 					if ((i < 0) || (i > a->Dims))
 						Val = 0.0;
@@ -1113,7 +1128,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 					break;
 
 				case VECTOR_ID_TOKEN:
-					Assign_Vector(Vect, (DBL *)Token.Data);
+					Assign_Vector(Vect, reinterpret_cast<DBL *>(Token.Data));
 					break;
 
 				case VNORMALIZE_TOKEN:
@@ -1172,7 +1187,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 					GET (LEFT_PAREN_TOKEN);
 					EXPECT
 						CASE (OBJECT_ID_TOKEN)
-							Object = (ObjectPtr )Token.Data;
+							Object = reinterpret_cast<ObjectPtr>(Token.Data);
 							if ( Object )
 							{
 								Vect[X]=Object->BBox.Lower_Left[X];
@@ -1197,7 +1212,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 					GET (LEFT_PAREN_TOKEN);
 					EXPECT
 						CASE (OBJECT_ID_TOKEN)
-							Object = (ObjectPtr )Token.Data;
+							Object = reinterpret_cast<ObjectPtr>(Token.Data);
 							if ( Object )
 							{
 								Vect[X]=Object->BBox.Lower_Left[X]+Object->BBox.Lengths[X];
@@ -1209,7 +1224,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 
 						// JN2007: Image map dimensions:
 						CASE (PIGMENT_ID_TOKEN)
-							Pigment = (PIGMENT*)Token.Data;
+							Pigment = reinterpret_cast<PIGMENT*>(Token.Data);
 							if(Pigment->Type != BITMAP_PATTERN)
 							{
 								Error("The parameter to max_extent must be an image map pigment identifier");
@@ -1273,21 +1288,21 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 		CASE (COLOUR_ID_TOKEN)
 			*Terms=5;
 			for (i=0; i<5; i++)
-				Express[i]=(DBL)(  ((COLC *)(Token.Data))[i]  );
+				Express[i]=(DBL)(  (reinterpret_cast<COLC *>(Token.Data))[i]  );
 			EXIT
 		END_CASE
 
 		CASE (UV_ID_TOKEN)
 			*Terms=2;
 			for (i=0; i<2; i++)
-				Express[i]=(DBL)(  ((DBL *)(Token.Data))[i]  );
+				Express[i]=(DBL)(  (reinterpret_cast<DBL *>(Token.Data))[i]  );
 			EXIT
 		END_CASE
 
 		CASE (VECTOR_4D_ID_TOKEN)
 			*Terms=4;
 			for (i=0; i<4; i++)
-				Express[i]=(DBL)(  ((DBL *)(Token.Data))[i]  );
+				Express[i]=(DBL)(  (reinterpret_cast<DBL *>(Token.Data))[i]  );
 			EXIT
 		END_CASE
 
@@ -1975,12 +1990,12 @@ void Parser::Parse_Express (EXPRESS Express,int *Terms)
 			Parse_Express(Local_Express2,&Local_Terms2);
 			if (ftrue(Express[0]))
 			{
-				Chosen = (EXPRESS *)&Local_Express1;
+				Chosen = reinterpret_cast<EXPRESS *>(&Local_Express1);
 				*Terms = Local_Terms1;
 			}
 			else
 			{
-				Chosen = (EXPRESS *)&Local_Express2;
+				Chosen = reinterpret_cast<EXPRESS *>(&Local_Express2);
 				*Terms = Local_Terms2;
 			}
 			POV_MEMCPY(Express,Chosen,sizeof(EXPRESS));
@@ -2740,7 +2755,7 @@ BLEND_MAP *Parser::Parse_Blend_Map (int Blend_Type,int Pat_Type)
 	EXPECT
 		CASE2 (COLOUR_MAP_ID_TOKEN, PIGMENT_MAP_ID_TOKEN)
 		CASE3 (NORMAL_MAP_ID_TOKEN, TEXTURE_MAP_ID_TOKEN, SLOPE_MAP_ID_TOKEN)
-			New = Copy_Blend_Map ((BLEND_MAP *) Token.Data);
+			New = Copy_Blend_Map (reinterpret_cast<BLEND_MAP *>(Token.Data));
 			if (Blend_Type != New->Type)
 			{
 				Error("Wrong identifier type");
@@ -2812,7 +2827,7 @@ BLEND_MAP *Parser::Parse_Blend_Map (int Blend_Type,int Pat_Type)
 					New->Number_Of_Entries = i;
 					New->Type=Blend_Type;
 					New->Transparency_Flag=true; /*Temp fix.  Really set in Post_???*/
-					New->Blend_Map_Entries = (BLEND_MAP_ENTRY *)POV_REALLOC(Temp_Ent,sizeof(BLEND_MAP_ENTRY)*i,"blend map entries");
+					New->Blend_Map_Entries = reinterpret_cast<BLEND_MAP_ENTRY *>(POV_REALLOC(Temp_Ent,sizeof(BLEND_MAP_ENTRY)*i,"blend map entries"));
 					EXIT
 				END_CASE
 			END_EXPECT
@@ -3145,7 +3160,7 @@ BLEND_MAP *Parser::Parse_Colour_Map ()
 
 	EXPECT
 		CASE (COLOUR_MAP_ID_TOKEN)
-			New = Copy_Blend_Map ((BLEND_MAP *) Token.Data);
+			New = Copy_Blend_Map (reinterpret_cast<BLEND_MAP *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -3230,7 +3245,7 @@ BLEND_MAP *Parser::Parse_Colour_Map ()
 					New->Number_Of_Entries = p;
 					New->Type=COLOUR_TYPE;
 					New->Transparency_Flag=true; /*Temp fix.  Really set in Post_???*/
-					New->Blend_Map_Entries = (BLEND_MAP_ENTRY *)POV_REALLOC(Temp_Ent,sizeof(BLEND_MAP_ENTRY)*p,"blend map entries");
+					New->Blend_Map_Entries = reinterpret_cast<BLEND_MAP_ENTRY *>(POV_REALLOC(Temp_Ent,sizeof(BLEND_MAP_ENTRY)*p,"blend map entries"));
 					EXIT
 				END_CASE
 			END_EXPECT
@@ -3291,7 +3306,7 @@ SPLINE *Parser::Parse_Spline()
 	/*Check for spline identifier*/
 	EXPECT
 		CASE(SPLINE_ID_TOKEN)
-			New = Copy_Spline((SPLINE *)Token.Data);
+			New = Copy_Spline(reinterpret_cast<SPLINE *>(Token.Data));
 			i = New->Number_Of_Entries;
 			MaxTerms = New->Terms;
 			Type = New->Type;
@@ -3495,7 +3510,7 @@ DBL Parser::stream_rand(int stream)
 
 int Parser::stream_seed(int seed)
 {
-	next_rand = (unsigned int *)POV_REALLOC(next_rand, (Number_Of_Random_Generators+1)*sizeof(unsigned int), "random number generator");
+	next_rand = reinterpret_cast<unsigned int *>(POV_REALLOC(next_rand, (Number_Of_Random_Generators+1)*sizeof(unsigned int), "random number generator"));
 
 	next_rand[Number_Of_Random_Generators] = (unsigned int)seed;
 

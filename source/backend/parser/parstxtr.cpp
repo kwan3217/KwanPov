@@ -4,6 +4,12 @@
  * This module parses textures and atmosphere effects.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -24,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/parser/parstxtr.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/parser/parstxtr.cpp $
+ * $Revision: #3 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -930,7 +936,7 @@ void Parser::Parse_Pigment (PIGMENT **Pigment_Ptr)
 	EXPECT            /* Look for [pigment_id] */
 		CASE (PIGMENT_ID_TOKEN)
 			Destroy_Pigment(*Pigment_Ptr);
-			*Pigment_Ptr = Copy_Pigment ((PIGMENT *) Token.Data);
+			*Pigment_Ptr = Copy_Pigment (reinterpret_cast<PIGMENT *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -940,7 +946,7 @@ void Parser::Parse_Pigment (PIGMENT **Pigment_Ptr)
 		END_CASE
 	END_EXPECT    /* End pigment_id */
 
-	Parse_Pattern((TPATTERN *)(*Pigment_Ptr),PIGMENT_TYPE);
+	Parse_Pattern(reinterpret_cast<TPATTERN *>(*Pigment_Ptr),PIGMENT_TYPE);
 
 	if (Not_In_Default && ((*Pigment_Ptr)->Type == NO_PATTERN))
 	{
@@ -1176,7 +1182,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 				Only_In("color","pigment or density");
 			}
 			New->Type = PLAIN_PATTERN;
-			Parse_Colour (((PIGMENT *)New)->colour);
+			Parse_Colour ((reinterpret_cast<PIGMENT *>(New))->colour);
 			EXIT
 		END_CASE
 
@@ -1191,9 +1197,9 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			New->Type = CHECKER_PATTERN;
 			New->Frequency = 0.0;
 			Destroy_Blend_Map(New->Blend_Map);
-			New->Blend_Map = Parse_Blend_List(2,&Check_Default_Map,TPat_Type);
+			New->Blend_Map = Parse_Blend_List(2,const_cast<BLEND_MAP *>(&Check_Default_Map),TPat_Type);
 			if (TPat_Type == NORMAL_TYPE)
-				((TNORMAL *)New)->Delta = 0.02;
+				(reinterpret_cast<TNORMAL *>(New))->Delta = 0.02;
 			EXIT
 		END_CASE
 
@@ -1208,7 +1214,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			New->Type = OBJECT_PATTERN;
 			New->Frequency = 0.0;
 			Destroy_Blend_Map(New->Blend_Map);
-			New->Blend_Map = Parse_Blend_List(2, &Check_Default_Map, TPat_Type);
+			New->Blend_Map = Parse_Blend_List(2, const_cast<BLEND_MAP *>(&Check_Default_Map), TPat_Type);
 			Parse_End();
 			EXIT
 		}
@@ -1228,9 +1234,9 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			}
 			New->Frequency = 0.0;
 			Destroy_Blend_Map(New->Blend_Map);
-			New->Blend_Map = Parse_Blend_List(2,&Brick_Default_Map,TPat_Type);
+			New->Blend_Map = Parse_Blend_List(2,const_cast<BLEND_MAP *>(&Brick_Default_Map),TPat_Type);
 			if (TPat_Type == NORMAL_TYPE)
-				((TNORMAL *)New)->Delta = 0.02;
+				(reinterpret_cast<TNORMAL *>(New))->Delta = 0.02;
 			EXIT
 		END_CASE
 
@@ -1238,9 +1244,9 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			New->Type = HEXAGON_PATTERN;
 			New->Frequency = 0.0;
 			Destroy_Blend_Map(New->Blend_Map);
-			New->Blend_Map = Parse_Blend_List(3,&Hex_Default_Map,TPat_Type);
+			New->Blend_Map = Parse_Blend_List(3,const_cast<BLEND_MAP *>(&Hex_Default_Map),TPat_Type);
 			if (TPat_Type == NORMAL_TYPE)
-				((TNORMAL *)New)->Delta = 0.02;
+				(reinterpret_cast<TNORMAL *>(New))->Delta = 0.02;
 			EXIT
 		END_CASE
 
@@ -1248,9 +1254,9 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			New->Type = SQUARE_PATTERN;
 			New->Frequency = 0.0;
 			Destroy_Blend_Map(New->Blend_Map);
-			New->Blend_Map = Parse_Blend_List(4,&Square_Default_Map,TPat_Type);
+			New->Blend_Map = Parse_Blend_List(4,const_cast<BLEND_MAP *>(&Square_Default_Map),TPat_Type);
 			if (TPat_Type == NORMAL_TYPE)
-				((TNORMAL *)New)->Delta = 0.02;
+				(reinterpret_cast<TNORMAL *>(New))->Delta = 0.02;
 			EXIT
 		END_CASE
 
@@ -1258,9 +1264,9 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			New->Type = TRIANGULAR_PATTERN;
 			New->Frequency = 0.0;
 			Destroy_Blend_Map(New->Blend_Map);
-			New->Blend_Map = Parse_Blend_List(6,&Triangular_Default_Map,TPat_Type);
+			New->Blend_Map = Parse_Blend_List(6,const_cast<BLEND_MAP *>(&Triangular_Default_Map),TPat_Type);
 			if (TPat_Type == NORMAL_TYPE)
-				((TNORMAL *)New)->Delta = 0.02;
+				(reinterpret_cast<TNORMAL *>(New))->Delta = 0.02;
 			EXIT
 		END_CASE
 
@@ -1269,9 +1275,9 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			New->Type = CUBIC_PATTERN;
 			New->Frequency = 0.0;
 			Destroy_Blend_Map(New->Blend_Map);
-			New->Blend_Map = Parse_Blend_List(6,&Cubic_Default_Map,TPat_Type);
+			New->Blend_Map = Parse_Blend_List(6,const_cast<BLEND_MAP *>(&Cubic_Default_Map),TPat_Type);
 			if (TPat_Type == NORMAL_TYPE)
-				((TNORMAL *)New)->Delta = 0.02;
+				(reinterpret_cast<TNORMAL *>(New))->Delta = 0.02;
 			EXIT
 		END_CASE
 
@@ -1288,7 +1294,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 
 			New->Type = BITMAP_PATTERN;
 			New->Frequency = 0.0;
-			Parse_Image_Map ((PIGMENT *)New);
+			Parse_Image_Map (reinterpret_cast<PIGMENT *>(New));
 			EXIT
 		END_CASE
 
@@ -1305,7 +1311,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 
 			New->Type = BITMAP_PATTERN;
 			New->Frequency = 0.0;
-			Parse_Bump_Map ((TNORMAL *)New);
+			Parse_Bump_Map (reinterpret_cast<TNORMAL *>(New));
 			EXIT
 		END_CASE
 
@@ -1598,7 +1604,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 	if (TPat_Type == NORMAL_TYPE)
 	{
 		Parse_Comma();
-		((TNORMAL *)New)->Amount = Allow_Float (((TNORMAL *)New)->Amount );
+		(reinterpret_cast<TNORMAL *>(New))->Amount = Allow_Float ((reinterpret_cast<TNORMAL *>(New))->Amount );
 	}
 
 	EXPECT         /* Look for pattern_modifier */
@@ -1607,7 +1613,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			{
 				Error("accuracy can only be used with normal patterns.");
 			}
-			((TNORMAL *)New)->Delta = Parse_Float();
+			(reinterpret_cast<TNORMAL *>(New))->Delta = Parse_Float();
 		END_CASE
 
 		CASE (SOLID_TOKEN)
@@ -1928,7 +1934,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 			{
 				Only_In("quick_color","pigment");
 			}
-			Parse_Colour (((PIGMENT *)New)->Quick_Colour);
+			Parse_Colour ((reinterpret_cast<PIGMENT *>(New))->Quick_Colour);
 		END_CASE
 
 		CASE (CONTROL0_TOKEN)
@@ -2008,7 +2014,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 		CASE (BUMP_SIZE_TOKEN)
 			if (TPat_Type != NORMAL_TYPE)
 				Only_In ("bump_size","normal");
-			((TNORMAL *)New)->Amount = Parse_Float ();
+			(reinterpret_cast<TNORMAL *>(New))->Amount = Parse_Float ();
 		END_CASE
 
 		CASE (NOISE_GENERATOR_TOKEN)
@@ -2114,7 +2120,7 @@ void Parser::Parse_Pattern (TPATTERN *New, int TPat_Type)
 		Error("Patterned texture must have texture_map.");
 	}
 
-	if (New->Type == PAVEMENT_PATTERN)
+	if ((New->Type==PAVEMENT_PATTERN))
 	{
 		const int valid6[]={1,1,3,7,22};
 		const int valid4[]={1,1,2,5,12,35};
@@ -2198,7 +2204,7 @@ void Parser::Parse_Tnormal (TNORMAL **Tnormal_Ptr)
 	EXPECT            /* Look for [tnormal_id] */
 		CASE (TNORMAL_ID_TOKEN)
 			Destroy_Tnormal(*Tnormal_Ptr);
-			*Tnormal_Ptr = Copy_Tnormal ((TNORMAL *) Token.Data);
+			*Tnormal_Ptr = Copy_Tnormal (reinterpret_cast<TNORMAL *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -2219,7 +2225,7 @@ void Parser::Parse_Tnormal (TNORMAL **Tnormal_Ptr)
 			*Tnormal_Ptr = Create_Tnormal ();
 		}
 	}
-	Parse_Pattern((TPATTERN *)*Tnormal_Ptr,NORMAL_TYPE);
+	Parse_Pattern(reinterpret_cast<TPATTERN *>(*Tnormal_Ptr),NORMAL_TYPE);
 }
 
 
@@ -2258,7 +2264,7 @@ void Parser::Parse_Finish (FINISH **Finish_Ptr)
 	EXPECT        /* Look for zero or one finish_id */
 		CASE (FINISH_ID_TOKEN)
 			Destroy_Finish(*Finish_Ptr);
-			*Finish_Ptr = Copy_Finish ((FINISH *) Token.Data);
+			*Finish_Ptr = Copy_Finish (reinterpret_cast<FINISH *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -2367,6 +2373,18 @@ void Parser::Parse_Finish (FINISH **Finish_Ptr)
 
 						CASE (EXPONENT_TOKEN)
 							New->Reflect_Exp = 1.0 / Parse_Float ();
+						END_CASE
+
+						CASE (ROUGHNESS_TOKEN)
+							New->Reflect_Blur = Parse_Float ();
+							if (New->Reflect_Blur != 0.0)
+							{
+								New->Reflect_Blur  = 1.0/New->Reflect_Blur;
+								double blurExp = 1.0/(New->Reflect_Blur + 1);
+								double cosThetaSqr = pow(0.5, 2*blurExp);
+								double sinThetaSqr = 1.0 - cosThetaSqr;
+								New->Reflect_Count = (unsigned int)(10000.0 * sinThetaSqr) + 1; // TODO - give the user control over this
+							}
 						END_CASE
 
 						CASE (METALLIC_TOKEN)
@@ -2590,7 +2608,7 @@ TEXTURE *Parser::Parse_Texture ()
 
 	EXPECT               /* First allow a texture identifier */
 		CASE (TEXTURE_ID_TOKEN)
-			Texture = Copy_Textures((TEXTURE *) Token.Data);
+			Texture = Copy_Textures(reinterpret_cast<TEXTURE *>(Token.Data));
 			Modified_Pnf = true;
 			EXIT
 		END_CASE
@@ -2617,21 +2635,21 @@ TEXTURE *Parser::Parse_Texture ()
 			CASE (PIGMENT_ID_TOKEN)
 				Warn_State(Token.Token_Id, PIGMENT_TOKEN);
 				Destroy_Pigment(Texture->Pigment);
-				Texture->Pigment = Copy_Pigment ((PIGMENT *) Token.Data);
+				Texture->Pigment = Copy_Pigment (reinterpret_cast<PIGMENT *>(Token.Data));
 				Modified_Pnf = true;
 			END_CASE
 
 			CASE (TNORMAL_ID_TOKEN)
 				Warn_State(Token.Token_Id, TNORMAL_TOKEN);
 				Destroy_Tnormal(Texture->Tnormal);
-				Texture->Tnormal = Copy_Tnormal ((TNORMAL *) Token.Data);
+				Texture->Tnormal = Copy_Tnormal (reinterpret_cast<TNORMAL *>(Token.Data));
 				Modified_Pnf = true;
 			END_CASE
 
 			CASE (FINISH_ID_TOKEN)
 				Warn_State(Token.Token_Id, FINISH_TOKEN);
 				Destroy_Finish(Texture->Finish);
-				Texture->Finish = Copy_Finish ((FINISH *) Token.Data);
+				Texture->Finish = Copy_Finish (reinterpret_cast<FINISH *>(Token.Data));
 				Modified_Pnf = true;
 			END_CASE
 
@@ -2755,7 +2773,7 @@ TEXTURE *Parser::Parse_Texture ()
 					Texture->Pigment = NULL;
 					Texture->Tnormal = NULL;
 					Texture->Finish  = NULL;
-					Parse_Pattern((TPATTERN *)Texture,TEXTURE_TYPE);
+					Parse_Pattern(reinterpret_cast<TPATTERN *>(Texture),TEXTURE_TYPE);
 					/* if following is true, parsed "texture{}" so restore
 					   default texture.
 					 */
@@ -3004,7 +3022,7 @@ TEXTURE *Parser::Parse_Vers1_Texture ()
 		END_CASE
 
 		CASE (TEXTURE_ID_TOKEN)
-			Texture = Copy_Textures((TEXTURE *) Token.Data);
+			Texture = Copy_Textures(reinterpret_cast<TEXTURE *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -3021,17 +3039,17 @@ TEXTURE *Parser::Parse_Vers1_Texture ()
 			EXPECT   /* Look for [pnf_ids] */
 				CASE (PIGMENT_ID_TOKEN)
 					Destroy_Pigment(Texture->Pigment);
-					Texture->Pigment = Copy_Pigment ((PIGMENT *) Token.Data);
+					Texture->Pigment = Copy_Pigment (reinterpret_cast<PIGMENT *>(Token.Data));
 				END_CASE
 
 				CASE (TNORMAL_ID_TOKEN)
 					Destroy_Tnormal(Texture->Tnormal);
-					Texture->Tnormal = Copy_Tnormal ((TNORMAL *) Token.Data);
+					Texture->Tnormal = Copy_Tnormal (reinterpret_cast<TNORMAL *>(Token.Data));
 				END_CASE
 
 				CASE (FINISH_ID_TOKEN)
 					Destroy_Finish(Texture->Finish);
-					Texture->Finish = Copy_Finish ((FINISH *) Token.Data);
+					Texture->Finish = Copy_Finish (reinterpret_cast<FINISH *>(Token.Data));
 				END_CASE
 
 				OTHERWISE
@@ -3131,7 +3149,7 @@ NOTE: Do not add new keywords to this section.  Use 1.0 syntax only.
 					Pigment->Type = CHECKER_PATTERN;
 					Pigment->Frequency = 0.0;
 					Destroy_Blend_Map(Pigment->Blend_Map);
-					Pigment->Blend_Map = Parse_Blend_List(2,&Check_Default_Map,COLOUR_TYPE);
+					Pigment->Blend_Map = Parse_Blend_List(2,const_cast<BLEND_MAP *>(&Check_Default_Map),COLOUR_TYPE);
 				END_CASE
 
 				CASE (HEXAGON_TOKEN)
@@ -3139,7 +3157,7 @@ NOTE: Do not add new keywords to this section.  Use 1.0 syntax only.
 					Pigment->Type = HEXAGON_PATTERN;
 					Pigment->Frequency = 0.0;
 					Destroy_Blend_Map(Pigment->Blend_Map);
-					Pigment->Blend_Map = Parse_Blend_List(3,&Hex_Default_Map,COLOUR_TYPE);
+					Pigment->Blend_Map = Parse_Blend_List(3,const_cast<BLEND_MAP *>(&Hex_Default_Map),COLOUR_TYPE);
 				END_CASE
 
 				CASE (SQUARE_TOKEN)
@@ -3147,7 +3165,7 @@ NOTE: Do not add new keywords to this section.  Use 1.0 syntax only.
 					Pigment->Type = SQUARE_PATTERN;
 					Pigment->Frequency = 0.0;
 					Destroy_Blend_Map(Pigment->Blend_Map);
-					Pigment->Blend_Map = Parse_Blend_List(4,&Square_Default_Map,COLOUR_TYPE);
+					Pigment->Blend_Map = Parse_Blend_List(4,const_cast<BLEND_MAP *>(&Square_Default_Map),COLOUR_TYPE);
 				END_CASE
 
 				CASE (TRIANGULAR_TOKEN)
@@ -3155,7 +3173,7 @@ NOTE: Do not add new keywords to this section.  Use 1.0 syntax only.
 					Pigment->Type = TRIANGULAR_PATTERN;
 					Pigment->Frequency = 0.0;
 					Destroy_Blend_Map(Pigment->Blend_Map);
-					Pigment->Blend_Map = Parse_Blend_List(6,&Triangular_Default_Map,COLOUR_TYPE);
+					Pigment->Blend_Map = Parse_Blend_List(6,const_cast<BLEND_MAP *>(&Triangular_Default_Map),COLOUR_TYPE);
 				END_CASE
 
 				CASE (IMAGE_MAP_TOKEN)
@@ -3382,7 +3400,7 @@ NOTE: Do not add new keywords to this section.  Use 1.0 syntax only.
 				CASE (TEXTURE_ID_TOKEN)
 					Warning(0, "Texture identifier overwriting previous values.");
 					Destroy_Textures(Texture);
-					Texture = Copy_Textures((TEXTURE *) Token.Data);
+					Texture = Copy_Textures(reinterpret_cast<TEXTURE *>(Token.Data));
 					Pigment = Texture->Pigment;
 					Tnormal = Texture->Tnormal;
 					Finish  = Texture->Finish;
@@ -3515,7 +3533,7 @@ void Parser::Parse_Media(vector<Media>& medialist)
 
 	EXPECT
 		CASE(MEDIA_ID_TOKEN)
-			IMediaObj = *((Media *)Token.Data);
+			IMediaObj = *(reinterpret_cast<Media *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -3725,7 +3743,7 @@ void Parser::Parse_Interior(Interior **Interior_Ptr)
 		CASE(INTERIOR_ID_TOKEN)
 			Destroy_Interior(*Interior_Ptr);
 			if(Token.Data != NULL)
-				*Interior_Ptr = new Interior(*(Interior *)Token.Data);
+				*Interior_Ptr = new Interior(*reinterpret_cast<Interior *>(Token.Data));
 			else
 				*Interior_Ptr = new Interior();
 			EXIT
@@ -3825,7 +3843,7 @@ void Parser::Parse_Media_Density_Pattern(PIGMENT **Density_Ptr)
 
 	EXPECT
 		CASE (DENSITY_ID_TOKEN)
-			New = Copy_Pigment ((PIGMENT *) Token.Data);
+			New = Copy_Pigment (reinterpret_cast<PIGMENT *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -3836,9 +3854,9 @@ void Parser::Parse_Media_Density_Pattern(PIGMENT **Density_Ptr)
 		END_CASE
 	END_EXPECT
 
-	Parse_Pattern((TPATTERN *)New,DENSITY_TYPE);
+	Parse_Pattern(reinterpret_cast<TPATTERN *>(New),DENSITY_TYPE);
 
-	New->Next = (TPATTERN *)(*Density_Ptr);
+	New->Next = reinterpret_cast<TPATTERN *>(*Density_Ptr);
 	*Density_Ptr = New;
 }
 
@@ -3879,7 +3897,7 @@ FOG *Parser::Parse_Fog()
 
 	EXPECT
 		CASE(FOG_ID_TOKEN)
-			Fog = Copy_Fog ((FOG *) Token.Data);
+			Fog = Copy_Fog (reinterpret_cast<FOG *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -3931,7 +3949,7 @@ FOG *Parser::Parse_Fog()
 		CASE (TURBULENCE_TOKEN)
 			if (Fog->Turb == NULL)
 			{
-				Fog->Turb=(TURB *)Create_Warp(CLASSIC_TURB_WARP);
+				Fog->Turb=reinterpret_cast<TURB *>(Create_Warp(CLASSIC_TURB_WARP));
 			}
 			Parse_Vector(Fog->Turb->Turbulence);
 		END_CASE
@@ -3939,7 +3957,7 @@ FOG *Parser::Parse_Fog()
 		CASE (OCTAVES_TOKEN)
 			if (Fog->Turb == NULL)
 			{
-				Fog->Turb=(TURB *)Create_Warp(CLASSIC_TURB_WARP);
+				Fog->Turb=reinterpret_cast<TURB *>(Create_Warp(CLASSIC_TURB_WARP));
 			}
 			Fog->Turb->Octaves = (int)Parse_Float();
 			if(Fog->Turb->Octaves < 1)
@@ -3951,7 +3969,7 @@ FOG *Parser::Parse_Fog()
 		CASE (OMEGA_TOKEN)
 			if (Fog->Turb == NULL)
 			{
-				Fog->Turb=(TURB *)Create_Warp(CLASSIC_TURB_WARP);
+				Fog->Turb=reinterpret_cast<TURB *>(Create_Warp(CLASSIC_TURB_WARP));
 			}
 			Fog->Turb->Omega = Parse_Float();
 		END_CASE
@@ -3959,7 +3977,7 @@ FOG *Parser::Parse_Fog()
 		CASE (LAMBDA_TOKEN)
 			if (Fog->Turb == NULL)
 			{
-				Fog->Turb=(TURB *)Create_Warp(CLASSIC_TURB_WARP);
+				Fog->Turb=reinterpret_cast<TURB *>(Create_Warp(CLASSIC_TURB_WARP));
 			}
 			Fog->Turb->Lambda = Parse_Float();
 		END_CASE
@@ -4054,7 +4072,7 @@ RAINBOW *Parser::Parse_Rainbow()
 
 	EXPECT
 		CASE(RAINBOW_ID_TOKEN)
-			Rainbow = Copy_Rainbow ((RAINBOW *) Token.Data);
+			Rainbow = Copy_Rainbow (reinterpret_cast<RAINBOW *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -4229,7 +4247,7 @@ SKYSPHERE *Parser::Parse_Skysphere()
 
 	EXPECT
 		CASE(SKYSPHERE_ID_TOKEN)
-			Skysphere = Copy_Skysphere((SKYSPHERE *)Token.Data);
+			Skysphere = Copy_Skysphere(reinterpret_cast<SKYSPHERE *>(Token.Data));
 			EXIT
 		END_CASE
 
@@ -4243,7 +4261,7 @@ SKYSPHERE *Parser::Parse_Skysphere()
 	EXPECT
 		CASE (PIGMENT_TOKEN)
 			Skysphere->Count++;
-			Skysphere->Pigments = (PIGMENT **)POV_REALLOC(Skysphere->Pigments, Skysphere->Count*sizeof(SKYSPHERE *), "sky-sphere pigment");
+			Skysphere->Pigments = reinterpret_cast<PIGMENT **>(POV_REALLOC(Skysphere->Pigments, Skysphere->Count*sizeof(SKYSPHERE *), "sky-sphere pigment"));
 			Skysphere->Pigments[Skysphere->Count-1] = Create_Pigment();
 			Parse_Begin();
 			Parse_Pigment(&(Skysphere->Pigments[Skysphere->Count-1]));
@@ -4422,7 +4440,7 @@ TURB *Parser::Check_Turb (WARP **Warps_Ptr)
 			Temp = Temp->Next_Warp;
 		}
 	}
-	return((TURB *)Temp);
+	return(reinterpret_cast<TURB *>(Temp));
 }
 
 
@@ -4465,7 +4483,7 @@ void Parser::Parse_Warp (WARP **Warp_Ptr)
 	EXPECT
 		CASE(TURBULENCE_TOKEN)
 			New=Create_Warp(EXTRA_TURB_WARP);
-			Turb=(TURB *)New;
+			Turb=reinterpret_cast<TURB *>(New);
 			Parse_Vector(Turb->Turbulence);
 			EXPECT
 				CASE(OCTAVES_TOKEN)
@@ -4494,7 +4512,7 @@ void Parser::Parse_Warp (WARP **Warp_Ptr)
 
 		CASE(REPEAT_TOKEN)
 			New=Create_Warp(REPEAT_WARP);
-			Repeat=(REPEAT *)New;
+			Repeat=reinterpret_cast<REPEAT *>(New);
 			Parse_Vector(Local_Vector);
 			Repeat->Axis=-1;
 			if (Local_Vector[X]!=0.0)
@@ -4551,7 +4569,7 @@ void Parser::Parse_Warp (WARP **Warp_Ptr)
 
 		CASE(BLACK_HOLE_TOKEN)
 			New = Create_Warp(BLACK_HOLE_WARP) ;
-			Black_Hole = (BLACK_HOLE *) New ;
+			Black_Hole = reinterpret_cast<BLACK_HOLE *>(New) ;
 			Parse_Vector (Local_Vector) ;
 			Assign_Vector (Black_Hole->Center, Local_Vector) ;
 			Parse_Comma () ;
@@ -4602,7 +4620,7 @@ void Parser::Parse_Warp (WARP **Warp_Ptr)
 
 		CASE(CYLINDRICAL_TOKEN)
 			New = Create_Warp(CYLINDRICAL_WARP);
-			CylW = (CYLW *) New ;
+			CylW = reinterpret_cast<CYLW *>(New) ;
 			EXPECT
 				CASE(ORIENTATION_TOKEN)
 					Parse_Vector (Local_Vector) ;
@@ -4624,7 +4642,7 @@ void Parser::Parse_Warp (WARP **Warp_Ptr)
 
 		CASE(SPHERICAL_TOKEN)
 			New = Create_Warp(SPHERICAL_WARP);
-			SphereW = (SPHEREW *) New ;
+			SphereW = reinterpret_cast<SPHEREW *>(New) ;
 			EXPECT
 				CASE(ORIENTATION_TOKEN)
 					Parse_Vector (Local_Vector) ;
@@ -4646,7 +4664,7 @@ void Parser::Parse_Warp (WARP **Warp_Ptr)
 
 		CASE(PLANAR_TOKEN)
 			New = Create_Warp(PLANAR_WARP);
-			PlanarW = (PLANARW *) New ;
+			PlanarW = reinterpret_cast<PLANARW *>(New) ;
 			if(Allow_Vector(Local_Vector))
 			{
 					VNormalizeEq(Local_Vector);
@@ -4659,7 +4677,7 @@ void Parser::Parse_Warp (WARP **Warp_Ptr)
 
 		CASE(TOROIDAL_TOKEN)
 			New = Create_Warp(TOROIDAL_WARP);
-			Toroidal = (TOROIDAL *) New ;
+			Toroidal = reinterpret_cast<TOROIDAL *>(New) ;
 			EXPECT
 				CASE(ORIENTATION_TOKEN)
 					Parse_Vector (Local_Vector) ;
@@ -4721,7 +4739,7 @@ void Parser::Parse_Material(MATERIAL *Material)
 
 	EXPECT
 		CASE(MATERIAL_ID_TOKEN)
-			Temp = (MATERIAL *)Token.Data;
+			Temp = reinterpret_cast<MATERIAL *>(Token.Data);
 			Texture = Copy_Textures(Temp->Texture);
 			Int_Texture = Copy_Textures(Temp->Interior_Texture);
 			Link_Textures(&(Material->Texture),Texture);
@@ -4756,7 +4774,7 @@ void Parser::Parse_Material(MATERIAL *Material)
 		END_CASE
 
 		CASE (INTERIOR_TOKEN)
-			Parse_Interior((Interior **)(&(Material->interior)));
+			Parse_Interior(reinterpret_cast<Interior **>(&(Material->interior)));
 		END_CASE
 
 		CASE (TRANSLATE_TOKEN)

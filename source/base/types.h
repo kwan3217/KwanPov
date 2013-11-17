@@ -2,6 +2,12 @@
  * types.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/base/types.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/base/types.h $
+ * $Revision: #2 $
+ * $Change: 5948 $
+ * $DateTime: 2013/07/22 20:36:31 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BASE_TYPES_H
@@ -734,9 +740,17 @@ template<typename T>
 inline double colourDistance (const GenericRGBColour<T>& a, const GenericRGBColour<T>& b) { return fabs(a.red() - b.red()) + fabs(a.green() - b.green()) + fabs(a.blue() - b.blue()); }
 
 template<typename T>
+inline GenericColour<T> Sqr(const GenericColour<T>& a) { return a * a; }
+template<typename T>
 inline GenericRGBColour<T> Sqr(const GenericRGBColour<T>& a) { return a * a; }
+
+template<typename T>
+inline GenericColour<T> exp(const GenericColour<T>& a) { return GenericColour<T>(::exp(a.red()), ::exp(a.green()), ::exp(a.blue()), ::exp(a.filter()), ::exp(a.transm())); }
 template<typename T>
 inline GenericRGBColour<T> exp(const GenericRGBColour<T>& a) { return GenericRGBColour<T>(::exp(a.red()), ::exp(a.green()), ::exp(a.blue())); }
+
+template<typename T>
+inline GenericColour<T> sqrt(const GenericColour<T>& a) { return GenericColour<T>(::sqrt(a.red()), ::sqrt(a.green()), ::sqrt(a.blue()), ::sqrt(a.filter()), ::sqrt(a.transm())); }
 template<typename T>
 inline GenericRGBColour<T> sqrt(const GenericRGBColour<T>& a) { return GenericRGBColour<T>(::sqrt(a.red()), ::sqrt(a.green()), ::sqrt(a.blue())); }
 

@@ -2,6 +2,12 @@
  * povray.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/povray.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/povray.cpp $
+ * $Revision: #5 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <boost/thread.hpp>
@@ -60,11 +66,22 @@
 	#ifndef LIBJPEG_MISSING
 		#include <jversion.h>
 	#endif
-
-	// Including tiffio.h causes the Windows compile to break. As all we need is the
-	// version function, we just declare it here.
 	#ifndef LIBTIFF_MISSING
-		extern "C" const char* TIFFGetVersion(void);
+		extern "C"
+		{
+			#ifndef __STDC__
+			#define __STDC__        (1)
+			#define UNDEF__STDC__
+			#endif
+			#ifndef AVOID_WIN32_FILEIO
+			#define AVOID_WIN32_FILEIO // this stops the tiff headers from pulling in windows.h on win32/64
+			#endif
+			#include <tiffio.h>
+			#ifdef UNDEF__STDC__
+			#undef __STDC__
+			#undef UNDEF__STDC__
+			#endif
+		}
 	#endif
 
 	// get boost version number. it isn't an image library but there's little point
@@ -169,6 +186,28 @@ const char *ContributingDevelopers[] =
 	NULL   // NULL flags the end of the list
 };
 
+#ifdef BRANCH_DEVELOPERS
+
+/// branch primary developers
+const char *BranchDevelopers[] =
+{
+	BRANCH_DEVELOPERS,
+	NULL
+};
+
+#endif
+
+#ifdef BRANCH_CONTRIBUTORS
+
+/// branch contributing developers
+const char *BranchContributors[] =
+{
+	BRANCH_CONTRIBUTORS,
+	NULL
+};
+
+#endif
+
 /// POVMS context to receive messages from the frontend
 volatile POVMSContext POV_RenderContext = NULL;
 
@@ -259,11 +298,14 @@ void BuildInitInfo(POVMSObjectPtr msg)
 		err = POVMSUtil_SetString(msg, kPOVAttrib_PlatformName, POVRAY_PLATFORM_NAME);
 	if(err == kNoErr)
 		err = POVMSUtil_SetFormatString(msg, kPOVAttrib_CoreVersion,
-		                                "Persistence of Vision(tm) Ray Tracer Version %s%s", POV_RAY_VERSION, COMPILER_VER);
+		                                BRANCH_FULL_NAME " Version %s%s", BRANCH_VERSION, COMPILER_VER);
 	if(err == kNoErr)
 		err = POVMSUtil_SetString(msg, kPOVAttrib_EnglishText,
 		                          DISTRIBUTION_MESSAGE_1 "\n" DISTRIBUTION_MESSAGE_2 "\n" DISTRIBUTION_MESSAGE_3
-		                          "\nPOV-Ray is based on DKBTrace 2.12 by David K. Buck & Aaron A. Collins\n" POV_RAY_COPYRIGHT);
+#if POV_RAY_IS_BRANCH == 1
+		                          "\n" BRANCH_NAME " is based on POV-Ray " POV_RAY_VERSION " " POV_RAY_COPYRIGHT
+#endif
+		                          "\nPOV-Ray is based on DKBTrace 2.12 by David K. Buck & Aaron A. Collins\n" BRANCH_COPYRIGHT);
 #if POV_RAY_IS_OFFICIAL == 1
 	if(err == kNoErr)
 		err = POVMSUtil_SetBool(msg, kPOVAttrib_Official, true);
@@ -331,6 +373,50 @@ void BuildInitInfo(POVMSObjectPtr msg)
 	}
 	if(err == kNoErr)
 		err = POVMSObject_Set(msg, &attrlist, kPOVAttrib_ContributingDevs);
+
+#ifdef BRANCH_DEVELOPERS
+	if(err == kNoErr)
+		err = POVMSAttrList_New(&attrlist);
+	if(err == kNoErr)
+	{
+		for(int i = 0; BranchDevelopers[i] != NULL; i++)
+		{
+			err = POVMSAttr_New(&attr);
+			if(err == kNoErr)
+			{
+				err = POVMSAttr_Set(&attr, kPOVMSType_CString, BranchDevelopers[i], (int) strlen(BranchDevelopers[i]) + 1);
+				if(err == kNoErr)
+					err = POVMSAttrList_Append(&attrlist, &attr);
+				else
+					err = POVMSAttr_Delete(&attr);
+			}
+		}
+	}
+	if(err == kNoErr)
+		err = POVMSObject_Set(msg, &attrlist, kPOVAttrib_BranchPrimaryDevs);
+#endif
+
+#ifdef BRANCH_CONTRIBUTORS
+	if(err == kNoErr)
+		err = POVMSAttrList_New(&attrlist);
+	if(err == kNoErr)
+	{
+		for(int i = 0; BranchContributors[i] != NULL; i++)
+		{
+			err = POVMSAttr_New(&attr);
+			if(err == kNoErr)
+			{
+				err = POVMSAttr_Set(&attr, kPOVMSType_CString, BranchContributors[i], (int) strlen(BranchContributors[i]) + 1);
+				if(err == kNoErr)
+					err = POVMSAttrList_Append(&attrlist, &attr);
+				else
+					err = POVMSAttr_Delete(&attr);
+			}
+		}
+	}
+	if(err == kNoErr)
+		err = POVMSObject_Set(msg, &attrlist, kPOVAttrib_BranchContributingDevs);
+#endif
 
 	if(err == kNoErr)
 		err = POVMSAttrList_New(&attrlist);
@@ -509,7 +595,7 @@ void MainThreadFunction(const boost::function0<void>& threadExit)
 	try
 	{
 		if(POVMS_OpenContext(const_cast<POVMSContext *>(&POV_RenderContext)) != kNoErr)
-			(void)POVMS_ASSERT_OUTPUT("Opening POVMS context failed in main POV-Ray backend thread.", __FILE__, __LINE__);
+			(void)POVMS_ASSERT_OUTPUT("Opening POVMS context failed in main " BRANCH_NAME " backend thread.", __FILE__, __LINE__);
 		else
 		{
 			try
@@ -520,7 +606,7 @@ void MainThreadFunction(const boost::function0<void>& threadExit)
 
 				if((POVMS_InstallReceiver((POVMSContext)POV_RenderContext, ConnectToFrontend, kPOVMsgClass_BackendControl, kPOVMsgIdent_InitInfo, NULL) != kNoErr) ||
 					(POVMS_InstallReceiver((POVMSContext)POV_RenderContext, DisconnectFromFrontend, kPOVMsgClass_BackendControl, kPOVMsgIdent_Done, NULL) != kNoErr))
-					(void)POVMS_ASSERT_OUTPUT("Installing POVMS receive handler functions failed in main POV-Ray backend thread.", __FILE__, __LINE__);
+					(void)POVMS_ASSERT_OUTPUT("Installing POVMS receive handler functions failed in main " BRANCH_NAME " backend thread.", __FILE__, __LINE__);
 
 				while(POV_TerminateMainThread == false)
 				{
@@ -537,7 +623,7 @@ void MainThreadFunction(const boost::function0<void>& threadExit)
 					}
 					catch(...)
 					{
-						(void)POVMS_ASSERT_OUTPUT("Unhandled exception in POVMS receive handler in main POV-Ray backend thread.", __FILE__, __LINE__);
+						(void)POVMS_ASSERT_OUTPUT("Unhandled exception in POVMS receive handler in main " BRANCH_NAME " backend thread.", __FILE__, __LINE__);
 					}
 
 					boost::thread::yield();
@@ -551,7 +637,7 @@ void MainThreadFunction(const boost::function0<void>& threadExit)
 			}
 			catch(...)
 			{
-				(void)POVMS_ASSERT_OUTPUT("Unexpected fatal error in main POV-Ray backend thread.", __FILE__, __LINE__);
+				(void)POVMS_ASSERT_OUTPUT("Unexpected fatal error in main " BRANCH_NAME " backend thread.", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -687,7 +773,7 @@ int main(int argc, char **argv)
 	int ret = 0;
 	int i = 0;
 
-	printf("Welcome to POV-Ray 3.7 SMP!\n");
+	printf("Welcome to " BRANCH_NAME " " BRANCH_VERSION " SMP!\n");
 	fflush(stdout);
 
 //	char *nargv[2];

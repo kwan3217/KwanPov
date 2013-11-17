@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/vfe/vfesession.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/vfe/vfesession.cpp $
+ * $Revision: #3 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifdef _MSC_VER
@@ -41,13 +47,13 @@
 #include "vfe.h"
 #include "povray.h"
 
-static POVMSContext POVMS_Output_Context = NULL;
+POVMSContext POVMS_Output_Context = NULL;
 
 namespace pov
 {
-  static volatile POVMSContext POVMS_GUI_Context = NULL ;
-  static volatile POVMSAddress RenderThreadAddr = POVMSInvalidAddress ;
-  static volatile POVMSAddress GUIThreadAddr = POVMSInvalidAddress ;
+  volatile POVMSContext POVMS_GUI_Context = NULL ;
+  volatile POVMSAddress RenderThreadAddr = POVMSInvalidAddress ;
+  volatile POVMSAddress GUIThreadAddr = POVMSInvalidAddress ;
 }
 
 namespace vfe
@@ -76,7 +82,7 @@ vfeSession::vfeSession(int id)
   m_RequestFlag = rqNoRequest;
   m_RequestResult = 0;
   m_StartTime = 0;
-  m_DisplayCreator = boost::bind(&vfe::vfeSession::DefaultDisplayCreator, this, _1, _2, _3, _4, _5);
+  m_DisplayCreator = boost::bind(&vfe::vfeSession::DefaultDisplayCreator, this, _1, _2, _3, _4, _5, _6);
   Reset();
 }
 
@@ -601,7 +607,7 @@ void vfeSession::WorkerThread()
         // circumstances, we won't risk it and instead will alert the user. note that
         // if we are implementing a detached frontend and are not attached, this may
         // not be possible, but there's not a lot we can do about that.
-        throw vfeCriticalError("Backend worker thread shut down prematurely: please re-start POV-Ray.");
+        throw vfeCriticalError("Backend worker thread shut down prematurely: please re-start " BRANCH_NAME ".");
       }
       try
       {
@@ -733,9 +739,9 @@ vfeSession *vfeSession::GetSessionFromThreadID()
   return m_CurrentSessionTemporaryHack ;
 }
 
-vfeDisplay *vfeSession::DefaultDisplayCreator (unsigned int width, unsigned int height, GammaCurvePtr gamma, vfeSession *session, bool visible)
+vfeDisplay *vfeSession::DefaultDisplayCreator (unsigned int width, unsigned int height, GammaCurvePtr gamma, float glareDesaturation, vfeSession *session, bool visible)
 {
-  return new vfeDisplay (width, height, gamma, session, visible) ;
+  return new vfeDisplay (width, height, gamma, glareDesaturation, session, visible) ;
 }
 
 // If a VFE implementation has provided the address of a display creator
@@ -746,9 +752,9 @@ vfeDisplay *vfeSession::DefaultDisplayCreator (unsigned int width, unsigned int 
 // If a display instance is returned, it is expected to conform to the
 // definition of the pov_frontend::Display class, but will typically be
 // a platform-specific derivative of that.
-vfeDisplay *vfeSession::CreateDisplay (unsigned int width, unsigned int height, GammaCurvePtr gamma, bool visible)
+vfeDisplay *vfeSession::CreateDisplay (unsigned int width, unsigned int height, GammaCurvePtr gamma, float glareDesaturation, bool visible)
 {
-  return m_DisplayCreator (width, height, gamma, this, visible);
+  return m_DisplayCreator (width, height, gamma, glareDesaturation, this, visible);
 }
 
 // This method causes a shutdown of the vfeSession instance. Specifically

@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/windows/pvfiles.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/windows/pvfiles.cpp $
+ * $Revision: #5 $
+ * $Change: 6009 $
+ * $DateTime: 2013/08/21 19:29:03 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #define POVWIN_FILE
@@ -95,7 +101,7 @@ void save_povlegal (void)
     return ;
   }
   fclose (outF) ;
-  sprintf (filename, "The POV-Ray license was written to the file %sagpl-3.0.txt", DocumentsPath) ;
+  sprintf (filename, "The " BRANCH_NAME " license was written to the file %sagpl-3.0.txt", DocumentsPath) ;
   PovMessageBox (filename, "agpl-3.0.txt saved") ;
 }
 
@@ -110,7 +116,7 @@ INT_PTR CALLBACK PovLegalDialogProc (HWND hDlg, UINT message, WPARAM wParam, LPA
     case WM_INITDIALOG :
          resize_listbox_dialog (hDlg, IDC_LISTBOX, 79) ;
          CenterWindowRelative ((HWND) lParam, hDlg, true, true) ;
-         SetWindowText (hDlg, "POV-Ray License") ;
+         SetWindowText (hDlg, BRANCH_NAME " License") ;
 //       hbr = CreateSolidBrush (GetSysColor (COLOR_BTNFACE)) ;
          fill_listbox (GetDlgItem (hDlg, IDC_LISTBOX)) ;
          return (true) ;

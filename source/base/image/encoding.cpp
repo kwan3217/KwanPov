@@ -2,6 +2,12 @@
  * encoding.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/base/image/encoding.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/base/image/encoding.cpp $
+ * $Revision: #2 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // configbase.h must always be the first POV file included within base *.cpp files
@@ -453,7 +459,7 @@ void GetEncodedGrayAValue(const Image* img, unsigned int x, unsigned int y, cons
 	alpha = IntEncode(fAlpha   + linOff.alpha, max, encOff.alpha, linOff.alpha);
 	dh.setError(x,y,linOff);
 }
-void GetEncodedRGBValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr& g, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, DitherHandler& dh)
+void GetEncodedRGBValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr& g, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, DitherHandler& dh, float glareDesaturation)
 {
 	float fRed, fGreen, fBlue;
 	if (!img->IsPremultiplied() && img->HasTransparency())
@@ -468,6 +474,7 @@ void GetEncodedRGBValue(const Image* img, unsigned int x, unsigned int y, const 
 		// no need to worry about premultiplication
 		img->GetRGBValue(x, y, fRed, fGreen, fBlue);
 	}
+	fixOverexposure(fRed, fGreen, fBlue, glareDesaturation);
 	DitherHandler::OffsetInfo linOff, encOff;
 	dh.getOffset(x,y,linOff,encOff);
 	red   = IntEncode(g,fRed   + linOff.red,   max, encOff.red,   linOff.red);
@@ -475,7 +482,7 @@ void GetEncodedRGBValue(const Image* img, unsigned int x, unsigned int y, const 
 	blue  = IntEncode(g,fBlue  + linOff.blue,  max, encOff.blue,  linOff.blue);
 	dh.setError(x,y,linOff);
 }
-void GetEncodedRGBAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr& g, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, unsigned int& alpha, DitherHandler& dh, bool premul)
+void GetEncodedRGBAValue(const Image* img, unsigned int x, unsigned int y, const GammaCurvePtr& g, unsigned int max, unsigned int& red, unsigned int& green, unsigned int& blue, unsigned int& alpha, DitherHandler& dh, float glareDesaturation, bool premul)
 {
 	bool doPremultiply   = premul && !img->IsPremultiplied() && img->HasTransparency(); // need to apply premultiplication if encoded data should be premul'ed but container content isn't
 	bool doUnPremultiply = !premul && img->IsPremultiplied() && img->HasTransparency(); // need to undo premultiplication if other way round
@@ -521,6 +528,7 @@ void GetEncodedRGBAValue(const Image* img, unsigned int x, unsigned int y, const
 		// No need for converting between premultiplied and un-premultiplied encoding.
 	}
 	// else no need to worry about premultiplication
+	fixOverexposure(fRed, fGreen, fBlue, glareDesaturation);
 	DitherHandler::OffsetInfo linOff, encOff;
 	dh.getOffset(x,y,linOff,encOff);
 	red   = IntEncode(g,fRed   + linOff.red,   max, encOff.red,   linOff.red);

@@ -2,6 +2,12 @@
  * pvdisplay.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/windows/pvdisplay.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/windows/pvdisplay.cpp $
+ * $Revision: #4 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #define POVWIN_FILE
@@ -105,8 +111,8 @@ shared_ptr<Display> gDisplay;
 
 BitmapInfo WinLegacyDisplay::m_BitmapTemplate;
 
-WinLegacyDisplay::WinLegacyDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible) :
-  WinDisplay(w, h, gamma, session, visible)
+WinLegacyDisplay::WinLegacyDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, float glareDesaturation, vfeSession *session, bool visible) :
+  WinDisplay(w, h, gamma, glareDesaturation, session, visible)
 {
   m_BitmapSurface = NULL;
   m_LastY = 0;
@@ -231,7 +237,7 @@ bool WinLegacyDisplay::CreateRenderWindow (void)
 
   if ((m_Handle = CreateWindowEx (0,
                                   PovLegacyRenderWinClass,
-                                  "POV-Ray",
+                                  BRANCH_NAME,
                                   flags | renderwin_flags,
                                   renderwin_left,
                                   renderwin_top,
@@ -717,7 +723,7 @@ LRESULT WinLegacyDisplay::WindowProc (UINT message, WPARAM wParam, LPARAM lParam
     case WM_CLOSE :
          if (!running_demo && !demo_mode && !benchmark_mode)
            FeatureNotify ("RenderwinClose",
-                          "POV-Ray - Render Window",
+                          BRANCH_NAME " - Render Window",
                           "If you find that the render window gets in your way during "
                           "or after rendering, there are a number of options to control it.\n\n"
                           "Press F1 to learn more.",

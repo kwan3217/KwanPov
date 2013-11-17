@@ -5,6 +5,12 @@
  * POV-Ray.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -25,11 +31,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/parser/parse.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/parser/parse.h $
+ * $Revision: #5 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef PARSE_H
@@ -269,7 +275,7 @@ class Parser : public Task
 		void Finish();
 		void Cleanup(void);
 
-		inline TraceThreadData *GetParserDataPtr() { return (TraceThreadData *)(GetDataPtr()); }
+		inline TraceThreadData *GetParserDataPtr() { return reinterpret_cast<TraceThreadData *>(GetDataPtr()); }
 
 		// parse.h/parse.cpp
 		void Parse_Error (TOKEN Token_Id);
@@ -387,7 +393,7 @@ class Parser : public Task
 		static FUNCTION_PTR Copy_Function(FunctionVM *, FUNCTION_PTR Function);
 
 		// parsestr.h/parsestr.cpp
-		char *Parse_C_String(bool pathname = false);
+		char *Parse_C_String(bool pathname = false, bool require = true);
 		UCS2 *Parse_String(bool pathname = false, bool require = true);
 
 		UCS2 *String_To_UCS2(const char *str, bool pathname = false);
@@ -614,7 +620,7 @@ class Parser : public Task
 		void Parse_Fclose(void);
 		void Parse_Read(void);
 		void Parse_Write(void);
-		int Parse_Read_Value(DATA_FILE *User_File,int Previous,int *NumberPtr,void **DataPtr);
+		int Parse_Read_Value(DATA_FILE *User_File,int Previous,int *NumberPtr,void **DataPtr, bool csv);
 		void Check_Macro_Vers(void);
 		DBL Parse_Cond_Param(void);
 		void Parse_Cond_Param2(DBL *V1,DBL *V2);

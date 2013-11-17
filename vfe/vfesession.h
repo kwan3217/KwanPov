@@ -6,6 +6,12 @@
  * Author: Christopher J. Cason
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -26,11 +32,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/vfe/vfesession.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/vfe/vfesession.h $
+ * $Revision: #2 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef __VFESESSION_H__
@@ -345,7 +351,7 @@ namespace vfe
 
     public:
       // Our DisplayCreator functor - see vfeSession::SetDisplayCreator().
-      typedef boost::function<vfeDisplay *(unsigned int, unsigned int, GammaCurvePtr, vfeSession *session, bool)> DisplayCreator;
+      typedef boost::function<vfeDisplay *(unsigned int, unsigned int, GammaCurvePtr, float, vfeSession *session, bool)> DisplayCreator;
       typedef enum
       {
         mUnclassified = 0,
@@ -528,7 +534,7 @@ namespace vfe
       // window be created. The display instance returned is expected to conform
       // to the definition of the pov_frontend::Display class (but it typically
       // a platform-specific derivative of that.)
-      virtual vfeDisplay *CreateDisplay(unsigned int width, unsigned int height, GammaCurvePtr gamma, bool visible = false);
+      virtual vfeDisplay *CreateDisplay(unsigned int width, unsigned int height, GammaCurvePtr gamma, float glareDesaturation, bool visible = false);
 
       // Used by VFE implementations to allow their own custom pov_frontend::Display
       // derived render preview window class to be created when the main POV-Ray code
@@ -1238,7 +1244,7 @@ namespace vfe
       static vfeSession *m_CurrentSessionTemporaryHack;
       shared_ptr<Console> m_Console;
 
-      virtual vfeDisplay *DefaultDisplayCreator (unsigned int width, unsigned int height, GammaCurvePtr gamma, vfeSession *session, bool visible);
+      virtual vfeDisplay *DefaultDisplayCreator (unsigned int width, unsigned int height, GammaCurvePtr gamma, float glareDesaturation, vfeSession *session, bool visible);
       DisplayCreator m_DisplayCreator;
 
       int m_MaxStatusMessages;
