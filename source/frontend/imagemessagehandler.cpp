@@ -2,6 +2,12 @@
  * imagemessagehandler.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/frontend/imagemessagehandler.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/frontend/imagemessagehandler.cpp $
+ * $Revision: #3 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // configbase.h must always be the first POV file included within base *.cpp files
@@ -89,8 +95,12 @@ void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, 
 		throw POV_EXCEPTION(kInvalidDataSizeErr, "Number of pixel colors and pixel positions does not match!");
 
 	GammaCurvePtr gamma;
+	float glareDesaturation = 0.0;
 	if (vd.display != NULL)
+	{
 		gamma = vd.display->GetGamma();
+		glareDesaturation = vd.display->GetGlareDesaturation();
+	}
 
 	for(int i = 0, ii = 0; (i < pixelcolors.size()) && (ii < pixelpositions.size()); i += 5, ii += 2)
 	{
@@ -113,6 +123,8 @@ void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, 
 				gcol.blue()  /= alpha;
 			}
 		}
+
+		fixOverexposure(gcol.red(), gcol.green(), gcol.blue(), glareDesaturation);
 
 		rgba.red   = IntEncode(gamma, gcol.red(),   255, dither);
 		rgba.green = IntEncode(gamma, gcol.green(), 255, dither);
@@ -167,9 +179,12 @@ void ImageMessageHandler::DrawPixelBlockSet(const SceneData& sd, const ViewData&
 	rgbas.reserve(rect.GetArea());
 
 	GammaCurvePtr gamma;
-
+	float glareDesaturation = 0.0;
 	if (vd.display != NULL)
+	{
 		gamma = vd.display->GetGamma();
+		glareDesaturation = vd.display->GetGlareDesaturation();
+	}
 
 	for(i = 0; i < rect.GetArea() *  5; i += 5)
 	{
@@ -192,6 +207,8 @@ void ImageMessageHandler::DrawPixelBlockSet(const SceneData& sd, const ViewData&
 				gcol.blue()  /= alpha;
 			}
 		}
+
+		fixOverexposure(gcol.red(), gcol.green(), gcol.blue(), glareDesaturation);
 
 		rgba.red   = IntEncode(gamma, gcol.red(),   255, dither);
 		rgba.green = IntEncode(gamma, gcol.green(), 255, dither);

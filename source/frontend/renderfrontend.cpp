@@ -2,6 +2,12 @@
  * renderfrontend.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/frontend/renderfrontend.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/frontend/renderfrontend.cpp $
+ * $Revision: #4 $
+ * $Change: 5948 $
+ * $DateTime: 2013/07/22 20:36:31 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // configbase.h must always be the first POV file included within base *.cpp files
@@ -759,9 +765,66 @@ void InitInfo(POVMS_Object& cppmsg, TextStreamBuffer *tsb)
 	if(POVMSUtil_GetString(msg, kPOVAttrib_EnglishText, charbuf, &l) == kNoErr)
 		tsb->printf("%s\n", charbuf);
 
-	tsb->printf("\n");
+	if(POVMSObject_Get(msg, &attrlist, kPOVAttrib_BranchPrimaryDevs) == kNoErr)
+	{
+		tsb->printf("\n");
+		tsb->printf("Primary " BRANCH_NAME " Developers: (Alphabetically)\n");
+		cnt = 0;
 
-	tsb->printf("Primary POV-Ray 3.7 Architects/Developers: (Alphabetically)\n");
+		if(POVMSAttrList_Count(&attrlist, &cnt) == kNoErr)
+		{
+			for(i = 0, h = 1; h <= cnt; i++)
+			{
+				for(j = 0; (j < NUMBER_OF_AUTHORS_ACROSS) && (h <= cnt); j++, h++)
+				{
+					if(POVMSAttrList_GetNth(&attrlist, h, &item) == kNoErr)
+					{
+						l = 1023;
+						charbuf[0] = 0;
+						if(POVMSAttr_Get(&item, kPOVMSType_CString, charbuf, &l) == kNoErr)
+							tsb->printf("  %-18s", charbuf);
+
+						(void)POVMSAttr_Delete(&item);
+					}
+				}
+				tsb->printf("\n");
+			}
+		}
+
+		(void)POVMSAttrList_Delete(&attrlist);
+	}
+
+	if(POVMSObject_Get(msg, &attrlist, kPOVAttrib_BranchContributingDevs) == kNoErr)
+	{
+		tsb->printf("\n");
+		tsb->printf("With Contributions From: (Alphabetically)\n");
+		cnt = 0;
+
+		if(POVMSAttrList_Count(&attrlist, &cnt) == kNoErr)
+		{
+			for(i = 0, h = 1; h <= cnt; i++)
+			{
+				for(j = 0; (j < NUMBER_OF_AUTHORS_ACROSS) && (h <= cnt); j++, h++)
+				{
+					if(POVMSAttrList_GetNth(&attrlist, h, &item) == kNoErr)
+					{
+						l = 1023;
+						charbuf[0] = 0;
+						if(POVMSAttr_Get(&item, kPOVMSType_CString, charbuf, &l) == kNoErr)
+							tsb->printf("  %-18s", charbuf);
+
+						(void)POVMSAttr_Delete(&item);
+					}
+				}
+				tsb->printf("\n");
+			}
+		}
+
+		(void)POVMSAttrList_Delete(&attrlist);
+	}
+
+	tsb->printf("\n");
+	tsb->printf("Primary POV-Ray Architects/Developers: (Alphabetically)\n");
 	if(POVMSObject_Get(msg, &attrlist, kPOVAttrib_PrimaryDevs) == kNoErr)
 	{
 		cnt = 0;
@@ -859,7 +922,7 @@ void InitInfo(POVMS_Object& cppmsg, TextStreamBuffer *tsb)
 		{
 			if(cnt > 0)
 			{
-				tsb->printf("Support libraries used by POV-Ray:\n");
+				tsb->printf("Support libraries used by " BRANCH_NAME ":\n");
 
 				for(i = 1; i <= cnt; i++)
 				{
@@ -962,8 +1025,8 @@ void RenderOptions(POVMS_Object& obj, TextStreamBuffer *tsb)
 	{
 		int method = 0;
 		if(obj.TryGetBool(kPOVAttrib_Antialias, false) == true)
-			method = clip(obj.TryGetInt(kPOVAttrib_SamplingMethod, 1), 0, 2);
-		int depth = clip(obj.TryGetInt(kPOVAttrib_AntialiasDepth, 3), 1, 9);
+			method = clip(obj.TryGetInt(kPOVAttrib_SamplingMethod, 1), 0, 3); // TODO FIXME - magic number in clip
+		int depth = clip(obj.TryGetInt(kPOVAttrib_AntialiasDepth, 3), 1, 9); // TODO FIXME - magic number in clip
 		float threshold = clip(obj.TryGetFloat(kPOVAttrib_AntialiasThreshold, 0.3f), 0.0f, 1.0f);
 		float aagamma = obj.TryGetFloat(kPOVAttrib_AntialiasGamma, 2.5f);
 		float jitter = 0.0f;

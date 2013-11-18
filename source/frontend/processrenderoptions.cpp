@@ -2,6 +2,12 @@
  * processrenderoptions.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/frontend/processrenderoptions.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/frontend/processrenderoptions.cpp $
+ * $Revision: #3 $
+ * $Change: 5948 $
+ * $DateTime: 2013/07/22 20:36:31 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <cctype>
@@ -94,6 +100,7 @@ struct ProcessOptions::INI_Parser_Table RenderOptions_INI_Table[] =
 	{ "Antialias",           kPOVAttrib_Antialias,          kPOVMSType_Bool },
 	{ "Antialias_Threshold", kPOVAttrib_AntialiasThreshold, kPOVMSType_Float },
 	{ "Antialias_Gamma",     kPOVAttrib_AntialiasGamma,     kPOVMSType_Float },
+	{ "Antialias_Confidence",kPOVAttrib_AntialiasConfidence,kPOVMSType_Float },
 	{ "Append_File",         kPOVAttrib_AppendConsoleFiles, kPOVMSType_Bool },
 
 	{ "Bits_Per_Color",      kPOVAttrib_BitsPerColor,       kPOVMSType_Int },
@@ -139,6 +146,7 @@ struct ProcessOptions::INI_Parser_Table RenderOptions_INI_Table[] =
 	{ "Final_Frame",         kPOVAttrib_FinalFrame,         kPOVMSType_Int },
 	{ "Frame_Step",          kPOVAttrib_FrameStep,          kPOVMSType_Int },
 
+	{ "Glare_Desaturation",  kPOVAttrib_GlareDesaturation,  kPOVMSType_Float },
 	{ "Grayscale_Output",    kPOVAttrib_GrayscaleOutput,    kPOVMSType_Bool },
 
 	{ "Height",              kPOVAttrib_Height,             kPOVMSType_Int },
@@ -234,6 +242,7 @@ struct ProcessOptions::INI_Parser_Table RenderOptions_INI_Table[] =
 */
 struct ProcessOptions::Cmd_Parser_Table RenderOptions_Cmd_Table[] =
 {
+	{ "AC",  kPOVAttrib_AntialiasConfidence,kPOVMSType_Float,       kNoParameter },
 	{ "AG",  kPOVAttrib_AntialiasGamma,     kPOVMSType_Float,       kNoParameter },
 	{ "AM",  kPOVAttrib_SamplingMethod,     kPOVMSType_Int,         kNoParameter },
 	{ "A0",  kPOVAttrib_AntialiasThreshold, kPOVMSType_Float,       kPOVAttrib_Antialias },
@@ -264,6 +273,7 @@ struct ProcessOptions::Cmd_Parser_Table RenderOptions_Cmd_Table[] =
 	{ "GF",  kPOVAttrib_FatalFile,          kPOVMSType_UCS2String,  kPOVAttrib_FatalConsole },
 	{ "GF",  kNoParameter,                  kNoParameter,           kPOVAttrib_FatalConsole },
 	{ "GI",  kPOVAttrib_CreateIni,          kPOVMSType_UCS2String,  kNoParameter },
+	{ "GLD", kPOVAttrib_GlareDesaturation,  kPOVMSType_Float,       kNoParameter },
 	{ "GP",  kNoParameter,                  kNoParameter,           kPOVAttrib_AppendConsoleFiles },
 	{ "GR",  kPOVAttrib_RenderFile,         kPOVMSType_UCS2String,  kPOVAttrib_RenderConsole },
 	{ "GR",  kNoParameter,                  kNoParameter,           kPOVAttrib_RenderConsole },

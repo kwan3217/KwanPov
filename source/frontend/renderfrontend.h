@@ -2,6 +2,12 @@
  * renderfrontend.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/frontend/renderfrontend.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/frontend/renderfrontend.h $
+ * $Revision: #2 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_FRONTEND_RENDERFRONTEND_H
@@ -291,7 +297,7 @@ class RenderFrontend : public RenderFrontendBase
 		void ResumeParser(SceneId sid);
 		void StopParser(SceneId sid);
 
-		ViewId CreateView(SceneId sid, POVMS_Object& obj, shared_ptr<ImageProcessing>& imageProcessing, boost::function<Display *(unsigned int, unsigned int, GammaCurvePtr)> fn);
+		ViewId CreateView(SceneId sid, POVMS_Object& obj, shared_ptr<ImageProcessing>& imageProcessing, boost::function<Display *(unsigned int, unsigned int, GammaCurvePtr, float)> fn);
 		void CloseView(ViewId vid);
 
 		ViewData::ViewState GetViewState(ViewId vid);
@@ -434,7 +440,7 @@ void RenderFrontend<PARSER_MH, FILE_MH, RENDER_MH, IMAGE_MH>::StopParser(SceneId
 }
 
 template<class PARSER_MH, class FILE_MH, class RENDER_MH, class IMAGE_MH>
-RenderFrontendBase::ViewId RenderFrontend<PARSER_MH, FILE_MH, RENDER_MH, IMAGE_MH>::CreateView(SceneId sid, POVMS_Object& obj, shared_ptr<ImageProcessing>& imageProcessing, boost::function<Display *(unsigned int,unsigned int,GammaCurvePtr)> fn)
+RenderFrontendBase::ViewId RenderFrontend<PARSER_MH, FILE_MH, RENDER_MH, IMAGE_MH>::CreateView(SceneId sid, POVMS_Object& obj, shared_ptr<ImageProcessing>& imageProcessing, boost::function<Display *(unsigned int,unsigned int,GammaCurvePtr,float)> fn)
 {
 	typename map<SceneId, SceneHandler>::iterator shi(scenehandler.find(sid));
 
@@ -522,6 +528,8 @@ RenderFrontendBase::ViewId RenderFrontend<PARSER_MH, FILE_MH, RENDER_MH, IMAGE_M
 					throw POV_EXCEPTION_STRING("Unknown gamma handling mode in CreateView()");
 			}
 
+			float glareDesaturation = obj.TryGetFloat(kPOVAttrib_GlareDesaturation, 0.0);
+
 			vh.data.state = ViewData::View_Invalid;
 
 			vid = RenderFrontendBase::CreateView(shi->second.data, vh.data, sid, obj);
@@ -543,7 +551,7 @@ RenderFrontendBase::ViewId RenderFrontend<PARSER_MH, FILE_MH, RENDER_MH, IMAGE_M
 			}
 
 			if(obj.TryGetBool(kPOVAttrib_Display, true) == true)
-				vh.data.display = shared_ptr<Display>(fn(width, height, gamma));
+				vh.data.display = shared_ptr<Display>(fn(width, height, gamma, glareDesaturation));
 
 			viewhandler[vid] = vh;
 			view2scene[vid] = sid;

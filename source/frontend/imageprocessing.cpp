@@ -2,6 +2,12 @@
  * imageprocessing.cpp
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Partial Copyright 2013 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/frontend/imageprocessing.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/frontend/imageprocessing.cpp $
+ * $Revision: #2 $
+ * $Change: 5921 $
+ * $DateTime: 2013/07/18 22:48:19 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <string>
@@ -109,6 +115,7 @@ UCS2String ImageProcessing::WriteImage(POVMS_Object& ropts, POVMSInt frame, int 
 		wopts.alphachannel = ropts.TryGetBool(kPOVAttrib_OutputAlpha, false);
 		wopts.compress = clip(ropts.TryGetInt(kPOVAttrib_Compression, 0), 0, 255);
 		wopts.grayscale = ropts.TryGetBool(kPOVAttrib_GrayscaleOutput, false);
+		wopts.glareDesaturation = ropts.TryGetFloat(kPOVAttrib_GlareDesaturation, 0.0);
 
 		switch(ropts.TryGetInt(kPOVAttrib_OutputFileType, DEFAULT_OUTPUT_FORMAT))
 		{
@@ -142,10 +149,12 @@ UCS2String ImageProcessing::WriteImage(POVMS_Object& ropts, POVMSInt frame, int 
 			case kPOVList_FileType_OpenEXR:
 				imagetype = Image::EXR;
 				filetype = POV_File_Image_EXR;
+				wopts.glareDesaturation = 0.0;
 				break;
 			case kPOVList_FileType_RadianceHDR:
 				imagetype = Image::HDR;
 				filetype = POV_File_Image_HDR;
+				wopts.glareDesaturation = 0.0;
 				break;
 			case kPOVList_FileType_System:
 				imagetype = Image::SYS;
