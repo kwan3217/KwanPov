@@ -1,6 +1,9 @@
 UberPOV - An Extension to POV-Ray
 =================================
 
+UberPOV 1.37 is an extended version of the free POV-Ray 3.7 ray tracer. Kudos to the POV-Ray dev team
+and all others who contributed to that fantastic piece of software!
+
 This document is a WIP
 --------------------------------------
 
