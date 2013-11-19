@@ -28,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/texture/texture.cpp $
+ * $File: //depot/clipka/upov/source/backend/texture/texture.cpp $
  * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $Change: 5916 $
+ * $DateTime: 2013/07/17 19:49:27 $
+ * $Author: clipka $
  *******************************************************************************/
 
 /*
@@ -1173,6 +1173,8 @@ FINISH *Create_Finish()
 	New->Temp_Refract =  1.0;
 	New->Reflect_Exp  =  1.0;
 	New->Reflect_Metallic = 0.0;
+	New->Reflect_Blur = 0.0;
+	New->Reflect_Count = 0;
 	/* Added Dec 19 1999 by NK */
 	New->Conserve_Energy = false;
 
