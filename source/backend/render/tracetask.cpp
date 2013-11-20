@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/tracetask.cpp $
- * $Revision: #4 $
- * $Change: 5969 $
- * $DateTime: 2013/07/29 10:30:49 $
+ * $Revision: #5 $
+ * $Change: 6107 $
+ * $DateTime: 2013/11/20 10:48:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -665,8 +665,6 @@ void TraceTask::StochasticSupersamplingM3()
 	else
 		confidenceFactor.push_back(0.0);
 
-	SequentialDoubleGeneratorPtr randgen(GetRandomDoubleGenerator(-0.5, 0.5, maxSamples*2));
-
 	while(GetViewData()->GetNextRectangle(rect, serial) == true)
 	{
 		radiosity.BeforeTile(highReproducibility? serial : 0);
@@ -684,9 +682,9 @@ void TraceTask::StochasticSupersamplingM3()
 		{
 			sampleMore = false;
 			unsigned int index = 0;
-			for(DBL y = DBL(rect.top); y <= DBL(rect.bottom); y++)
+			for(unsigned int y = rect.top; y <= rect.bottom; y++)
 			{
-				for(DBL x = DBL(rect.left); x <= DBL(rect.right); x++)
+				for(unsigned int x = rect.left; x <= rect.right; x++)
 				{
 					DblColour neighborSum(0.0);
 					DblColour neighborSumSqr(0.0);
@@ -704,28 +702,28 @@ void TraceTask::StochasticSupersamplingM3()
 
 					// TODO - we should obtain information about the neighboring render blocks as well
 					index2 = index - 1;
-					if ((x > rect.left) && (index2 < pixelsSamples.size()))
+					if (x > rect.left)
 					{
 						neighborSum     += pixelsSum     [index2];
 						neighborSumSqr  += pixelsSumSqr  [index2];
 						neighborSamples += pixelsSamples [index2];
 					}
 					index2 = index - rect.GetWidth();
-					if ((y > rect.top) && (index2 < pixelsSamples.size()))
+					if (y > rect.top)
 					{
 						neighborSum     += pixelsSum     [index2];
 						neighborSumSqr  += pixelsSumSqr  [index2];
 						neighborSamples += pixelsSamples [index2];
 					}
 					index2 = index + 1;
-					if ((x < rect.right) && (index2 < pixelsSamples.size()))
+					if (x < rect.right)
 					{
 						neighborSum     += pixelsSum     [index2];
 						neighborSumSqr  += pixelsSumSqr  [index2];
 						neighborSamples += pixelsSamples [index2];
 					}
 					index2 = index + rect.GetWidth();
-					if ((y > rect.bottom) && (index2 < pixelsSamples.size()))
+					if (y < rect.bottom)
 					{
 						neighborSum     += pixelsSum     [index2];
 						neighborSumSqr  += pixelsSumSqr  [index2];
@@ -801,9 +799,9 @@ void TraceTask::StochasticSupersamplingM3()
 		// So far we've just accumulated the samples for any pixel;
 		// now compute the actual average.
 		unsigned int index = 0;
-		for(DBL y = DBL(rect.top); y <= DBL(rect.bottom); y++)
+		for(unsigned int y = rect.top; y <= rect.bottom; y++)
 		{
-			for(DBL x = DBL(rect.left); x <= DBL(rect.right); x++)
+			for(unsigned int x = rect.left; x <= rect.right; x++)
 			{
 				pixels [index] /= pixelsSamples[index];
 				index ++;
