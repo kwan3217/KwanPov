@@ -24,11 +24,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/scene/atmosph.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/scene/atmosph.cpp $
+ * $Revision: #2 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -82,7 +82,7 @@ FOG *Create_Fog()
 {
 	FOG *New;
 
-	New = (FOG *)POV_MALLOC(sizeof(FOG), "fog");
+	New = new FOG;
 
 	New->Type = ORIG_FOG;
 
@@ -142,7 +142,7 @@ FOG *Copy_Fog(const FOG *Old)
 
 	*New = *Old;
 
-	New->Turb = (TURB *)Copy_Warps(((WARP *)Old->Turb));
+	New->Turb = reinterpret_cast<TURB *>(Copy_Warps((reinterpret_cast<WARP *>(Old->Turb))));
 
 	return (New);
 }
@@ -183,7 +183,7 @@ void Destroy_Fog(FOG *Fog)
 	{
 		Destroy_Turb(Fog->Turb);
 
-		POV_FREE(Fog);
+		delete Fog;
 	}
 }
 
@@ -221,7 +221,7 @@ RAINBOW *Create_Rainbow()
 {
 	RAINBOW *New;
 
-	New = (RAINBOW *)POV_MALLOC(sizeof(RAINBOW), "fog");
+	New = new RAINBOW;
 
 	New->Distance = MAX_DISTANCE;
 	New->Jitter   = 0.0;
@@ -323,7 +323,7 @@ void Destroy_Rainbow(RAINBOW *Rainbow)
 	{
 		Destroy_Pigment(Rainbow->Pigment);
 
-		POV_FREE(Rainbow);
+		delete Rainbow;
 	}
 }
 
@@ -361,7 +361,7 @@ SKYSPHERE *Create_Skysphere()
 {
 	SKYSPHERE *New;
 
-	New = (SKYSPHERE *)POV_MALLOC(sizeof(SKYSPHERE), "fog");
+	New = new SKYSPHERE;
 
 	New->Count = 0;
 	New->Emission = RGBColour(1.0);
@@ -420,7 +420,7 @@ SKYSPHERE *Copy_Skysphere(const SKYSPHERE *Old)
 
 	if (New->Count > 0)
 	{
-		New->Pigments = (PIGMENT **)POV_MALLOC(New->Count*sizeof(PIGMENT *), "skysphere pigment");
+		New->Pigments = reinterpret_cast<PIGMENT **>(POV_MALLOC(New->Count*sizeof(PIGMENT *), "skysphere pigment"));
 
 		for (i = 0; i < New->Count; i++)
 		{
@@ -476,7 +476,7 @@ void Destroy_Skysphere(SKYSPHERE *Skysphere)
 
 		Destroy_Transform(Skysphere->Trans);
 
-		POV_FREE(Skysphere);
+		delete Skysphere;
 	}
 }
 

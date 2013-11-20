@@ -24,11 +24,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/support/fileutil.cpp $
+ * $File: //depot/clipka/upov/source/backend/support/fileutil.cpp $
  * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $Change: 5916 $
+ * $DateTime: 2013/07/17 19:49:27 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // TODO FIXME - fileutil.cpp code is needed by front- abd backend alike, so should be in "base" directory
@@ -261,6 +261,34 @@ IStream *Locate_File(Parser *p, shared_ptr<SceneData>& sd, const UCS2String& fil
 	return result;
 }
 */
+
+boost::posix_time::ptime Get_File_Time(Parser *p, shared_ptr<SceneData>& sd, const UCS2String& filename, unsigned int stype, bool err_flag)
+{
+	UCS2String fn(filename);
+	UCS2String foundfile(sd->FindFile(p->GetPOVMSContext(), fn, stype));
+
+	if(foundfile.empty() == true)
+	{
+		if(err_flag == true)
+			p->PossibleError("Cannot find file '%s', even after trying to append file type extension.", UCS2toASCIIString(fn).c_str());
+
+		return boost::posix_time::ptime(boost::posix_time::not_a_date_time);
+	}
+
+	if(fn.find('.') == UCS2String::npos)
+	{
+		// the passed-in filename didn't have an extension, but a file has been found,
+		// which means one of the appended extensions worked. we need to work out which
+		// one and append it to the original filename so we can store it in the cache
+		// (since it's that name that the cache search routine looks for).
+		UCS2String ext = GetFileExtension(Path(foundfile));
+		if (ext.size() != 0)
+			fn += ext;
+	}
+
+	return sd->GetFileTime(p->GetPOVMSContext(), fn, foundfile.c_str(), stype);
+}
+
 /*****************************************************************************
 *
 * FUNCTION

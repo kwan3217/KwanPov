@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/lighting/radiosity.cpp $
- * $Revision: #4 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
+ * $Revision: #5 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -324,10 +324,13 @@ void RadiosityFunction::ResetTopLevelStats()
 
 void RadiosityFunction::BeforeTile(int id, unsigned int pts)
 {
+	// TODO - find out why this assertion does not hold true when mosaic pretrace is enabled
+	/*
 	if (isFinalTrace)
 		assert( pts == FINAL_TRACE );
 	else
 		assert( (pts >= PRETRACE_FIRST) && (pts <= PRETRACE_MAX) );
+	*/
 
 	// different pretrace step than last tile
 	if (pts != pretraceStep)
@@ -586,7 +589,8 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
 			// this is necessary to fix problems splotchiness caused by very
 			// bright objects
 			// changed lighting.c to ignore phong/specular if tracing radiosity beam
-			COLC max_ill = max3(temp_colour[pRED], temp_colour[pGREEN], temp_colour[pBLUE]);
+			// TODO FIXME - while the following line is required for backward compatibility, we might consider replacing .max() with .weight(), .weightMax() or .weightMaxAbs() for v3.7.x
+			COLC max_ill = temp_colour.max();
 
 			if((max_ill > settings.maxSample) && (settings.maxSample > 0.0))
 				temp_colour *= (settings.maxSample / max_ill);
@@ -1683,14 +1687,14 @@ bool RadiosityCache::AverageNearBlock(OT_BLOCK *block, void *void_info)
 						// it doesn't seem to cause problems for non-HRD scenes.
 						// But we want to make sure that our deltas don't cause a positive illumination
 						// to go below zero, while allowing negative illuminations to stay negative.
-						if((d[pRED] + block->Illuminance[pRED] < 0.0) && (block->Illuminance[pRED]>  0.0))
-							d[pRED] = -block->Illuminance[pRED];
+						if((d.red() + block->Illuminance.red() < 0.0) && (block->Illuminance.red()>  0.0))
+							d.red() = -block->Illuminance.red();
 
-						if((d[pGREEN] + block->Illuminance[pGREEN] < 0.0) && (block->Illuminance[pGREEN] > 0.0))
-							d[pGREEN] = -block->Illuminance[pGREEN];
+						if((d.green() + block->Illuminance.green() < 0.0) && (block->Illuminance.green() > 0.0))
+							d.green() = -block->Illuminance.green();
 
-						if((d[pBLUE] + block->Illuminance[pBLUE] < 0.0) && (block->Illuminance[pBLUE] > 0.0))
-							d[pBLUE] = -block->Illuminance[pBLUE];
+						if((d.blue() + block->Illuminance.blue() < 0.0) && (block->Illuminance.blue() > 0.0))
+							d.blue() = -block->Illuminance.blue();
 
 						prediction = block->Illuminance + d;
 

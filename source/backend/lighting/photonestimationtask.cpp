@@ -26,11 +26,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/lighting/photonestimationtask.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/lighting/photonestimationtask.cpp $
+ * $Revision: #2 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -150,7 +150,7 @@ void PhotonEstimationTask::SearchThroughObjectsEstimatePhotons(vector<ObjectPtr>
 		/* if it has children, check them too */
 		else if(((*Sib)->Type & IS_COMPOUND_OBJECT))
 		{
-			SearchThroughObjectsEstimatePhotons(((CSG *)(*Sib))->children, Light);
+			SearchThroughObjectsEstimatePhotons((reinterpret_cast<CSG *>(*Sib))->children, Light);
 		}
 	}
 }

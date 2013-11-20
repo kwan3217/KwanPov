@@ -26,11 +26,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/shape/prism.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/shape/prism.cpp $
+ * $Revision: #2 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 /****************************************************************************
@@ -1388,9 +1388,9 @@ void Prism::Compute_Prism(UV_VECT *P, TraceThreadData *Thread)
 
 	if (Spline == NULL)
 	{
-		Spline = (PRISM_SPLINE *)POV_MALLOC(sizeof(PRISM_SPLINE), "spline segments of prism");
+		Spline = reinterpret_cast<PRISM_SPLINE *>(POV_MALLOC(sizeof(PRISM_SPLINE), "spline segments of prism"));
 		Spline->References = 1;
-		Spline->Entry = (PRISM_SPLINE_ENTRY *)POV_MALLOC(Number*sizeof(PRISM_SPLINE_ENTRY), "spline segments of prism");
+		Spline->Entry = reinterpret_cast<PRISM_SPLINE_ENTRY *>(POV_MALLOC(Number*sizeof(PRISM_SPLINE_ENTRY), "spline segments of prism"));
 	}
 	else
 	{

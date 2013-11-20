@@ -24,15 +24,17 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/support/fileutil.h $
+ * $File: //depot/clipka/upov/source/backend/support/fileutil.h $
  * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $Change: 5916 $
+ * $DateTime: 2013/07/17 19:49:27 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POV_UTIL_H
 #define POV_UTIL_H
+
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "base/povms.h"
 #include "base/stringutilities.h"
@@ -45,6 +47,7 @@ namespace pov
 using namespace pov_base;
 
 IStream *Locate_File(Parser *p, shared_ptr<SceneData>& sd, const UCS2String& filename, unsigned int stype, UCS2String& buffer, bool err_flag = false);
+boost::posix_time::ptime Get_File_Time(Parser *p, shared_ptr<SceneData>& sd, const UCS2String& filename, unsigned int stype, bool err_flag = false);
 IMemStream *Internal_Font_File(const int font_id, UCS2String& buffer);
 
 }

@@ -22,11 +22,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/scene/scene.h $
+ * $File: //depot/clipka/upov/source/backend/scene/scene.h $
  * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $Change: 5916 $
+ * $DateTime: 2013/07/17 19:49:27 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #ifndef POVRAY_BACKEND_SCENE_H
@@ -37,6 +37,7 @@
 #include <map>
 
 #include <boost/thread.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "base/povmscpp.h"
 #include "base/image/image.h" // TODO - this is just for the GammaCurve stuff; find a different place for that
@@ -290,6 +291,16 @@ class SceneData
 		 *							responsible for freeing the pointer!
 		 */
 		IStream *ReadFile(POVMSContext ctx, const UCS2String& origname, const UCS2String& filename, unsigned int stype); // TODO FIXME - see above and source code [trf]
+
+		/**
+		 *	Get a file's last modification time.
+		 *	@param  ctx             POVMS message context for the current thread.
+		 *	@param  origname        The original name of the file as in the scene file (could be relative). // TODO FIXME - not needed, just a hack, the source [trf]
+		 *	@param  filename        Name and optional (partial) path.
+		 *	@param  stype           File type.
+		 *	@return                 Last modification time or boost::posix_time::ptime(not_a_date_time).
+		 */
+		boost::posix_time::ptime GetFileTime(POVMSContext ctx, const UCS2String& origname, const UCS2String& filename, unsigned int stype); // TODO FIXME - see above and source code [trf]
 
 		/**
 		 *	Open a file given by name and optional (partial) path for writing.

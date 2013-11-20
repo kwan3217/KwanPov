@@ -24,11 +24,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/colour/colour.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/colour/colour.cpp $
+ * $Revision: #3 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -98,7 +98,7 @@ COLOUR *Create_Colour ()
 {
 	COLOUR *New;
 
-	New = (COLOUR *)POV_MALLOC(sizeof (COLOUR), "color");
+	New = reinterpret_cast<COLOUR *>(POV_MALLOC(sizeof (COLOUR), "color"));
 
 	Make_ColourA (*New, 0.0, 0.0, 0.0, 0.0, 0.0);
 
@@ -179,78 +179,7 @@ BLEND_MAP_ENTRY *Create_BMap_Entries (int Map_Size)
 {
 	BLEND_MAP_ENTRY *New;
 
-	New = (BLEND_MAP_ENTRY *)POV_CALLOC(Map_Size, sizeof (BLEND_MAP_ENTRY), "blend map entry");
-
-	return (New);
-}
-
-
-
-/*****************************************************************************
-*
-* FUNCTION
-*
-* INPUT
-*   
-* OUTPUT
-*   
-* RETURNS
-*   
-* AUTHOR
-*
-*   POV-Ray Team
-*   
-* DESCRIPTION
-*
-*
-* CHANGES
-*
-******************************************************************************/
-
-BLEND_MAP_ENTRY *Copy_BMap_Entries (const BLEND_MAP_ENTRY *Old, int Map_Size, int Type)
-{
-	int i;
-	BLEND_MAP_ENTRY *New;
-
-	if (Old != NULL)
-	{
-		New = Create_BMap_Entries (Map_Size);
-
-		for (i = 0; i < Map_Size; i++)
-		{
-			switch (Type)
-			{
-				case PIGMENT_TYPE:
-
-					New[i].Vals.Pigment = Copy_Pigment(Old[i].Vals.Pigment);
-
-					break;
-
-				case NORMAL_TYPE:
-
-					New[i].Vals.Tnormal = Copy_Tnormal(Old[i].Vals.Tnormal);
-
-					break;
-
-				case TEXTURE_TYPE:
-
-					New[i].Vals.Texture = Copy_Textures(Old[i].Vals.Texture);
-
-					break;
-
-				case COLOUR_TYPE:
-				case SLOPE_TYPE:
-
-					New[i] = Old[i];
-
-					break;
-			}
-		}
-	}
-	else
-	{
-		New = NULL;
-	}
+	New = reinterpret_cast<BLEND_MAP_ENTRY *>(POV_CALLOC(Map_Size, sizeof (BLEND_MAP_ENTRY), "blend map entry"));
 
 	return (New);
 }
@@ -287,7 +216,7 @@ BLEND_MAP *Create_Blend_Map ()
 {
 	BLEND_MAP *New;
 
-	New = (BLEND_MAP *)POV_MALLOC(sizeof (BLEND_MAP), "blend map");
+	New = reinterpret_cast<BLEND_MAP *>(POV_MALLOC(sizeof (BLEND_MAP), "blend map"));
 
 	New->Users = 1;
 
@@ -382,10 +311,10 @@ BLEND_MAP *Copy_Blend_Map (BLEND_MAP *Old)
 
 DBL Colour_Distance_RGBT (const Colour& colour1, const Colour& colour2)
 {
-	return (fabs(colour1[pRED]    - colour2[pRED]) +
-	        fabs(colour1[pGREEN]  - colour2[pGREEN]) +
-	        fabs(colour1[pBLUE]   - colour2[pBLUE]) +
-	        fabs(colour1[pTRANSM] - colour2[pTRANSM]));
+	return (fabs(colour1.red()    - colour2.red()) +
+	        fabs(colour1.green()  - colour2.green()) +
+	        fabs(colour1.blue()   - colour2.blue()) +
+	        fabs(colour1.transm() - colour2.transm()));
 }
 
 

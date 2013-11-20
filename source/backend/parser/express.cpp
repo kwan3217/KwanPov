@@ -32,9 +32,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/express.cpp $
- * $Revision: #4 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
+ * $Revision: #6 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -673,7 +673,8 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 	IStream *f;
 	POV_ARRAY *a;
 	int Old_Ok=Ok_To_Declare;
-	DBL greater_val, less_val, equal_val ;
+	DBL greater_val, less_val, equal_val;
+	boost::posix_time::ptime fileTime;
 	PIGMENT* Pigment; // JN2007: Image map dimensions
 
 	Ok_To_Declare=true;
@@ -805,6 +806,27 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 					Val = ((f=Locate_File(this, sceneData, UCS2String(ASCIItoUCS2String(Local_C_String)),POV_File_Text_User,ign,false))==NULL) ? 0.0 : 1.0;
 					if (f != NULL)
 						delete f;
+
+					POV_FREE(Local_C_String);
+
+					GET (RIGHT_PAREN_TOKEN);
+					break;
+
+				case FILE_TIME_TOKEN:
+					GET (LEFT_PAREN_TOKEN);
+
+					Local_C_String=Parse_C_String();
+
+					fileTime=Get_File_Time(this, sceneData, UCS2String(ASCIItoUCS2String(Local_C_String)),POV_File_Text_User,false);
+					if (fileTime.is_not_a_date_time())
+					{
+						Val = -HUGE_VAL;
+					}
+					else
+					{
+						static boost::posix_time::ptime y2k(boost::gregorian::date(2000,1,1));
+						Val = (fileTime-y2k).total_microseconds() * (1.0e-6) / (24*60*60);
+					}
 
 					POV_FREE(Local_C_String);
 
@@ -1471,7 +1493,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 
 						case GRAY_TOKEN:
 							*Terms=1;
-							Express[0]=GREY_SCALE(Express);
+							Express[0]=DblColour(Express).greyscale();
 							return;
 
 						default:

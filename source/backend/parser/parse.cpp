@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/parse.cpp $
- * $Revision: #4 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
+ * $Revision: #5 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -10094,8 +10094,8 @@ void Parser::Convert_Filter_To_Transmit(PIGMENT *Pigment)
 	switch (Pigment->Type)
 	{
 		case PLAIN_PATTERN:
-			Pigment->colour[pTRANSM] += Pigment->colour[pFILTER];
-			Pigment->colour[pFILTER] =  0;
+			Pigment->colour.transm() += Pigment->colour.filter();
+			Pigment->colour.filter() =  0;
 			break;
 
 		default:

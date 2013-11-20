@@ -32,9 +32,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/frame.h $
- * $Revision: #2 $
- * $Change: 5953 $
- * $DateTime: 2013/07/23 17:33:05 $
+ * $Revision: #3 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -58,6 +58,7 @@
 
 #include "base/configbase.h"
 #include "base/types.h"
+#include "base/colour.h"
 
 #include "backend/configbackend.h"
 #include "backend/support/simplevector.h"
@@ -199,6 +200,7 @@ inline void Assign_Vector_4D(VECTOR_4D d, const VECTOR_4D s)
 	d[T] = s[T];
 }
 
+// TODO - obsolete
 inline void Assign_Colour(COLOUR d, const COLOUR s)
 {
 	d[pRED] = s[pRED];
@@ -208,6 +210,7 @@ inline void Assign_Colour(COLOUR d, const COLOUR s)
 	d[pTRANSM] = s[pTRANSM];
 }
 
+// TODO - obsolete
 inline void Assign_Colour_Express(COLOUR d, const EXPRESS s)
 {
 	d[pRED] = s[pRED];
@@ -226,6 +229,7 @@ inline void Assign_Express(EXPRESS d, const EXPRESS s)
 	d[pTRANSM] = s[pTRANSM];
 }
 
+// TODO - obsolete
 inline void Make_ColourA(COLOUR c, COLC r, COLC g, COLC b, COLC a, COLC t)
 {
 	c[pRED] = r;
@@ -279,6 +283,7 @@ inline void Destroy_Vector_4D(VECTOR_4D *x)
 		POV_FREE(x);
 }
 
+// TODO - obsolete
 inline void Destroy_Colour(COLOUR *x)
 {
 	if(x != NULL)

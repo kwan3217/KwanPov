@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/frontend/imageprocessing.cpp $
- * $Revision: #2 $
- * $Change: 5921 $
- * $DateTime: 2013/07/18 22:48:19 $
+ * $Revision: #3 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -199,22 +199,6 @@ UCS2String ImageProcessing::WriteImage(POVMS_Object& ropts, POVMSInt frame, int 
 shared_ptr<Image>& ImageProcessing::GetImage()
 {
 	return image;
-}
-
-void ImageProcessing::RGB2XYZ(const COLC *rgb, COLC *xyz)
-{
-	// assumes D65 white point (slightly rounded sRGB)
-	xyz[X] = (0.412453 * rgb[Colour::RED]) + (0.357580 * rgb[Colour::GREEN]) + (0.180423 * rgb[Colour::BLUE]);
-	xyz[Y] = (0.212671 * rgb[Colour::RED]) + (0.715160 * rgb[Colour::GREEN]) + (0.072169 * rgb[Colour::BLUE]);
-	xyz[Z] = (0.019334 * rgb[Colour::RED]) + (0.119193 * rgb[Colour::GREEN]) + (0.950227 * rgb[Colour::BLUE]);
-}
-
-void ImageProcessing::XYZ2RGB(const COLC *xyz, COLC *rgb)
-{
-	// assumes D65 white point (slightly rounded sRGB)
-	rgb[Colour::RED] =    (3.240479 * xyz[X]) + (-1.537150 * xyz[X]) + (-0.498535 * xyz[X]);
-	rgb[Colour::GREEN] = (-0.969256 * xyz[Y]) +  (1.875992 * xyz[Y]) +  (0.041556 * xyz[Y]);
-	rgb[Colour::BLUE] =   (0.055648 * xyz[Z]) + (-0.204043 * xyz[Z]) +  (1.057311 * xyz[Z]);
 }
 
 bool ImageProcessing::OutputIsStdout(POVMS_Object& ropts)

@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/base/image/image.h $
- * $Revision: #2 $
- * $Change: 5921 $
- * $DateTime: 2013/07/18 22:48:19 $
+ * $Revision: #3 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -362,7 +362,7 @@ class Image
 
 		float RGB2Gray(float red, float green, float blue) const
 		{
-			return (red * 0.297f + green * 0.589f + blue * 0.114f);
+			return RGBColour(red, green, blue).greyscale();
 		}
 	private:
 		/// not available

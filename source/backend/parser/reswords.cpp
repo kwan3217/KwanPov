@@ -232,6 +232,7 @@ const RESERVED_WORD Reserved_Words[LAST_TOKEN] = {
 	{FCLOSE_TOKEN, "fclose"},
 	{FILE_EXISTS_TOKEN, "file_exists"},
 	{FILE_ID_TOKEN, "file identifier"},
+	{FILE_TIME_TOKEN, "file_time"},
 	{FILL_LIGHT_TOKEN, "shadowless"},
 	{FILTER_TOKEN, "filter"},
 	{FINISH_ID_TOKEN, "finish identifier"},

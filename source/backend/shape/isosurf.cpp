@@ -27,11 +27,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/shape/isosurf.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/shape/isosurf.cpp $
+ * $Revision: #2 $
+ * $Change: 6087 $
+ * $DateTime: 2013/11/11 03:53:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <limits.h>
@@ -650,7 +650,7 @@ IsoSurface::IsoSurface() : ObjectBase(ISOSURFACE_OBJECT)
 	gradient = 0.0;
 	threshold = 0.0;
 
-	mginfo = (ISO_Max_Gradient *)POV_MALLOC(sizeof(ISO_Max_Gradient), "isosurface max_gradient info");
+	mginfo = reinterpret_cast<ISO_Max_Gradient *>(POV_MALLOC(sizeof(ISO_Max_Gradient), "isosurface max_gradient info"));
 	mginfo->refcnt = 1;
 	mginfo->max_gradient = 0.0;
 	mginfo->gradient = 0.0; // not really necessary yet [trf]

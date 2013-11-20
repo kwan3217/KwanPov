@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/base/image/encoding.h $
- * $Revision: #2 $
- * $Change: 5921 $
- * $DateTime: 2013/07/18 22:48:19 $
+ * $Revision: #3 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -196,6 +196,33 @@ inline unsigned int IntEncode(const GammaCurvePtr& g, float x, unsigned int max,
 	err = clip(x,0.0f,1.0f) - IntDecode(g,v,max);
 	return v;
 }
+
+/**
+ *  Function to apply alpha premultiplication.
+ *  @param[in,out]  colour  RGBFT colour to premultiply
+ */
+void AlphaPremultiply(Colour& colour);
+
+/**
+ *  Function to apply alpha premultiplication.
+ *  @param[in,out]  colour  RGB colour to premultiply
+ *  @param[in]      alpha   alpha to premultiply with
+ */
+void AlphaPremultiply(RGBColour& colour, float alpha);
+
+/**
+ *  Function to undo alpha premultiplication.
+ *  @param[in,out]  colour  RGBFT colour to un-premultiply
+ */
+void AlphaUnPremultiply(Colour& colour);
+
+/**
+ *  Function to undo alpha premultiplication.
+ *  @param[in,out]  colour  RGB colour to un-premultiply
+ *  @param[in]      alpha   alpha the colour is premultiplied with
+ */
+void AlphaUnPremultiply(RGBColour& colour, float alpha);
+
 
 /*******************************************************************************/
 

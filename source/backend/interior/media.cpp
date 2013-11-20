@@ -24,11 +24,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/interior/media.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/interior/media.cpp $
+ * $Revision: #3 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -147,7 +147,7 @@ Media& Media::operator=(const Media& source)
 		{
 			if(Intervals > 0)
 			{
-				Sample_Threshold = (DBL *)POV_MALLOC(Intervals * sizeof(DBL), "sample threshold list");
+				Sample_Threshold = reinterpret_cast<DBL *>(POV_MALLOC(Intervals * sizeof(DBL), "sample threshold list"));
 
 				for(int i = 0; i < Intervals; i++)
 					Sample_Threshold[i] =  source.Sample_Threshold[i];
@@ -188,7 +188,7 @@ void Media::PostProcess()
 		POV_FREE(Sample_Threshold);
 
 	// Create list of thresholds for confidence test.
-	Sample_Threshold = (DBL *)POV_MALLOC(Max_Samples*sizeof(DBL), "sample threshold list");
+	Sample_Threshold = reinterpret_cast<DBL *>(POV_MALLOC(Max_Samples*sizeof(DBL), "sample threshold list"));
 
 	if(Max_Samples > 1)
 	{
@@ -211,7 +211,7 @@ void Media::PostProcess()
 
 void Transform_Density(PIGMENT *Density, const TRANSFORM *Trans)
 {
-	TPATTERN *Temp = (TPATTERN *)Density;
+	TPATTERN *Temp = reinterpret_cast<TPATTERN *>(Density);
 
 	while(Temp != NULL)
 	{
@@ -229,7 +229,7 @@ MediaFunction::MediaFunction(TraceThreadData *td, Trace *t, PhotonGatherer *pg) 
 {
 }
 
-void MediaFunction::ComputeMedia(vector<Media>& mediasource, const Ray& ray, Intersection& isect, Colour& colour, Trace::TraceTicket& ticket)
+void MediaFunction::ComputeMedia(vector<Media>& mediasource, const Ray& ray, Intersection& isect, RGBColour& colour, COLC& transm, Trace::TraceTicket& ticket)
 {
 	if(!mediasource.empty())
 	{
@@ -243,11 +243,11 @@ void MediaFunction::ComputeMedia(vector<Media>& mediasource, const Ray& ray, Int
 		// to deposit photons in the infinite atmosphere, only in contained
 		// media, which is processed later (in ComputeLightedTexture).  [nk]
 		if(!medialist.empty())
-			ComputeMedia(medialist, ray, isect, colour, ticket);
+			ComputeMedia(medialist, ray, isect, colour, transm, ticket);
 	}
 }
 
-void MediaFunction::ComputeMedia(const RayInteriorVector& mediasource, const Ray& ray, Intersection& isect, Colour& colour, Trace::TraceTicket& ticket)
+void MediaFunction::ComputeMedia(const RayInteriorVector& mediasource, const Ray& ray, Intersection& isect, RGBColour& colour, COLC& transm, Trace::TraceTicket& ticket)
 {
 	if(!mediasource.empty())
 	{
@@ -264,7 +264,7 @@ void MediaFunction::ComputeMedia(const RayInteriorVector& mediasource, const Ray
 		// to deposit photons in the infinite atmosphere, only in contained
 		// media, which is processed later (in ComputeLightedTexture).  [nk]
 		if(!medialist.empty())
-			ComputeMedia(medialist, ray, isect, colour, ticket);
+			ComputeMedia(medialist, ray, isect, colour, transm, ticket);
 	}
 }
 
@@ -278,7 +278,7 @@ void MediaFunction::ComputeMedia(const RayInteriorVector& mediasource, const Ray
 *   Colour    - Color arriving at the end point
 ******************************************************************************/
 
-void MediaFunction::ComputeMedia(MediaVector& medias, const Ray& ray, Intersection& isect, Colour& colour, Trace::TraceTicket& ticket)
+void MediaFunction::ComputeMedia(MediaVector& medias, const Ray& ray, Intersection& isect, RGBColour& colour, COLC& transm, Trace::TraceTicket& ticket)
 {
 	LightSourceEntryVector lights;
 	LitIntervalVector litintervals;
@@ -354,7 +354,7 @@ void MediaFunction::ComputeMedia(MediaVector& medias, const Ray& ray, Intersecti
 	else
 		ComputeMediaRegularSampling(medias, lights, mediaintervals, ray, IMedia, minSamples, ignore_photons, use_scattering, all_constant_and_light_ray, ticket);
 
-	ComputeMediaColour(mediaintervals, colour);
+	ComputeMediaColour(mediaintervals, colour, transm);
 }
 
 void MediaFunction::ComputeMediaRegularSampling(MediaVector& medias, LightSourceEntryVector& lights, MediaIntervalVector& mediaintervals,
@@ -505,7 +505,7 @@ void MediaFunction::ComputeMediaAdaptiveSampling(MediaVector& medias, LightSourc
 	}
 }
 
-void MediaFunction::ComputeMediaColour(MediaIntervalVector& mediaintervals, Colour& colour)
+void MediaFunction::ComputeMediaColour(MediaIntervalVector& mediaintervals, RGBColour& colour, COLC& transm)
 {
 	RGBColour Od, Te;
 	DBL n;
@@ -525,11 +525,8 @@ void MediaFunction::ComputeMediaColour(MediaIntervalVector& mediaintervals, Colo
 	// Add contribution estimated for the participating media.
 	Od = exp(-Od);
 
-	colour.red()   = colour.red()   * Od.red()   + Te.red();
-	colour.green() = colour.green() * Od.green() + Te.green();
-	colour.blue()  = colour.blue()  * Od.blue()  + Te.blue();
-
-	colour.transm() *= Od.greyscale();
+	colour = colour * Od + Te;
+	transm *= Od.greyscale(); // TODO - in the long run, we should make transm a full-fledged RGB term
 }
 
 void MediaFunction::ComputeMediaSampleInterval(LitIntervalVector& litintervals, MediaIntervalVector& mediaintervals, const Media *media)

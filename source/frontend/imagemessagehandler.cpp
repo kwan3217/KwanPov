@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/frontend/imagemessagehandler.cpp $
- * $Revision: #3 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
+ * $Revision: #4 $
+ * $Change: 6103 $
+ * $DateTime: 2013/11/19 19:43:57 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -59,27 +59,29 @@ ImageMessageHandler::~ImageMessageHandler()
 
 void ImageMessageHandler::HandleMessage(const SceneData& sd, const ViewData& vd, POVMSType ident, POVMS_Object& msg)
 {
+	bool final = msg.Exist(kPOVAttrib_PixelId); // only final blocks will be stored in the image buffer, others are just sent to the preview display
+
 	switch(ident)
 	{
 		case kPOVMsgIdent_PixelSet:
-			DrawPixelSet(sd, vd, msg);
+			DrawPixelSet(sd, vd, msg, final);
 			break;
 		case kPOVMsgIdent_PixelBlockSet:
-			DrawPixelBlockSet(sd, vd, msg);
+			DrawPixelBlockSet(sd, vd, msg, final);
 			break;
 		case kPOVMsgIdent_PixelRowSet:
-			DrawPixelRowSet(sd, vd, msg);
+			DrawPixelRowSet(sd, vd, msg, final);
 			break;
 		case kPOVMsgIdent_RectangleFrameSet:
-			DrawRectangleFrameSet(sd, vd, msg);
+			DrawRectangleFrameSet(sd, vd, msg, final);
 			break;
 		case kPOVMsgIdent_FilledRectangleSet:
-			DrawFilledRectangleSet(sd, vd, msg);
+			DrawFilledRectangleSet(sd, vd, msg, final);
 			break;
 	}
 }
 
-void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg)
+void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg, bool final)
 {
 	POVMS_Attribute pixelposattr;
 	POVMS_Attribute pixelcolattr;
@@ -115,13 +117,7 @@ void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, 
 		{
 			// TODO ALPHA - display may profit from receiving the data in its original, premultiplied form
 			// Premultiplied alpha was good for the math, but the display expects non-premultiplied alpha, so fix this if possible.
-			float alpha = gcol.FTtoA();
-			if (alpha != 1.0 && fabs(alpha) > 1e-6) // TODO FIXME - magic value
-			{
-				gcol.red()   /= alpha;
-				gcol.green() /= alpha;
-				gcol.blue()  /= alpha;
-			}
+			AlphaUnPremultiply(gcol);
 		}
 
 		fixOverexposure(gcol.red(), gcol.green(), gcol.blue(), glareDesaturation);
@@ -136,7 +132,7 @@ void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, 
 			if(vd.display != NULL)
 				vd.display->DrawPixel(x, y, rgba);
 
-			if((vd.image != NULL) && (x < vd.image->GetWidth()) && (y < vd.image->GetHeight()))
+			if(final && (vd.image != NULL) && (x < vd.image->GetWidth()) && (y < vd.image->GetHeight()))
 				vd.image->SetRGBAValue(x, y, col.red(), col.green(), col.blue(), col.FTtoA());
 		}
 		else
@@ -144,7 +140,7 @@ void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, 
 			if(vd.display != NULL)
 				vd.display->DrawFilledRectangle(x, y, x + psize - 1, y + psize - 1, rgba);
 
-			if(vd.image != NULL)
+			if(final && (vd.image != NULL))
 			{
 				for(unsigned int py = 0; (py < psize) && (y + py < vd.image->GetHeight()); py++)
 				{
@@ -155,14 +151,14 @@ void ImageMessageHandler::DrawPixelSet(const SceneData& sd, const ViewData& vd, 
 		}
 	}
 
-	if(vd.imageBackup != NULL)
+	if(final && (vd.imageBackup != NULL))
 	{
 		msg.Write(*vd.imageBackup);
 		vd.imageBackup->flush();
 	}
 }
 
-void ImageMessageHandler::DrawPixelBlockSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg)
+void ImageMessageHandler::DrawPixelBlockSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg, bool final)
 {
 	POVRect rect(msg.GetInt(kPOVAttrib_Left), msg.GetInt(kPOVAttrib_Top), msg.GetInt(kPOVAttrib_Right), msg.GetInt(kPOVAttrib_Bottom));
 	POVMS_Attribute pixelattr;
@@ -199,13 +195,7 @@ void ImageMessageHandler::DrawPixelBlockSet(const SceneData& sd, const ViewData&
 		{
 			// TODO ALPHA - display may profit from receiving the data in its original, premultiplied form
 			// Premultiplied alpha was good for the math, but the display expects non-premultiplied alpha, so fix this if possible.
-			float alpha = gcol.FTtoA();
-			if (alpha != 1.0 && fabs(alpha) > 1e-6) // TODO FIXME - magic value
-			{
-				gcol.red()   /= alpha;
-				gcol.green() /= alpha;
-				gcol.blue()  /= alpha;
-			}
+			AlphaUnPremultiply(gcol);
 		}
 
 		fixOverexposure(gcol.red(), gcol.green(), gcol.blue(), glareDesaturation);
@@ -233,7 +223,7 @@ void ImageMessageHandler::DrawPixelBlockSet(const SceneData& sd, const ViewData&
 		}
 	}
 
-	if(vd.image != NULL)
+	if(final && (vd.image != NULL))
 	{
 		for(unsigned int y = rect.top, i = 0; y <= rect.bottom; y += psize)
 		{
@@ -248,22 +238,22 @@ void ImageMessageHandler::DrawPixelBlockSet(const SceneData& sd, const ViewData&
 		}
 	}
 
-	if(vd.imageBackup != NULL)
+	if(final && (vd.imageBackup != NULL))
 	{
 		msg.Write(*vd.imageBackup);
 		vd.imageBackup->flush();
 	}
 }
 
-void ImageMessageHandler::DrawPixelRowSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg)
+void ImageMessageHandler::DrawPixelRowSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg, bool final)
 {
 }
 
-void ImageMessageHandler::DrawRectangleFrameSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg)
+void ImageMessageHandler::DrawRectangleFrameSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg, bool final)
 {
 }
 
-void ImageMessageHandler::DrawFilledRectangleSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg)
+void ImageMessageHandler::DrawFilledRectangleSet(const SceneData& sd, const ViewData& vd, POVMS_Object& msg, bool final)
 {
 }
 

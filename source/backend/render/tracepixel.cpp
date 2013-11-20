@@ -34,9 +34,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/tracepixel.cpp $
- * $Revision: #4 $
- * $Change: 5953 $
- * $DateTime: 2013/07/23 17:33:05 $
+ * $Revision: #6 $
+ * $Change: 6104 $
+ * $DateTime: 2013/11/19 20:08:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -1035,17 +1035,17 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 
 			// Add color to color sum.
 
-			S1[pRED]    += C[pRED];
-			S1[pGREEN]  += C[pGREEN];
-			S1[pBLUE]   += C[pBLUE];
-			S1[pTRANSM] += C[pTRANSM];
+			S1.red()    += C.red();
+			S1.green()  += C.green();
+			S1.blue()   += C.blue();
+			S1.transm() += C.transm();
 
 			// Add color to squared color sum.
 
-			S2[pRED]    += Sqr(C[pRED]);
-			S2[pGREEN]  += Sqr(C[pGREEN]);
-			S2[pBLUE]   += Sqr(C[pBLUE]);
-			S2[pTRANSM] += Sqr(C[pTRANSM]);
+			S2.red()    += Sqr(C.red());
+			S2.green()  += Sqr(C.green());
+			S2.blue()   += Sqr(C.blue());
+			S2.transm() += Sqr(C.transm());
 
 			nr ++;
 			seed2 ++;
@@ -1055,12 +1055,12 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 
 		n = (DBL)nr;
 
-		V1[pRED]    = (S2[pRED]    - Sqr(S1[pRED])    / n) / Sqr(n);
-		V1[pGREEN]  = (S2[pGREEN]  - Sqr(S1[pGREEN])  / n) / Sqr(n);
-		V1[pBLUE]   = (S2[pBLUE]   - Sqr(S1[pBLUE])   / n) / Sqr(n);
-		V1[pTRANSM] = (S2[pTRANSM] - Sqr(S1[pTRANSM]) / n) / Sqr(n);
+		V1.red()    = (S2.red()    - Sqr(S1.red())    / n) / Sqr(n);
+		V1.green()  = (S2.green()  - Sqr(S1.green())  / n) / Sqr(n);
+		V1.blue()   = (S2.blue()   - Sqr(S1.blue())   / n) / Sqr(n);
+		V1.transm() = (S2.transm() - Sqr(S1.transm()) / n) / Sqr(n);
 		// TODO - the above is *not* actually the variance; the proper formula for that would be:
-		// V1[...]  = (S2[...]     - Sqr(S1[...])     / n) / (n-1);
+		// V1       = (S2          - Sqr(S1)          / n) / (n-1);
 		// There might be something fishy here.
 
 		// Exit if samples are likely too be good enough.
@@ -1072,8 +1072,8 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 			threshold = threshold * Sqr(brightness);
 
 		if((nr >= minSamples) &&
-		   (V1[pRED]  < threshold) && (V1[pGREEN]  < threshold) &&
-		   (V1[pBLUE] < threshold) && (V1[pTRANSM] < threshold))
+		   (V1.red()  < threshold) && (V1.green()  < threshold) &&
+		   (V1.blue() < threshold) && (V1.transm() < threshold))
 			break;
 	}
 	while(nr < maxSamples);
@@ -1152,7 +1152,7 @@ TracePixel::FocalBlurData::FocalBlurData(const Camera& camera, TraceThreadData* 
 			{
 				v = (*vgen)();
 				Compute_Pigment(c, camera.Bokeh, *Vector3d(v.x() + 0.5, v.y() + 0.5, 0.0), NULL, NULL, threadData);
-				weight = c.greyscale();
+				weight = RGBColour(c).weightGreyscale();
 				weightSum += weight;
 				weightMax = max(weightMax, weight);
 				weight += tries / max_tries; // safeguard against infinite loops

@@ -22,17 +22,18 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/scene/scene.cpp $
+ * $File: //depot/clipka/upov/source/backend/scene/scene.cpp $
  * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $Change: 5916 $
+ * $DateTime: 2013/07/17 19:49:27 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <sstream>
 
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
+#include <sys/stat.h>
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
@@ -371,6 +372,21 @@ IStream *SceneData::ReadFile(POVMSContext ctx, const UCS2String& filename, unsig
 	return NULL;
 }
 */
+
+boost::posix_time::ptime SceneData::GetFileTime(POVMSContext ctx, const UCS2String& origname, const UCS2String& filename, unsigned int stype)
+{
+#ifdef USE_SCENE_FILE_MAPPING
+	#error not implemented yet
+#else
+	struct stat s;
+	string fn = UCS2toASCIIString(filename);
+	if (stat(fn.c_str(),&s) == 0)
+		return boost::posix_time::from_time_t(s.st_mtime);
+	else
+		return boost::posix_time::ptime(boost::posix_time::not_a_date_time);
+#endif
+}
+
 OStream *SceneData::CreateFile(POVMSContext ctx, const UCS2String& filename, unsigned int stype, bool append)
 {
 	UCS2String scenefile(filename);

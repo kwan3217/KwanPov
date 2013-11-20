@@ -11,9 +11,7 @@ Changes between POV-Ray 3.7.0 and UberPOV 1.37.0.0
     following notable changes (in addition to the obvious change of the
     program name and version).
 
-  - UberPOV does not include POV-Ray's complete set of sample scenes (as a
-    matter of fact it only includes biscuits.pov, plus sample scenes for its
-    own features).
+  - UberPOV adds a few sample scenes for its own features).
 
   - For now, UberPOV does not come with any documentation worth mentioning;
     instead, please refer to the original POV-Ray 3.7 documentation, plus the
@@ -61,6 +59,15 @@ Testing for UberPOV:
 
   - UberPOV currently recognizes the following extension names:
 
+      - upov (137.00)
+
+        This pseudo-extension indicates the version of UberPOV.
+
+      - upov-file_time (0.90):
+
+        The "file_time" keyword can be used as a function to determine the
+        last modification time of a file.
+
       - upov-read-text (1.00):
 
         The "text" keyword can be specified in the "#read" directive, enabling
@@ -84,6 +91,24 @@ Plaintext Reading:
     This syntax extension can be tested for using the #patch directive or
     patch() function with the patch name "upov-read-text"; the current
     implementation is version 1.0.
+
+File Modification Time
+----------------------
+
+  - UberPOV provides a function to determine when a particular file was last
+    modified:
+
+        file_time(STRING)
+
+    where STRING is the name of the file. The function returns a numeric value
+    specifying the file's last modification time in days since 2000-01-01,
+    00:00:00, with time of day being represented as fractional days.
+    This is the same format as used by both the now keyword and the datetime
+    function.
+
+    This syntax extension can be tested for using the #patch directive or
+    patch() function with the patch name "upov-file_time"; the current
+    implementation is version 0.9.
 
 Glare Desaturation:
 -------------------
@@ -175,20 +200,17 @@ Adaptive Multi-Level Oversampling:
 Windows Related:
 ----------------
 
-  - Removed the CodeMax editor component from the source tree, thereby
-    disabling the ability to edit code in the Windows GUI if UberPOV is
-    installed on its own.
-    (This is a temporary solution made necessary due to legal issues; official
-    POV-Ray is expected to come with a new GUI some time in the near future
-    for very much the same reason, at which time UberPOV will adopt that GUI.)
-    Code editing is still availabe if UberPOV is installed alongside an
-    official POV-Ray 3.7.0 for Windows installation.
+  - UberPOV for Windows does not come with an installer; instead, it is
+    intended to be copied into the binary directory of an existing POV-Ray 3.7
+    installation.
 
-  - UberPOV for Windows is distributed as a raw binary, without any additional
-    distribution files, and is intended to be copied into the binary directory
-    of an existing POV-Ray 3.7 installation. If that installation includes the
-    editor DLLs, UberPOV will be able to use them and provide code editing in
-    its own GUI as well.
+    Like POV-Ray 3.7.0 for Windows, UberPOV for Windows needs an additional
+    editor DLL in order to be able to edit scenes in the GUI. Needless to say
+    that UberPOV uses the very same DLL as POV-Ray.
+
+  - At the time of writing, there is no official pre-built Windows binary of
+    UberPOV yet. You will need to compile it from source using Visual Studio
+    2010 (or later).
 
 Unix Related:
 -------------

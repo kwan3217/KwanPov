@@ -121,6 +121,9 @@
     <ClCompile Include="..\..\source\base\font\timrom.cpp">
       <Filter>Base source\Font</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\base\colour.cpp">
+      <Filter>Base source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\base\configbase.h">
@@ -239,6 +242,9 @@
       <Filter>Base Headers\Font</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\base\branch.h">
+      <Filter>Base Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\base\colour.h">
       <Filter>Base Headers</Filter>
     </ClInclude>
   </ItemGroup>
