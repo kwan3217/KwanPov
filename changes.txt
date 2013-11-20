@@ -11,7 +11,7 @@ Changes between POV-Ray 3.7.0 and UberPOV 1.37.0.0
     following notable changes (in addition to the obvious change of the
     program name and version).
 
-  - UberPOV adds a few sample scenes for its own features).
+  - UberPOV adds a few sample scenes for its own features.
 
   - For now, UberPOV does not come with any documentation worth mentioning;
     instead, please refer to the original POV-Ray 3.7 documentation, plus the
@@ -208,9 +208,10 @@ Windows Related:
     editor DLL in order to be able to edit scenes in the GUI. Needless to say
     that UberPOV uses the very same DLL as POV-Ray.
 
-  - At the time of writing, there is no official pre-built Windows binary of
-    UberPOV yet. You will need to compile it from source using Visual Studio
-    2010 (or later).
+  - At the time of writing, the UberPOV for Windows binary packages do not
+    feature any additional distribution files yet, such as include files or
+    sample scenes. These can be found in the /distribution/ directory of the
+    source package.
 
 Unix Related:
 -------------

@@ -25,9 +25,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/base/colour.h $
- * $Revision: #1 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #2 $
+ * $Change: 6111 $
+ * $DateTime: 2013/11/20 17:14:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -758,6 +758,11 @@ template<typename T>
 inline GenericColour<T> operator+ (double a, const GenericColour<T>& b) { return b + a; }
 template<typename T>
 inline GenericRGBColour<T> operator+ (double a, const GenericRGBColour<T>& b) { return b + a; }
+
+template<typename T>
+inline GenericColour<T> operator- (double a, const GenericColour<T>& b) { return GenericColour<T>(a) - b; }
+template<typename T>
+inline GenericRGBColour<T> operator- (double a, const GenericRGBColour<T>& b) { return GenericRGBColour<T>(a) - b; }
 
 template<typename T>
 inline double colourDistance (const GenericColour<T>& a, const GenericColour<T>& b) { return fabs(a.red() - b.red()) + fabs(a.green() - b.green()) + fabs(a.blue() - b.blue()); }
