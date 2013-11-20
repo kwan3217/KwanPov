@@ -34,9 +34,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/tracepixel.cpp $
- * $Revision: #6 $
- * $Change: 6104 $
- * $DateTime: 2013/11/19 20:08:39 $
+ * $Revision: #7 $
+ * $Change: 6105 $
+ * $DateTime: 2013/11/20 09:54:13 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -953,7 +953,8 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 	int dxi, dyi;
 	int i;
 	DBL dx, dy, n, randx, randy;
-	Colour C, V1, S1, S2;
+	Colour C, V1;
+	DblColour S1, S2;
 	int minSamples, maxSamples;
 	int seed = int(x * 313.0 + 11.0) + int(y * 311.0 + 17.0);
 	int seed2;
@@ -1048,7 +1049,7 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 			S2.transm() += Sqr(C.transm());
 
 			nr ++;
-			seed2 ++;
+			seed2 = (seed2 + 1) % camera.Blur_Samples;
 		}
 
 		// Get variance of samples.
