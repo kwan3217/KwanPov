@@ -27,9 +27,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/base/branch.h $
- * $Revision: #3 $
- * $Change: 5970 $
- * $DateTime: 2013/07/29 10:32:25 $
+ * $Revision: #4 $
+ * $Change: 6106 $
+ * $DateTime: 2013/11/20 10:18:06 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -40,13 +40,11 @@
 #define BRANCH_FULL_NAME        "UberPOV Raytracer"
 #define BRANCH_MAINTAINER       "Christoph Lipka"
 #define BRANCH_CONTACT          "http://www.lipka-koeln.de"
-#define BRANCH_VERSION          "1.37.0.0"
+#define BRANCH_VERSION          "1.37.0.0-alpha"
 #define BRANCH_COPYRIGHT        "Copyright 2013 Christoph Lipka."
 
 #define BRANCH_DEVELOPERS       "Christoph Lipka" // alphabetically ordered comma-separated list of strings, e.g. , "John Doe", "Frank N. Furter"
 //#define BRANCH_CONTRIBUTORS     // alphabetically ordered comma-separated list of strings, e.g. , "John Doe", "Frank N. Furter"
-
-#define BRANCH_BUILD_IS_OFFICIAL 0
 
 
 // TODO FIXME - as long as it doesn't have its own installer and set of distribution files,
