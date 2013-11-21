@@ -34,9 +34,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/tracepixel.cpp $
- * $Revision: #7 $
- * $Change: 6105 $
- * $DateTime: 2013/11/20 09:54:13 $
+ * $Revision: #8 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -47,7 +47,6 @@
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
-#include "backend/colour/colour.h"
 #include "backend/math/vector.h"
 #include "backend/math/chi2.h"
 #include "backend/math/matrices.h"

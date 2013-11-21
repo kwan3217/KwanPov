@@ -37,9 +37,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/tokenize.cpp $
- * $Revision: #7 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
+ * $Revision: #8 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -51,7 +51,7 @@
 #include "base/povmsgid.h"
 #include "base/stringutilities.h"
 #include "backend/parser/parse.h"
-#include "backend/colour/colour.h"
+#include "backend/colour/colour_old.h"
 #include "backend/texture/texture.h"
 #include "backend/math/matrices.h"
 #include "backend/support/fileutil.h"

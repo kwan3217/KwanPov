@@ -26,9 +26,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/support/imageutil.cpp $
- * $Revision: #3 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #4 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -39,7 +39,6 @@
 #include "backend/support/imageutil.h"
 #include "backend/math/vector.h"
 #include "backend/pattern/pattern.h"
-#include "backend/colour/colour.h"
 #include "backend/support/fileutil.h"
 #include "base/pov_err.h"
 
@@ -498,11 +497,11 @@ HF_VAL image_height_at(const ImageData *image, int x, int y)
 	// for 8-bit indexed images, use the index (scaled to match short int range)
 	if (image->data->IsIndexed())
 		return ((HF_VAL)image->data->GetIndexedValue(x, y) * 256); 
-  // TODO FIXME - should be *257 to get a max value of 255*257 = 65535
-  /* [JG-2013]: do not change 256 for 257, due to backward compatibility with all versions up to 3.6
-   * it's a shame to not being able to cover the full range when using indexed image, but
-   * it was like that for a very very long time (since the introduction of height field in povray)
-   */
+	// TODO FIXME - should be *257 to get a max value of 255*257 = 65535
+	/* [JG-2013]: do not change 256 for 257, due to backward compatibility with all versions up to 3.6
+	 * it's a shame to not being able to cover the full range when using indexed image, but
+	 * it was like that for a very very long time (since the introduction of height field in povray)
+	 */
 
 	// for greyscale images, use the float greyscale value (scaled to match short int range)
 	if (image->data->IsGrayscale())
@@ -516,7 +515,7 @@ HF_VAL image_height_at(const ImageData *image, int x, int y)
 
 	// for images with low bit depth (<=8 bit per color channel), compose from red (high byte) and green (low byte) channel.
 	return ((HF_VAL) ((colour.red() * 256.0 + colour.green()) * 255.0)); 
-  // [JG-2013] : the high byte / low byte is (r *255) * 256 + (g*255) , which is factored as (r*256+g)*255 (was issue flyspray #308)
+	// [JG-2013] : the high byte / low byte is (r *255) * 256 + (g*255) , which is factored as (r*256+g)*255 (was issue flyspray #308)
 }
 
 

@@ -12,9 +12,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/vm/fncode.cpp $
- * $Revision: #3 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #4 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -30,7 +30,6 @@
 #include "backend/vm/fncode.h"
 #include "backend/vm/fnpovfpu.h"
 #include "backend/vm/fnintern.h"
-#include "backend/colour/colour.h"
 
 // this must be the last header file included
 #include "base/povdebug.h"

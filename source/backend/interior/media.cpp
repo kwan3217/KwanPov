@@ -25,9 +25,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/interior/media.cpp $
- * $Revision: #3 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #4 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -39,7 +39,6 @@
 #include "backend/interior/media.h"
 #include "backend/texture/pigment.h"
 #include "backend/pattern/pattern.h"
-#include "backend/colour/colour.h"
 #include "backend/math/chi2.h"
 #include "backend/math/vector.h"
 

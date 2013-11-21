@@ -1,7 +1,7 @@
 /*******************************************************************************
- * colour.cpp
+ * colour_old.cpp
  *
- * This module implements routines to manipulate colours.
+ * This module implements legacy routines to manipulate colours.
  *
  * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
@@ -24,16 +24,16 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/colour/colour.cpp $
- * $Revision: #3 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $File: //depot/clipka/upov/source/backend/colour/colour_old.cpp $
+ * $Revision: #1 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
-#include "backend/colour/colour.h"
+#include "backend/colour/colour_old.h"
 #include "backend/texture/texture.h"
 #include "backend/texture/pigment.h"
 #include "backend/texture/normal.h"
@@ -279,42 +279,6 @@ BLEND_MAP *Copy_Blend_Map (BLEND_MAP *Old)
 	}
 
 	return (New);
-}
-
-
-
-/*****************************************************************************
-*
-* FUNCTION
-*
-*   Colour_Distance_RGBT
-*
-* INPUT
-*
-* OUTPUT
-*
-* RETURNS
-*
-* AUTHOR
-*
-*   POV-Ray Team
-*
-* DESCRIPTION
-*
-*   -
-*
-* CHANGES
-*
-*   -
-*
-******************************************************************************/
-
-DBL Colour_Distance_RGBT (const Colour& colour1, const Colour& colour2)
-{
-	return (fabs(colour1.red()    - colour2.red()) +
-	        fabs(colour1.green()  - colour2.green()) +
-	        fabs(colour1.blue()   - colour2.blue()) +
-	        fabs(colour1.transm() - colour2.transm()));
 }
 
 

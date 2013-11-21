@@ -25,11 +25,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/pattern/pattern.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/pattern/pattern.cpp $
+ * $Revision: #2 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
+ * $Author: clipka $
  *******************************************************************************/
 
 /*
@@ -46,7 +46,7 @@
 #include "backend/scene/objects.h"
 #include "backend/scene/scene.h"
 #include "backend/support/imageutil.h"
-#include "backend/colour/colour.h"
+#include "backend/colour/colour_old.h"
 #include "backend/parser/parse.h"
 #include "backend/math/vector.h"
 #include "backend/math/matrices.h"

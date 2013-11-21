@@ -32,9 +32,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/express.cpp $
- * $Revision: #6 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #7 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -46,7 +46,7 @@
 #include "backend/parser/parse.h"
 #include "backend/parser/patch.h"
 #include "backend/math/vector.h"
-#include "backend/colour/colour.h"
+#include "backend/colour/colour_old.h"
 #include "backend/math/splines.h"
 #include "backend/math/matrices.h"
 #include "backend/pattern/pattern.h"

@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/lighting/radiosity.cpp $
- * $Revision: #5 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #6 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -74,7 +74,6 @@
 #include "backend/math/vector.h"
 #include "backend/support/fileutil.h"
 #include "backend/support/octree.h"
-#include "backend/colour/colour.h"
 
 // this must be the last file included
 #include "base/povdebug.h"

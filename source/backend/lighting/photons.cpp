@@ -33,9 +33,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/lighting/photons.cpp $
- * $Revision: #4 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #5 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -58,7 +58,6 @@
 #include "backend/texture/normal.h"
 #include "backend/texture/pigment.h"
 #include "backend/texture/texture.h"
-#include "backend/colour/colour.h"
 #include "lightgrp.h"
 #include "backend/lighting/photonshootingstrategy.h"
 

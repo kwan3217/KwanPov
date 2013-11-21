@@ -25,16 +25,15 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/colour/colutils.cpp $
- * $Revision: #2 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #3 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/colour/colutils.h"
-#include "backend/colour/colour.h"
 #include "backend/math/vector.h"
 
 // this must be the last file included
