@@ -72,7 +72,7 @@ namespace vfePlatform
 
 		// system configuration file
 		m_conf    = "";
-		m_sysconf = POVCONFDIR "/" PACKAGE" .conf";
+		m_sysconf = POVCONFDIR "/" PACKAGE ".conf";
 
 		// user configuration file
 		if (m_home.length() > 0)
