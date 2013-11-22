@@ -33,9 +33,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/reswords.cpp $
- * $Revision: #3 $
- * $Change: 5944 $
- * $DateTime: 2013/07/22 09:27:03 $
+ * $Revision: #5 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -106,6 +106,7 @@ const RESERVED_WORD Reserved_Words[LAST_TOKEN] = {
 	{BITWISE_OR_TOKEN, "bitwise_or"},
 	{BITWISE_XOR_TOKEN, "bitwise_xor"},
 	{BLACK_HOLE_TOKEN, "black_hole"},
+	{BLINK_TOKEN, "blink"},
 	{BLOB_TOKEN, "blob"},
 	{BLUE_TOKEN, "blue"},
 	{BLUR_SAMPLES_TOKEN, "blur_samples"},

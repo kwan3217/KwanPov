@@ -26,10 +26,10 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/base/pointer.h $
- * $Revision: #1 $
- * $Change: 5916 $
- * $DateTime: 2013/07/17 19:49:27 $
+ * $File: //depot/clipka/upov/source/backend/parser/patch.cpp $
+ * $Revision: #6 $
+ * $Change: 6117 $
+ * $DateTime: 2013/11/21 21:16:31 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -54,6 +54,7 @@ typedef struct {
 static const Patch_Data patch_data[] = {
 	{ "upov",                    137.00 }, // UberPOV version number
 
+	{ "upov-blink",                0.90 }, // UberPOV-style blink keyword
 	{ "upov-file_time",            0.90 }, // UberPOV-style file_time function
 	{ "upov-read-text",            1.00 }, // UberPOV-style plaintext reading
 	{ "upov-reflection-roughness", 0.90 }, // UberPOV-style blurred reflections

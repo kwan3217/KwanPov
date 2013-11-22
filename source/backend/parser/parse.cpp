@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/parse.cpp $
- * $Revision: #5 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #7 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -53,7 +53,7 @@
 #include "backend/math/splines.h"
 #include "backend/math/polysolv.h"
 #include "backend/bounding/bsphere.h"
-#include "backend/colour/colour.h"
+#include "backend/colour/colour_old.h"
 #include "backend/scene/atmosph.h"
 #include "backend/scene/objects.h"
 #include "backend/interior/interior.h"
@@ -7674,6 +7674,29 @@ ObjectPtr Parser::Parse_Object_Mods (ObjectPtr Object)
 			POV_FREE (s) ;
 		END_CASE
 
+		CASE(BLINK_TOKEN)
+			Object->subFrameTimeStart = Parse_Float();
+			Parse_Comma();
+			Object->subFrameTimeEnd = Allow_Float(-1.0);
+			if (Object->subFrameTimeEnd == -1.0)
+			{
+				// "blink FLOAT" is taken as specifying a duration, with the object being visible at the beginning of the frame
+				Object->subFrameTimeEnd   = Object->subFrameTimeStart;
+				Object->subFrameTimeStart = 0.0;
+				if (Object->subFrameTimeEnd == 0.0)
+					Object->subFrameTimeEnd = 1.0; // "blink off" is taken as the object being always visible throughout the frame
+				else if ( (Object->subFrameTimeEnd < 0.0) ||
+					      (Object->subFrameTimeEnd > 1.0) )
+					Error("blink duration must be greater than 0.0 and at most 1.0.");
+			}
+			else if (Object->subFrameTimeStart >= Object->subFrameTimeEnd)
+				Error("blink interval start must be smaller than interval end.");
+			else if (Object->subFrameTimeStart < 0.0)
+				Error("blink interval start must be at least 0.0.");
+			else if (Object->subFrameTimeEnd > 1.0)
+				Error("blink interval end must be at most 1.0.");
+		END_CASE
+
 		OTHERWISE
 			UNGET
 			EXIT
@@ -9398,6 +9421,19 @@ void Parser::Post_Process (ObjectPtr Object, ObjectPtr Parent)
 		{
 			Set_Flag(Object, PH_IGNORE_PHOTONS_FLAG);
 		}
+
+		// promote blink settings to child, unless it has its own settings
+		if (Object->subFrameTimeStart == -1.0)
+			Object->subFrameTimeStart = Parent->subFrameTimeStart;
+		if (Object->subFrameTimeEnd == -1.0)
+			Object->subFrameTimeEnd = Parent->subFrameTimeEnd;
+	}
+	else
+	{
+		if (Object->subFrameTimeStart == -1.0)
+			Object->subFrameTimeStart = 0.0;
+		if (Object->subFrameTimeEnd == -1.0)
+			Object->subFrameTimeEnd = 1.0;
 	}
 
 	if(Object->interior != NULL)
@@ -9577,6 +9613,8 @@ void Parser::Post_Process (ObjectPtr Object, ObjectPtr Parent)
 
 	if ((dynamic_cast<Blob *>(Object) == NULL) && // FIXME
 	    (dynamic_cast<Mesh *>(Object) == NULL) && // FIXME
+	    (Object->subFrameTimeStart <= 0) &&
+	    (Object->subFrameTimeEnd >= 1.0) &&
 	    (Test_Opacity(Object->Texture)) &&
 	    ((Object->Interior_Texture==NULL) ||
 	     Test_Opacity(Object->Interior_Texture)))

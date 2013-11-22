@@ -1,7 +1,7 @@
 /*******************************************************************************
- * colour.h
+ * colour_old.h
  *
- * This module contains all defines, typedefs, and prototypes for COLOUR.CPP.
+ * This module contains all defines, typedefs, and prototypes for colour_old.cpp.
  *
  * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
@@ -24,17 +24,17 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/colour/colour.h $
- * $Revision: #2 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $File: //depot/clipka/upov/source/backend/colour/colour_old.h $
+ * $Revision: #1 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
 /* NOTE: FRAME.H contains other colour stuff. */
 
-#ifndef COLOUR_H
-#define COLOUR_H
+#ifndef COLOUR_OLD_H
+#define COLOUR_OLD_H
 
 namespace pov
 {
@@ -61,7 +61,6 @@ namespace pov
 // TODO - obsolete
 COLOUR *Create_Colour (void);
 COLOUR *Copy_Colour (const COLOUR Old);
-DBL Colour_Distance_RGBT (const Colour& colour1, const Colour& colour2);
 
 // TODO - refactor
 BLEND_MAP_ENTRY *Create_BMap_Entries (int Map_Size);

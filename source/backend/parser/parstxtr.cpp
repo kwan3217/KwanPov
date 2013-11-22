@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/parstxtr.cpp $
- * $Revision: #3 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
+ * $Revision: #4 $
+ * $Change: 6114 $
+ * $DateTime: 2013/11/20 20:51:05 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -42,7 +42,7 @@
 #include "backend/parser/parse.h"
 
 #include "backend/math/vector.h"
-#include "backend/colour/colour.h"
+#include "backend/colour/colour_old.h"
 #include "backend/interior/interior.h"
 #include "backend/math/matrices.h"
 #include "backend/interior/media.h"
@@ -3998,8 +3998,8 @@ FOG *Parser::Parse_Fog()
 			Parse_Vector(Vector);
 			Warning(0, "A fog's up vector can't be translated.");
 /*
-      Compute_Translation_Transform(&Trans, Vector);
-      MTransDirection(Fog->Up, Fog->Up, &Trans);
+			Compute_Translation_Transform(&Trans, Vector);
+			MTransDirection(Fog->Up, Fog->Up, &Trans);
 */
 		END_CASE
 

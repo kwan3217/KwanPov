@@ -7,11 +7,10 @@ located in the same directory as this file is.
 Changes between POV-Ray 3.7.0 and UberPOV 1.37.0.0
 --------------------------------------------------
 
-  - UberPOV 1.37.0.0 is based on from POV-Ray 3.7.0 revision #5946, with the
-    following notable changes (in addition to the obvious change of the
-    program name and version).
+  - UberPOV 1.37.0.0 is based on from POV-Ray 3.7.0, with the following notable
+    changes (in addition to the obvious change of the program name and version).
 
-  - UberPOV adds a few sample scenes for its own features).
+  - UberPOV adds a few sample scenes for its own features.
 
   - For now, UberPOV does not come with any documentation worth mentioning;
     instead, please refer to the original POV-Ray 3.7 documentation, plus the
@@ -62,6 +61,11 @@ Testing for UberPOV:
       - upov (137.00)
 
         This pseudo-extension indicates the version of UberPOV.
+
+      - upov-blink (0.90):
+
+        The "blink" keyword can be used as an object modifier to achieve
+        multiple-exposure effects.
 
       - upov-file_time (0.90):
 
@@ -148,6 +152,30 @@ Reflection Blur:
     patch() function with the patch name "upov-reflection-roughness"; the
     current implementation is version 0.9.
 
+Blink Keyword:
+--------------
+
+  - UberPOV can render an object as if it was present in the scene only during
+    a portion of the exposure time. This feature is activated by using the
+    following object modifier:
+
+        blink [START_TIME,] END_TIME
+
+    where START_TIME and END_TIME specify the time interval during which the
+    object is supposed to be present, ranging from 0.0 (start of current frame)
+    to 1.0 (end of current frame). The default values are 0.0 and 1.0
+    respecively.
+
+    The primary purpose of this feature is to provide basic support for motion
+    blur effects, which can be achieved by creating multiple copies of an
+    object with different blink intervals. Another potential use of this
+    mechanism is to model ghost-like objects which appear transparent with
+    respect to the background but opaque with respect to themselves.
+
+    This syntax extension can be tested for using the #patch directive or
+    patch() function with the patch name "upov-blink"; the current
+    implementation is version 0.9.
+
 Stochastic Anti-Aliasing:
 -------------------------
 
@@ -208,9 +236,10 @@ Windows Related:
     editor DLL in order to be able to edit scenes in the GUI. Needless to say
     that UberPOV uses the very same DLL as POV-Ray.
 
-  - At the time of writing, there is no official pre-built Windows binary of
-    UberPOV yet. You will need to compile it from source using Visual Studio
-    2010 (or later).
+  - At the time of writing, the UberPOV for Windows binary packages do not
+    feature any additional distribution files yet, such as include files or
+    sample scenes. These can be found in the /distribution/ directory of the
+    source package.
 
 Unix Related:
 -------------

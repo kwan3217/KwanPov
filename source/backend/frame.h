@@ -32,9 +32,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/frame.h $
- * $Revision: #3 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #4 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -1370,6 +1370,8 @@ class ObjectBase
 		BBOX BBox;
 		TRANSFORM *Trans;
 		TRANSFORM *UV_Trans;
+		float subFrameTimeStart;
+		float subFrameTimeEnd;
 		SNGL Ph_Density;
 		FloatSetting RadiosityImportance;
 		unsigned int Flags;
@@ -1392,7 +1394,7 @@ class ObjectBase
 		ObjectBase(int t) :
 			Type(t),
 			Texture(NULL), Interior_Texture(NULL), interior(NULL), Trans(NULL), UV_Trans(NULL),
-			Ph_Density(0), RadiosityImportance(0.0), Flags(0)
+			Ph_Density(0), RadiosityImportance(0.0), Flags(0), subFrameTimeStart(-1.0), subFrameTimeEnd(-1.0)
 		{
 			Make_BBox(BBox, -BOUND_HUGE/2.0, -BOUND_HUGE/2.0, -BOUND_HUGE/2.0, BOUND_HUGE, BOUND_HUGE, BOUND_HUGE);
 		}
@@ -1400,7 +1402,7 @@ class ObjectBase
 		ObjectBase(int t, ObjectBase& o, bool transplant) :
 			Type(t),
 			Texture(o.Texture), Interior_Texture(o.Interior_Texture), interior(o.interior), Trans(o.Trans), UV_Trans(o.UV_Trans),
-			Ph_Density(o.Ph_Density), RadiosityImportance(o.RadiosityImportance), Flags(o.Flags),
+			Ph_Density(o.Ph_Density), RadiosityImportance(o.RadiosityImportance), Flags(o.Flags), subFrameTimeStart(-1.0), subFrameTimeEnd(-1.0),
 			Bound(o.Bound), Clip(o.Clip), LLights(o.LLights), BBox(o.BBox)
 		{
 			if (transplant)
@@ -1438,6 +1440,12 @@ class ObjectBase
 		// destruction - e.g. IsoSurface max_gradient warnings. (object destruction
 		// isn't the place to do that anymore since a scene may persist between views).
 		virtual void DispatchShutdownMessages(MessageFactory& messageFactory) {};
+
+		inline bool VisibleAtSubFrameTime(float subFrameTime)
+		{
+			return (subFrameTime < 0.0) ||
+			       ((subFrameTime > subFrameTimeStart) && (subFrameTime < subFrameTimeEnd));
+		}
 
 	protected:
 		explicit ObjectBase(const ObjectBase&) { }
@@ -1757,6 +1765,7 @@ class Ray
 
 		VECTOR Origin;
 		VECTOR Direction;
+		float subFrameTime;
 
 		Ray(RayType rt = PrimaryRay, bool shadowTest = false, bool photon = false, bool radiosity = false, bool monochromatic = false, bool pretrace = false);
 		Ray(const VECTOR ov, const VECTOR dv, RayType rt = PrimaryRay, bool shadowTest = false, bool photon = false, bool radiosity = false, bool monochromatic = false, bool pretrace = false);
