@@ -32,9 +32,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/reswords.h $
- * $Revision: #3 $
- * $Change: 5944 $
- * $DateTime: 2013/07/22 09:27:03 $
+ * $Revision: #5 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -194,6 +194,7 @@ enum TOKEN_IDS
 	BACK_SLASH_TOKEN,
 	BAR_TOKEN,
 	BICUBIC_PATCH_TOKEN,
+	BLINK_TOKEN,
 	BLOB_TOKEN,
 	BOKEH_TOKEN,
 	BOUNDED_BY_TOKEN,

@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/lighting/radiosity.cpp $
- * $Revision: #6 $
- * $Change: 6114 $
- * $DateTime: 2013/11/20 20:51:05 $
+ * $Revision: #7 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -504,6 +504,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
 	unsigned int save_trace_level;
 	unsigned int save_stochasticCount;
 	unsigned int save_stochasticDepth;
+	unsigned int save_subFrameTime;
 	RecursionParameters& param = recursionParameters[ticket.radiosityRecursionDepth];
 	const RadiosityRecursionSettings& recSettings = recursionSettings[ticket.radiosityRecursionDepth];
 
@@ -522,6 +523,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
 	save_radiosityQuality   = ticket.radiosityQuality;
 	save_stochasticCount    = ticket.stochasticCount;
 	save_stochasticDepth    = ticket.stochasticDepth;
+	save_subFrameTime       = ticket.subFrameTime;
 
 	// adjust the max_trace_level
 	// [CLi] Set max trace level to a value independent of "ray history" (except for the current radiosity bounce depth of course),
@@ -565,10 +567,12 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
 		ticket.radiosityQuality = 1.0;
 		Ray nray(*ipoint, *direction, Ray::OtherRay, false, false, true); // Build a ray pointing in the chosen direction
 		ticket.radiosityRecursionDepth++;
+		ticket.subFrameTime = 0.5; // TODO - should be random
 		ticket.radiosityImportanceQueried = (float)i / (float)(cur_sample_count-1);
 		bool alphaBackground = ticket.alphaBackground;
 		ticket.alphaBackground = false;
 		Colour temp_full_colour;
+		nray.subFrameTime = ticket.subFrameTime;
 		DBL depth = trace.TraceRay(nray, temp_full_colour, weight, ticket, false); // Go down in recursion, trace the result, and come back up
 		RGBColour temp_colour = RGBColour(temp_full_colour);
 		ticket.radiosityRecursionDepth--;
@@ -725,6 +729,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
 	ticket.radiosityQuality     = max(save_radiosityQuality, qualitySum/okCount);
 	ticket.stochasticDepth      = save_stochasticDepth;
 	ticket.stochasticCount      = save_stochasticCount;
+	ticket.subFrameTime         = save_subFrameTime;
 
 	return qualitySum/okCount;
 }

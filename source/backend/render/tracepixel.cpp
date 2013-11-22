@@ -34,9 +34,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/tracepixel.cpp $
- * $Revision: #8 $
- * $Change: 6114 $
- * $DateTime: 2013/11/20 20:51:05 $
+ * $Revision: #9 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -275,11 +275,13 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour,
 				Colour col;
 
 				Trace::TraceTicket ticket(maxTraceLevel, adcBailout, sceneData->outputAlpha);
+				ticket.subFrameTime = (*threadData->stochasticRandomGenerator)();
 				if (siblingRays > 0)
 				{
 					ticket.stochasticCount = siblingRays;
 					ticket.stochasticDepth = 1;
 				}
+				ray.subFrameTime = ticket.subFrameTime;
 				TraceRay(ray, col, 1.0, ticket, false, camera.Max_Ray_Distance);
 				colour += col;
 				numTraced++;
@@ -1021,11 +1023,13 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 				Trace::TraceTicket ticket(maxTraceLevel, adcBailout, sceneData->outputAlpha);
 				ticket.stochasticCount = max(1, minSamples);
 				ticket.stochasticDepth = 1;
+				ticket.subFrameTime    = (*threadData->stochasticRandomGenerator)();
 				if (siblingRays > 0)
 				{
 					ticket.stochasticCount *= siblingRays;
 					ticket.stochasticDepth ++;
 				}
+				ray.subFrameTime = ticket.subFrameTime;
 				TraceRay(ray, C, 1.0, ticket, false, camera.Max_Ray_Distance);
 
 				colour += C;

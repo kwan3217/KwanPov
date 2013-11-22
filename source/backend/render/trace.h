@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/trace.h $
- * $Revision: #6 $
- * $Change: 6111 $
- * $DateTime: 2013/11/20 17:14:39 $
+ * $Revision: #7 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -185,9 +185,12 @@ class Trace
 			/// number of "sibling rays" (including this one)
 			unsigned int stochasticCount;
 
+			/// point in time associated with this single trace
+			float subFrameTime;
+
 			TraceTicket(unsigned int mtl, double adcb, bool ab = true, unsigned int rrd = 0, unsigned int ssrd = 0, float riq = -1.0, float rq = 1.0):
 				traceLevel(0), maxAllowedTraceLevel(mtl), maxFoundTraceLevel(0), adcBailout(adcb), alphaBackground(ab), radiosityRecursionDepth(rrd), subsurfaceRecursionDepth(ssrd),
-				radiosityImportanceQueried(riq), radiosityImportanceFound(-1.0), radiosityQuality(rq), stochasticDepth(0), stochasticCount(0) {}
+				radiosityImportanceQueried(riq), radiosityImportanceFound(-1.0), radiosityQuality(rq), stochasticDepth(0), stochasticCount(0), subFrameTime(-1.0) {}
 		};
 
 		class CooperateFunctor

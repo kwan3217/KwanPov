@@ -24,11 +24,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/scene/objects.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/scene/objects.cpp $
+ * $Revision: #2 $
+ * $Change: 6116 $
+ * $DateTime: 2013/11/21 21:10:39 $
+ * $Author: clipka $
  *******************************************************************************/
 
 #include <cassert>
@@ -101,7 +101,7 @@ std::string& ObjectDebugHelper::SimpleDesc(std::string& result)
 
 bool Find_Intersection(Intersection *isect, ObjectPtr object, const Ray& ray, TraceThreadData *threadData)
 {
-	if(object != NULL)
+	if((object != NULL) && object->VisibleAtSubFrameTime(ray.subFrameTime))
 	{
 		DBL closest = HUGE_VAL;
 		BBOX_VECT origin;
@@ -155,7 +155,7 @@ bool Find_Intersection(Intersection *isect, ObjectPtr object, const Ray& ray, Tr
 
 bool Find_Intersection(Intersection *isect, ObjectPtr object, const Ray& ray, const RayObjectCondition& postcondition, TraceThreadData *threadData)
 {
-	if(object != NULL)
+	if((object != NULL) && object->VisibleAtSubFrameTime(ray.subFrameTime))
 	{
 		DBL closest = HUGE_VAL;
 		BBOX_VECT origin;
@@ -209,7 +209,7 @@ bool Find_Intersection(Intersection *isect, ObjectPtr object, const Ray& ray, co
 
 bool Find_Intersection(Intersection *isect, ObjectPtr object, const Ray& ray, ObjectBase::BBoxDirection variant, const BBOX_VECT& origin, const BBOX_VECT& invdir, TraceThreadData *threadData)
 {
-	if(object != NULL)
+	if((object != NULL) && object->VisibleAtSubFrameTime(ray.subFrameTime))
 	{
 		DBL closest = HUGE_VAL;
 
@@ -255,7 +255,7 @@ bool Find_Intersection(Intersection *isect, ObjectPtr object, const Ray& ray, Ob
 
 bool Find_Intersection(Intersection *isect, ObjectPtr object, const Ray& ray, ObjectBase::BBoxDirection variant, const BBOX_VECT& origin, const BBOX_VECT& invdir, const RayObjectCondition& postcondition, TraceThreadData *threadData)
 {
-	if(object != NULL)
+	if((object != NULL) && object->VisibleAtSubFrameTime(ray.subFrameTime))
 	{
 		DBL closest = HUGE_VAL;
 
