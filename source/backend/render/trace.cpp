@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/trace.cpp $
- * $Revision: #9 $
- * $Change: 6116 $
- * $DateTime: 2013/11/21 21:10:39 $
+ * $Revision: #10 $
+ * $Change: 6125 $
+ * $DateTime: 2013/11/23 18:42:59 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -3373,7 +3373,7 @@ bool Trace::IsSameSSLTObject(const ObjectBase* obj1, const ObjectBase* obj2)
 	return (obj1 && obj2 && obj1->interior == obj2->interior);
 }
 
-void Trace::ComputeDiffuseSampleBase(Vector3d& basePoint, const Intersection& out, const Vector3d& vOut, double avgFreeDist)
+void Trace::ComputeDiffuseSampleBase(Vector3d& basePoint, const Intersection& out, const Vector3d& vOut, double avgFreeDist, const TraceTicket& ticket)
 {
 	Vector3d pOut(out.IPoint);
 	Vector3d nOut(out.INormal);
@@ -3388,7 +3388,7 @@ void Trace::ComputeDiffuseSampleBase(Vector3d& basePoint, const Intersection& ou
 	// however, never place it closer to the "back side" than to the front
 	Intersection backSide;
 	Ray ray(*pOut, *nOut); // we're shooting from the surface, so SubsurfaceRay would do us no good (as it would potentially "re-discover" the current surface)
-	// TODO - ray.subFrameTime
+	ray.subFrameTime = ticket.subFrameTime;
 	backSide.Depth = avgFreeDist * 2; // max distance we're looking at
 	bool found = FindIntersection(backSide, ray);
 	if (found)
@@ -3413,7 +3413,7 @@ void Trace::ComputeDiffuseSamplePoint(const Vector3d& basePoint, Intersection& i
 		v = Uniform3dOnSphere(stochasticRandomGenerator);
 
 	Ray ray(*basePoint, *v, Ray::SubsurfaceRay);
-	// TODO - ray.subFrameTime
+	ray.subFrameTime = ticket.subFrameTime;
 	bool found = FindIntersection(in, ray);
 
 	if (found)
@@ -3446,7 +3446,7 @@ void Trace::ComputeOneSingleScatteringContribution(const LightSource& lightsourc
 	// Do Light source to get the correct lightsourceray
 	// (note that for now we're mainly interested in the direction)
 	Ray lightsourceray(Ray::SubsurfaceRay);
-	// TODO - ray.subFrameTime
+	lightsourceray.subFrameTime = ticket.subFrameTime;
 	double lightsourcedepth;
 	ComputeOneWhiteLightRay(lightsource, lightsourcedepth, lightsourceray, bend_point);
 
@@ -3679,6 +3679,7 @@ void Trace::ComputeDiffuseContribution1(const LightSource& lightsource, const In
 
 	// Get a colour and a ray.
 	Ray lightsourceray;
+	lightsourceray.subFrameTime = ticket.subFrameTime;
 	double lightsourcedepth;
 	RGBColour lightcolour;
 	ComputeOneLightRay(lightsource, lightsourcedepth, lightsourceray, Vector3d(in.IPoint), lightcolour, true);
@@ -3755,7 +3756,7 @@ void Trace::ComputeDiffuseAmbientContribution1(const Intersection& out, const Ve
 		return;
 
 	Ray ambientray = Ray(in.IPoint, *vIn, Ray::OtherRay); // TODO FIXME - [CLi] check whether ray type is suitable
-	// TODO - ray.subFrameTime
+	ambientray.subFrameTime = ticket.subFrameTime;
 	RGBColour ambientcolour;
 	TraceRay(ambientray, ambientcolour, weight, ticket, false);
 
@@ -3868,7 +3869,7 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 	                        (Test_Flag(out.Object, IGNORE_RADIOSITY_FLAG) == false);
 
 	Vector3d sampleBase;
-	ComputeDiffuseSampleBase(sampleBase, out, vOut, 1.0 / (sigma_prime_t_mean * sceneData->mmPerUnit));
+	ComputeDiffuseSampleBase(sampleBase, out, vOut, 1.0 / (sigma_prime_t_mean * sceneData->mmPerUnit), ticket);
 
 	weightSum = 0.0;
 	trueNumSamples = 0;
@@ -3925,7 +3926,7 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 	if (SSLTComputeRefractedDirection(Vector3d(Eye.Direction), Vector3d(out.INormal), 1.0/eta, refractedEye))
 	{
 		Ray refractedEyeRay(out.IPoint, *refractedEye);
-		// TODO - ray.subFrameTime
+		refractedEyeRay.subFrameTime = ticket.subFrameTime;
 		Intersection unscatteredIn;
 
 		double dist;

@@ -24,11 +24,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/render/ray.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: //depot/clipka/upov/source/backend/render/ray.cpp $
+ * $Revision: #2 $
+ * $Change: 6125 $
+ * $DateTime: 2013/11/23 18:42:59 $
+ * $Author: clipka $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -45,7 +45,8 @@
 namespace pov
 {
 
-Ray::Ray(RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace)
+Ray::Ray(RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace) :
+	subFrameTime(0.5)
 {
 	Make_Vector(Origin, 0.0, 0.0, 0.0);
 	Make_Vector(Direction, 0.0, 0.0, 0.0);
@@ -55,7 +56,8 @@ Ray::Ray(RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochro
 	ClearInteriors();
 }
 
-Ray::Ray(const VECTOR ov, const VECTOR dv, RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace)
+Ray::Ray(const VECTOR ov, const VECTOR dv, RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace) :
+	subFrameTime(0.5)
 {
 	Assign_Vector(Origin, ov);
 	Assign_Vector(Direction, dv);

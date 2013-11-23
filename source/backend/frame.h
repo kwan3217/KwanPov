@@ -32,9 +32,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/frame.h $
- * $Revision: #4 $
- * $Change: 6116 $
- * $DateTime: 2013/11/21 21:10:39 $
+ * $Revision: #5 $
+ * $Change: 6125 $
+ * $DateTime: 2013/11/23 18:42:59 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -1443,8 +1443,7 @@ class ObjectBase
 
 		inline bool VisibleAtSubFrameTime(float subFrameTime)
 		{
-			return (subFrameTime < 0.0) ||
-			       ((subFrameTime > subFrameTimeStart) && (subFrameTime < subFrameTimeEnd));
+			return (subFrameTime > subFrameTimeStart) && (subFrameTime < subFrameTimeEnd);
 		}
 
 	protected:
