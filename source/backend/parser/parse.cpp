@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/parser/parse.cpp $
- * $Revision: #7 $
- * $Change: 6116 $
- * $DateTime: 2013/11/21 21:10:39 $
+ * $Revision: #8 $
+ * $Change: 6126 $
+ * $DateTime: 2013/11/23 21:08:40 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -7677,8 +7677,8 @@ ObjectPtr Parser::Parse_Object_Mods (ObjectPtr Object)
 		CASE(BLINK_TOKEN)
 			Object->subFrameTimeStart = Parse_Float();
 			Parse_Comma();
-			Object->subFrameTimeEnd = Allow_Float(-1.0);
-			if (Object->subFrameTimeEnd == -1.0)
+			Object->subFrameTimeEnd = Allow_Float(numeric_limits<float>::max());
+			if (Object->subFrameTimeEnd == numeric_limits<float>::max())
 			{
 				// "blink FLOAT" is taken as specifying a duration, with the object being visible at the beginning of the frame
 				Object->subFrameTimeEnd   = Object->subFrameTimeStart;
@@ -9423,17 +9423,10 @@ void Parser::Post_Process (ObjectPtr Object, ObjectPtr Parent)
 		}
 
 		// promote blink settings to child, unless it has its own settings
-		if (Object->subFrameTimeStart == -1.0)
+		if (Object->subFrameTimeStart == -numeric_limits<float>::max())
 			Object->subFrameTimeStart = Parent->subFrameTimeStart;
-		if (Object->subFrameTimeEnd == -1.0)
+		if (Object->subFrameTimeEnd == numeric_limits<float>::max())
 			Object->subFrameTimeEnd = Parent->subFrameTimeEnd;
-	}
-	else
-	{
-		if (Object->subFrameTimeStart == -1.0)
-			Object->subFrameTimeStart = 0.0;
-		if (Object->subFrameTimeEnd == -1.0)
-			Object->subFrameTimeEnd = 1.0;
 	}
 
 	if(Object->interior != NULL)

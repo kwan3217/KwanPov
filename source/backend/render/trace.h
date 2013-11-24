@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/trace.h $
- * $Revision: #7 $
- * $Change: 6116 $
- * $DateTime: 2013/11/21 21:10:39 $
+ * $Revision: #8 $
+ * $Change: 6125 $
+ * $DateTime: 2013/11/23 18:42:59 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -190,7 +190,7 @@ class Trace
 
 			TraceTicket(unsigned int mtl, double adcb, bool ab = true, unsigned int rrd = 0, unsigned int ssrd = 0, float riq = -1.0, float rq = 1.0):
 				traceLevel(0), maxAllowedTraceLevel(mtl), maxFoundTraceLevel(0), adcBailout(adcb), alphaBackground(ab), radiosityRecursionDepth(rrd), subsurfaceRecursionDepth(ssrd),
-				radiosityImportanceQueried(riq), radiosityImportanceFound(-1.0), radiosityQuality(rq), stochasticDepth(0), stochasticCount(0), subFrameTime(-1.0) {}
+				radiosityImportanceQueried(riq), radiosityImportanceFound(-1.0), radiosityQuality(rq), stochasticDepth(0), stochasticCount(0), subFrameTime(0.5) {}
 		};
 
 		class CooperateFunctor
@@ -774,7 +774,7 @@ class Trace
 		void ComputeSurfaceTangents(const Vector3d& normal, Vector3d& u, Vector3d& v);
 		void ComputeSSLTNormal (Intersection& Ray_Intersection);
 		bool IsSameSSLTObject(const ObjectBase* obj1, const ObjectBase* obj2);
-		void ComputeDiffuseSampleBase(Vector3d& basePoint, const Intersection& out, const Vector3d& vOut, double avgFreeDist);
+		void ComputeDiffuseSampleBase(Vector3d& basePoint, const Intersection& out, const Vector3d& vOut, double avgFreeDist, const TraceTicket& ticket);
 		void ComputeDiffuseSamplePoint(const Vector3d& basePoint, Intersection& in, double& sampleArea, TraceTicket& ticket);
 		void ComputeDiffuseContribution(const Intersection& out, const Vector3d& vOut, const Vector3d& pIn, const Vector3d& nIn, const Vector3d& vIn, double& sd, double sigma_prime_s, double sigma_a, double eta);
 		void ComputeDiffuseContribution1(const LightSource& lightsource, const Intersection& out, const Vector3d& vOut, const Intersection& in, RGBColour& Total_Colour, const DblRGBColour& sigma_prime_s, const DblRGBColour& sigma_a, double eta, double weight, TraceTicket& ticket);

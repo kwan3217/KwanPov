@@ -32,9 +32,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/frame.h $
- * $Revision: #4 $
- * $Change: 6116 $
- * $DateTime: 2013/11/21 21:10:39 $
+ * $Revision: #6 $
+ * $Change: 6126 $
+ * $DateTime: 2013/11/23 21:08:40 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -1394,7 +1394,8 @@ class ObjectBase
 		ObjectBase(int t) :
 			Type(t),
 			Texture(NULL), Interior_Texture(NULL), interior(NULL), Trans(NULL), UV_Trans(NULL),
-			Ph_Density(0), RadiosityImportance(0.0), Flags(0), subFrameTimeStart(-1.0), subFrameTimeEnd(-1.0)
+			Ph_Density(0), RadiosityImportance(0.0), Flags(0),
+			subFrameTimeStart(-numeric_limits<float>::max()), subFrameTimeEnd(numeric_limits<float>::max())
 		{
 			Make_BBox(BBox, -BOUND_HUGE/2.0, -BOUND_HUGE/2.0, -BOUND_HUGE/2.0, BOUND_HUGE, BOUND_HUGE, BOUND_HUGE);
 		}
@@ -1402,7 +1403,8 @@ class ObjectBase
 		ObjectBase(int t, ObjectBase& o, bool transplant) :
 			Type(t),
 			Texture(o.Texture), Interior_Texture(o.Interior_Texture), interior(o.interior), Trans(o.Trans), UV_Trans(o.UV_Trans),
-			Ph_Density(o.Ph_Density), RadiosityImportance(o.RadiosityImportance), Flags(o.Flags), subFrameTimeStart(-1.0), subFrameTimeEnd(-1.0),
+			Ph_Density(o.Ph_Density), RadiosityImportance(o.RadiosityImportance), Flags(o.Flags),
+			subFrameTimeStart(-numeric_limits<float>::max()), subFrameTimeEnd(numeric_limits<float>::max()),
 			Bound(o.Bound), Clip(o.Clip), LLights(o.LLights), BBox(o.BBox)
 		{
 			if (transplant)
@@ -1443,8 +1445,7 @@ class ObjectBase
 
 		inline bool VisibleAtSubFrameTime(float subFrameTime)
 		{
-			return (subFrameTime < 0.0) ||
-			       ((subFrameTime > subFrameTimeStart) && (subFrameTime < subFrameTimeEnd));
+			return (subFrameTime >= subFrameTimeStart) && (subFrameTime <= subFrameTimeEnd);
 		}
 
 	protected:
