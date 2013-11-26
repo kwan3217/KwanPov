@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/render/tracetask.cpp $
- * $Revision: #6 $
- * $Change: 6114 $
- * $DateTime: 2013/11/20 20:51:05 $
+ * $Revision: #7 $
+ * $Change: 6141 $
+ * $DateTime: 2013/11/26 12:39:54 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -753,7 +753,6 @@ void TraceTask::StochasticSupersamplingM3()
 						Vector2d jitter = Uniform2dOnSquare(GetViewDataPtr()->stochasticRandomGenerator) - 0.5;
 						trace(x + jitter.x(), y + jitter.y(), GetViewData()->GetWidth(), GetViewData()->GetHeight(), colTemp, max(samples, minSamples));
 
-						pixels.push_back(colTemp);
 						col = DblColour(GammaCurve::Encode(aaGamma, colTemp));
 						colSqr = col*col;
 
@@ -761,6 +760,7 @@ void TraceTask::StochasticSupersamplingM3()
 						{
 							GetViewDataPtr()->Stats()[Number_Of_Pixels]++;
 
+							pixels.push_back(colTemp);
 							pixelsSum.push_back(col);
 							pixelsSumSqr.push_back(colSqr);
 							pixelsSamples.push_back(1);
@@ -768,7 +768,6 @@ void TraceTask::StochasticSupersamplingM3()
 						else
 						{
 							pixels [index] += colTemp;
-
 							pixelsSum [index] += col;
 							pixelsSumSqr [index] += colSqr;
 							pixelsSamples [index] ++;
