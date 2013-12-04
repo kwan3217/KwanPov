@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/base/image/encoding.h $
- * $Revision: #3 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #4 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -83,7 +83,7 @@ class DitherHandler
 		virtual void setError(unsigned int x, unsigned int y, const OffsetInfo& err) {}
 };
 
-typedef boost::shared_ptr<DitherHandler> DitherHandlerPtr;
+typedef shared_ptr<DitherHandler> DitherHandlerPtr;
 
 /// Factory class to get a dithering rule and state.
 DitherHandlerPtr GetDitherHandler(int method, unsigned int imageWidth);

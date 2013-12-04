@@ -33,9 +33,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/vfe/vfesession.cpp $
- * $Revision: #3 $
- * $Change: 5921 $
- * $DateTime: 2013/07/18 22:48:19 $
+ * $Revision: #4 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -546,7 +546,7 @@ const char *vfeSession::GetBackendStateName (void) const
 // Returns a copy of the shared pointer containing the current instance
 // of a pov_frontend::Display-derived render preview instance, which may
 // be NULL.
-boost::shared_ptr<Display> vfeSession::GetDisplay() const
+shared_ptr<Display> vfeSession::GetDisplay() const
 {
   if (m_Frontend == NULL)
     return (shared_ptr<Display>());

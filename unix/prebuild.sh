@@ -68,9 +68,9 @@
 # DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 #---------------------------------------------------------------------------
 # $File: //depot/clipka/upov/unix/prebuild.sh $
-# $Revision: #7 $
-# $Change: 6087 $
-# $DateTime: 2013/11/11 03:53:39 $
+# $Revision: #8 $
+# $Change: 6157 $
+# $DateTime: 2013/12/02 16:43:38 $
 # $Author: clipka $
 # $Log$
 ###############################################################################
@@ -377,7 +377,7 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   for file in \
     AUTHORS ChangeLog configure.ac COPYING NEWS README VERSION \
     povray.1 $pov_binary.conf \
-    ../distribution/ini/ ../distribution/include/ ../distribution/scenes/
+    ../distribution/ini ../distribution/include ../distribution/scenes
   do
     out=`basename $file`
     echo "Create ../$out`test -d $file && echo /`"
@@ -751,7 +751,7 @@ aclocal -I .
 autoheader --warnings=all
 
 # Create all Makefile.in's from Makefile.am's
-automake --warnings=all ###--ignore-deps
+automake --add-missing --warnings=all ###--ignore-deps
 
 # Create configure from configure.ac
 autoconf --warnings=all

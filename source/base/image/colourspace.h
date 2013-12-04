@@ -25,9 +25,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/base/image/colourspace.h $
- * $Revision: #2 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $Revision: #3 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -36,7 +36,6 @@
 
 #include <vector>
 
-#include <boost/weak_ptr.hpp>
 #include <boost/thread.hpp>
 
 #include "base/configbase.h"
@@ -52,12 +51,12 @@ class SimpleGammaCurve;
 /**
  *  Class holding a shared reference to a gamma curve.
  */
-typedef boost::shared_ptr<GammaCurve> GammaCurvePtr;
+typedef shared_ptr<GammaCurve> GammaCurvePtr;
 
 /**
  *  Class holding a shared reference to a simple gamma curve.
  */
-typedef boost::shared_ptr<SimpleGammaCurve> SimpleGammaCurvePtr;
+typedef shared_ptr<SimpleGammaCurve> SimpleGammaCurvePtr;
 
 /**
  *  Abstract class representing an encoding gamma curve (or, more generally, transfer function).
@@ -201,7 +200,7 @@ class GammaCurve
 		 *  This static member variable caches pointers of gamma curve instances currently in use, forming the basis
 		 *  of the @c GetMatching() mechanism to avoid duplicate instances.
 		 */
-		static list<boost::weak_ptr<GammaCurve> > cache;
+		static list<weak_ptr<GammaCurve> > cache;
 
 		/**
 		 *  Mutex to guard access to @c cache.

@@ -33,9 +33,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/vfe/vfesession.h $
- * $Revision: #2 $
- * $Change: 5921 $
- * $DateTime: 2013/07/18 22:48:19 $
+ * $Revision: #3 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -522,7 +522,7 @@ namespace vfe
       // Returns a copy of the shared pointer containing the current instance
       // of a pov_frontend::Display-derived render preview instance, which may
       // be NULL.
-      virtual boost::shared_ptr<Display> GetDisplay() const;
+      virtual shared_ptr<Display> GetDisplay() const;
 
       // If a VFE implementation has provided a display creator functor via
       // vfeSession::SetDisplayCreator(), this method will call it with the
@@ -1198,7 +1198,7 @@ namespace vfe
 
       // Create an instance of the frontend ShelloutProcessing class. this handles creating and
       // managing render shellout commands, and typically will need platform-specific implementation.
-      virtual ShelloutProcessing *CreateShelloutProcessing(POVMS_Object& opts, const string& scene, uint width, uint height) { return new ShelloutProcessing(opts, scene, width, height); }
+      virtual ShelloutProcessing *CreateShelloutProcessing(POVMS_Object& opts, const string& scene, unsigned int width, unsigned int height) { return new ShelloutProcessing(opts, scene, width, height); }
 
       struct vfeSessionWorker
       {

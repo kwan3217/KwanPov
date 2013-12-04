@@ -34,9 +34,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/unix/disp.h $
- * $Revision: #3 $
- * $Change: 5944 $
- * $DateTime: 2013/07/22 09:27:03 $
+ * $Revision: #4 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -52,7 +52,7 @@ namespace pov_frontend
 	using namespace std;
 	using namespace vfe;
 
-	extern boost::shared_ptr<Display> gDisplay;
+	extern shared_ptr<Display> gDisplay;
 
 	class UnixDisplay : public vfeDisplay
 	{

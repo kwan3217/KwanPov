@@ -33,9 +33,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/vfe/win/vfeplatform.cpp $
- * $Revision: #4 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
+ * $Revision: #5 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -428,7 +428,7 @@ namespace vfePlatform
   /////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////
 
-  WinShelloutProcessing::WinShelloutProcessing(POVMS_Object& opts, const string& scene, uint width, uint height): ShelloutProcessing(opts, scene, width, height)
+  WinShelloutProcessing::WinShelloutProcessing(POVMS_Object& opts, const string& scene, unsigned int width, unsigned int height): ShelloutProcessing(opts, scene, width, height)
   {
     m_ProcessRunning = false;
     m_ProcessId = m_LastError = m_ExitCode = 0;

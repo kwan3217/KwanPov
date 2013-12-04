@@ -29,9 +29,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/source/backend/support/randomsequences.cpp $
- * $Revision: #3 $
- * $Change: 5951 $
- * $DateTime: 2013/07/23 09:45:49 $
+ * $Revision: #4 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -43,8 +43,6 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-
-#include <boost/weak_ptr.hpp>
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
@@ -62,8 +60,6 @@ using boost::uniform_int;
 using boost::uniform_real;
 using boost::variate_generator;
 using boost::mt19937;
-
-using boost::weak_ptr;
 
 #ifndef SIZE_MAX
 #define SIZE_MAX ((size_t)-1)

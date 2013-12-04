@@ -31,9 +31,9 @@
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
  * $File: //depot/clipka/upov/vfe/vfe.h $
- * $Revision: #2 $
- * $Change: 5921 $
- * $DateTime: 2013/07/18 22:48:19 $
+ * $Revision: #3 $
+ * $Change: 6157 $
+ * $DateTime: 2013/12/02 16:43:38 $
  * $Author: clipka $
  *******************************************************************************/
 
@@ -228,7 +228,7 @@ namespace vfe
       virtual bool IsPausable() ;
       virtual bool Paused() ;
       virtual bool PausePending() { return m_PauseRequested; }
-      virtual boost::shared_ptr<Display> GetDisplay() { return renderFrontend.GetDisplay(viewId); }
+      virtual shared_ptr<Display> GetDisplay() { return renderFrontend.GetDisplay(viewId); }
 
       // TODO: take care of any pending messages (e.g. a thread waiting on a blocking send)
       virtual void InvalidateBackend() { backendAddress = POVMSInvalidAddress; }
