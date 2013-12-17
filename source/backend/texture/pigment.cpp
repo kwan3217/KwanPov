@@ -25,10 +25,10 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/texture/pigment.cpp $
- * $Revision: #2 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $File: //depot/povray/smp/source/backend/texture/pigment.cpp $
+ * $Revision: #35 $
+ * $Change: 6096 $
+ * $DateTime: 2013/11/18 14:11:26 $
  * $Author: clipka $
  *******************************************************************************/
 

@@ -24,10 +24,10 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/interior/media.h $
- * $Revision: #2 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $File: //depot/povray/smp/source/backend/interior/media.h $
+ * $Revision: #21 $
+ * $Change: 6095 $
+ * $DateTime: 2013/11/18 06:02:33 $
  * $Author: clipka $
  *******************************************************************************/
 

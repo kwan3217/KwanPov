@@ -29,11 +29,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/shape/blob.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 /****************************************************************************
@@ -127,7 +127,7 @@ const DBL INSIDE_TOLERANCE = 1.0e-6;
 
 /* Ray enters/exits a component. */
 const int ENTERING = 0;
-const int EXITING  = 1;
+const int EXITING  = BLOB_ENTER_EXIT_FLAG;
 
 
 /*****************************************************************************
@@ -2545,9 +2545,11 @@ int Blob::Make_Blob(DBL threshold, Blob_List_Struct *BlobList, int npoints, Trac
 		if (temp->elem.Type & BLOB_CYLINDER)
 			count += 2;
 
+#ifdef MAX_BLOB_COMPONENTS
 	/* Test for too many components. [DB 12/94] */
 	if (count >= MAX_BLOB_COMPONENTS)
 		throw POV_EXCEPTION_STRING("There are more than the maximum supported components in a blob.");
+#endif
 
 	/* Initialize the blob data. */
 
@@ -3258,9 +3260,11 @@ void Blob::Create_Blob_Element_Texture_List(Blob_List_Struct *BlobList, int npoi
 		if (bl->elem.Type & BLOB_CYLINDER)
 			count += 2;
 
+#ifdef MAX_BLOB_COMPONENTS
 	/* Test for too many components. [DB 12/94] */
 	if (count >= MAX_BLOB_COMPONENTS)
 		throw POV_EXCEPTION_STRING("There are more than the maximum supported components in a blob.");
+#endif
 
 	Data = new Blob_Data (count) ;
 

@@ -11,10 +11,10 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/vm/fncode.cpp $
- * $Revision: #4 $
- * $Change: 6114 $
- * $DateTime: 2013/11/20 20:51:05 $
+ * $File: //depot/povray/smp/source/backend/vm/fncode.cpp $
+ * $Revision: #23 $
+ * $Change: 6113 $
+ * $DateTime: 2013/11/20 20:39:54 $
  * $Author: clipka $
  *******************************************************************************/
 

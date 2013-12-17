@@ -40,7 +40,7 @@
  * This file is distributed as part of:
  *
  * UberPOV Raytracer version 1.37.
- * Partial Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.

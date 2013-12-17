@@ -8,7 +8,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Partial Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -33,11 +33,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/unix/disp.h $
- * $Revision: #3 $
- * $Change: 5944 $
- * $DateTime: 2013/07/22 09:27:03 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #ifndef _DISP_H
@@ -52,7 +52,7 @@ namespace pov_frontend
 	using namespace std;
 	using namespace vfe;
 
-	extern boost::shared_ptr<Display> gDisplay;
+	extern shared_ptr<Display> gDisplay;
 
 	class UnixDisplay : public vfeDisplay
 	{

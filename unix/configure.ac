@@ -5,7 +5,7 @@
 #
 # ---------------------------------------------------------------------------
 # UberPOV Raytracer version 1.37.
-# Partial Copyright 2013 Christoph Lipka.
+# Portions Copyright 2013 Christoph Lipka.
 #
 # UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 # subject to the same licensing terms and conditions.
@@ -30,11 +30,11 @@
 # DKBTrace was originally written by David K. Buck.
 # DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 #---------------------------------------------------------------------------
-# $File: //depot/clipka/upov/unix/configure.ac $
-# $Revision: #6 $
-# $Change: 6087 $
-# $DateTime: 2013/11/11 03:53:39 $
-# $Author: clipka $
+# $File: N/A $
+# $Revision: N/A $
+# $Change: N/A $
+# $DateTime: N/A $
+# $Author: N/A $
 # $Log$
 ##############################################################################
 
@@ -175,7 +175,7 @@ Environment
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE([1.9 dist-bzip2])
+AM_INIT_AUTOMAKE([1.9 dist-bzip2 subdir-objects])
 AM_MAINTAINER_MODE
 
 AX_FIX_INCORRECT_PATH(C_INCLUDE_PATH, ".", [pov_warn_path="$pov_warn_path C_INCLUDE_PATH"])
@@ -1007,8 +1007,8 @@ AC_DEFINE_UNQUOTED([BUILTIN_XWIN_DISPLAY], ["$pov_xwin_msg"], [X Window display.
 AC_DEFINE_UNQUOTED([BUILTIN_IMG_FORMATS], ["$pov_img_fmt_builtin $pov_img_fmt_enabled"], [Supported image formats.])
 AC_DEFINE_UNQUOTED([MISSING_IMG_FORMATS], ["$pov_img_fmt_disabled"], [Unsupported image formats.])
 
-povowner=`stat -c %u ${HOME}`
-povgroup=`stat -c %g ${HOME}`
+povowner=`stat --format=%u ${HOME} || stat -f %u ${HOME}`
+povgroup=`stat --format=%g ${HOME} || stat -f %g ${HOME}`
 AC_SUBST([povowner])
 AC_SUBST([povgroup])
 
