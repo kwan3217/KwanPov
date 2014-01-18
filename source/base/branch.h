@@ -40,7 +40,7 @@
 #define BRANCH_FULL_NAME        "UberPOV Raytracer"
 #define BRANCH_MAINTAINER       "Christoph Lipka"
 #define BRANCH_CONTACT          "http://www.lipka-koeln.de"
-#define BRANCH_VERSION          "1.37-dev"
+#define BRANCH_VERSION          "1.37.0.0-beta.4"
 #define BRANCH_COPYRIGHT        "Copyright 2013 Christoph Lipka."
 
 #define BRANCH_DEVELOPERS       "Christoph Lipka" // alphabetically ordered comma-separated list of strings, e.g. , "John Doe", "Frank N. Furter"
