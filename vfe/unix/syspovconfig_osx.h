@@ -1,5 +1,8 @@
 /*******************************************************************************
- * imagemessagehandler.h
+ * syspovconfig_osx.h
+ *
+ * This file contains Unix flavor-specific defines for compiling the VFE
+ * on MAC OS X systems.
  *
  * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
@@ -22,45 +25,37 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/povray/smp/source/frontend/imagemessagehandler.h $
- * $Revision: #17 $
- * $Change: 6086 $
- * $DateTime: 2013/11/10 10:34:40 $
+ * $File: //depot/povray/smp/vfe/unix/syspovconfig_osx.h $
+ * $Revision: #3 $
+ * $Change: 6148 $
+ * $DateTime: 2013/11/30 04:25:45 $
  * $Author: clipka $
  *******************************************************************************/
 
-#ifndef POVRAY_FRONTEND_IMAGEMESSAGEHANDLER_H
-#define POVRAY_FRONTEND_IMAGEMESSAGEHANDLER_H
+#ifndef __SYSPOVCONFIG_OSX_H__
+#define __SYSPOVCONFIG_OSX_H__
 
-#include "base/types.h"
+#include <unistd.h>
 
-#include "frontend/configfrontend.h"
-#include "frontend/renderfrontend.h"
+// TODO - someone needs to verify that off_t is indeed always 64 bit on Mac OS X
+#define lseek64(handle,offset,whence) lseek(handle,offset,whence)
 
-#include <vector>
-#include <list>
-#include <map>
+// TODO - the POV_LONG stuff is just copied from the Posix settings; someone needs to test this on OS X.
+#if defined(_POSIX_V6_LPBIG_OFFBIG) || defined(_POSIX_V6_LP64_OFF64)
+	// long is at least 64 bits.
+	#define POV_LONG long
+#elif defined(_POSIX_V6_ILP32_OFFBIG) || defined(_POSIX_V6_ILP32_OFF32)
+	// long is 32 bits.
+	#define POV_LONG long long
+#else
+	// Unable to detect long size at compile-time, assuming less than 64 bits.
+	#define POV_LONG long long
+#endif
 
-namespace pov_frontend
-{
+// The following macros are deliberately left undefined; POV-Ray will use boost as a fallback there:
+//  DECLARE_THREAD_LOCAL_PTR(ptrType, ptrName)
+//  IMPLEMENT_THREAD_LOCAL_PTR(ptrType, ptrName, ignore)
+//  GET_THREAD_LOCAL_PTR(ptrName)
+//  SET_THREAD_LOCAL_PTR(ptrName, ptrValue)
 
-using namespace pov_base;
-
-class ImageMessageHandler
-{
-	public:
-		ImageMessageHandler();
-		virtual ~ImageMessageHandler();
-
-		void HandleMessage(const SceneData&, const ViewData&, POVMSType, POVMS_Object&);
-	protected:
-		virtual void DrawPixelSet(const SceneData&, const ViewData&, POVMS_Object&, bool final);
-		virtual void DrawPixelBlockSet(const SceneData&, const ViewData&, POVMS_Object&, bool final);
-		virtual void DrawPixelRowSet(const SceneData&, const ViewData&, POVMS_Object&, bool final);
-		virtual void DrawRectangleFrameSet(const SceneData&, const ViewData&, POVMS_Object&, bool final);
-		virtual void DrawFilledRectangleSet(const SceneData&, const ViewData&, POVMS_Object&, bool final);
-};
-
-}
-
-#endif // POVRAY_FRONTEND_IMAGEMESSAGEHANDLER_H
+#endif

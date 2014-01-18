@@ -22,7 +22,16 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * ---------------------------------------------------------------------------
+ * POV-Ray is based on the popular DKB raytracer version 2.12.
+ * DKBTrace was originally written by David K. Buck.
+ * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
+ * ---------------------------------------------------------------------------
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *********************************************************************************/
 
 /*
@@ -155,8 +164,11 @@ Image *Read (IStream *file, const Image::ReadOptions& options, bool IsPOTFile)
 				}
 
 				/* Check "interlaced" bit. */
-				if ((buffer[9] & 0x40) != 0)
+				if ((buffer[8] & 0x40) != 0)
 					throw POV_EXCEPTION(kFileDataErr, "Interlacing in GIF image unsupported");
+				/* Check for local palette */
+				if ((buffer[8] & 0x80) != 0)
+					throw POV_EXCEPTION(kFileDataErr, "Image block with local palette in GIF image unsupported");
 
 				width  = (int) buffer[4] | ((int) buffer[5] << 8);
 				height = (int) buffer[6] | ((int) buffer[7] << 8);

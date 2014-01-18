@@ -26,11 +26,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/math/hcmplx.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -39,8 +39,6 @@
 #include "backend/shape/fractal.h" // TODO - Where should hcmplx.h/hcmplx.cpp go? Are they really math? [trf]
 #include "backend/shape/spheres.h" // TODO - Move sphere intersection function to math code! [trf]
 #include "backend/math/hcmplx.h"
-
-#include "hcmplx.h" // own include
 
 // this must be the last file included
 #include "base/povdebug.h"
@@ -208,9 +206,9 @@ int Iteration_HCompl(const VECTOR IPoint, const Fractal *HCompl, DBL **IterStack
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Z];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 
@@ -273,9 +271,9 @@ int D_Iteration_HCompl(const VECTOR IPoint, const Fractal *HCompl, const VECTOR&
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Z];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 
@@ -465,9 +463,9 @@ int Iteration_HCompl_z3(const VECTOR IPoint, const Fractal *HCompl, DBL **IterSt
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Z];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 
@@ -528,9 +526,9 @@ int D_Iteration_HCompl_z3(const VECTOR IPoint, const Fractal *HCompl, const VECT
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Z];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 
@@ -708,9 +706,9 @@ int Iteration_HCompl_Reciprocal(const VECTOR IPoint, const Fractal *HCompl, DBL 
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Z];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 
@@ -769,9 +767,9 @@ int D_Iteration_HCompl_Reciprocal(const VECTOR IPoint, const Fractal *HCompl, co
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Z];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 
@@ -943,9 +941,9 @@ int Iteration_HCompl_Func(const VECTOR IPoint, const Fractal *HCompl, DBL **Iter
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Y];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 
@@ -1004,9 +1002,9 @@ int D_Iteration_HCompl_Func(const VECTOR IPoint, const Fractal *HCompl, const VE
 	y = IterStack[Y][0] = IPoint[Y];
 	z = IterStack[Z][0] = IPoint[Z];
 	w = IterStack[W][0] = (HCompl->SliceDist
-	                - HCompl->Slice[X]*x
-	                - HCompl->Slice[Y]*y
-	                - HCompl->Slice[Z]*z)/HCompl->Slice[T];
+	                     - HCompl->Slice[X]*x
+	                     - HCompl->Slice[Y]*y
+	                     - HCompl->Slice[Z]*z)/HCompl->Slice[T];
 
 	Exit_Value = HCompl->Exit_Value;
 

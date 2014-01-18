@@ -2,12 +2,6 @@
  * types.h
  *
  * ---------------------------------------------------------------------------
- * UberPOV Raytracer version 1.37.
- * Partial Copyright 2013 Christoph Lipka.
- *
- * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
- * subject to the same licensing terms and conditions.
- * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -28,10 +22,10 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/base/types.h $
- * $Revision: #3 $
- * $Change: 6103 $
- * $DateTime: 2013/11/19 19:43:57 $
+ * $File: //depot/povray/smp/source/base/types.h $
+ * $Revision: #42 $
+ * $Change: 6089 $
+ * $DateTime: 2013/11/11 09:18:35 $
  * $Author: clipka $
  *******************************************************************************/
 

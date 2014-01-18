@@ -6,7 +6,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Partial Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -696,14 +696,14 @@ class Vector3d
 		// returns an arbitrary unit-length vector perpendicular to this one
 		Vector3d orthogonal()
 		{
-			if ((abs(vect[X]) < abs(vect[Y])) && (abs(vect[X]) < abs(vect[Z])))
-				// x component is smallest; compute cross product with X axis (which boils down to the following formula)
+			if ((abs(vect[X]) <= abs(vect[Y])) && (abs(vect[X]) <= abs(vect[Z])))
+				// x component is (one of) the smallest; compute cross product with X axis (which boils down to the following formula)
 				return Vector3d(0,vect[Z],-vect[Y]).normalized();
-			else if ((abs(vect[Y]) < abs(vect[X])) && (abs(vect[Y]) < abs(vect[Z])))
-				// y component is smallest; compute cross product with Y axis (which boils down to the following formula)
+			else if ((abs(vect[Y]) <= abs(vect[X])) && (abs(vect[Y]) <= abs(vect[Z])))
+				// y component is (one of) the smallest; compute cross product with Y axis (which boils down to the following formula)
 				return Vector3d(-vect[Z],0,vect[X]).normalized();
 			else
-				// z component is smallest (or all are of same length); compute cross product with Z axis (which boils down to the following formula)
+				// z component is the smallest; compute cross product with Z axis (which boils down to the following formula)
 				return Vector3d(vect[Y],-vect[X],0).normalized();
 		}
 

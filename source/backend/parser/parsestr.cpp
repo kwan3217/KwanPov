@@ -5,7 +5,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Partial Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -30,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/parser/parsestr.cpp $
- * $Revision: #3 $
- * $Change: 5944 $
- * $DateTime: 2013/07/22 09:27:03 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #include <stdlib.h>
@@ -496,7 +496,7 @@ UCS2 *Parser::Parse_Datetime(bool pathname)
 		CASE(RIGHT_PAREN_TOKEN)
 			CallFree = false;
 			// we use GMT as some platforms (e.g. windows) have different ideas of what to print when handling '%z'.
-			FormatStr = "%Y-%m-%d %H:%M:%SZ";
+			FormatStr = (char *)"%Y-%m-%d %H:%M:%SZ";
 			EXIT
 		END_CASE
 
@@ -504,7 +504,7 @@ UCS2 *Parser::Parse_Datetime(bool pathname)
 			UNGET
 			CallFree = true;
 			FormatStr = Parse_C_String(pathname);
-			if (strlen(FormatStr) == 0)
+			if (FormatStr[0] == '\0')
 			{
 				POV_FREE(FormatStr);
 				Error("Empty format string.");
@@ -540,7 +540,7 @@ UCS2 *Parser::Parse_Datetime(bool pathname)
 			throw;
 		vlen = 0;
 	}
-	if ((vlen == PARSE_NOW_VAL_LENGTH)) // on error: max for libc 4.4.1 & before
+	if (vlen == PARSE_NOW_VAL_LENGTH) // on error: max for libc 4.4.1 & before
 		vlen = 0; // return an empty string on error (content of val[] is undefined)
 	val[vlen]='\0'; // whatever, that operation is now safe (and superflous except for error)
 

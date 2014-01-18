@@ -24,11 +24,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/shape/blob.h $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #ifndef BLOB_H
@@ -45,8 +45,8 @@ namespace pov
 
 #define BLOB_OBJECT (STURM_OK_OBJECT+HIERARCHY_OK_OBJECT)
 
-/* Do not use the first bit!!! (Used for enter/exit in intersection test) */
-
+// TODO - the following values probably don't have to be all discrete bits, except for BLOB_ENTER_EXIT_FLAG
+#define BLOB_ENTER_EXIT_FLAG      1 // internal use only
 #define BLOB_SPHERE               2
 #define BLOB_CYLINDER             4
 #define BLOB_ELLIPSOID            8
@@ -57,8 +57,8 @@ namespace pov
 
 
 /* Define max. number of blob components. */
-
-#define MAX_BLOB_COMPONENTS 1000000
+// [CLi] un-comment the following line if you want a hard limit of blob components; should be obsolete by now.
+// #define MAX_BLOB_COMPONENTS 1000000
 
 /* Generate additional blob statistics. */
 
