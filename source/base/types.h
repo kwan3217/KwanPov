@@ -60,6 +60,29 @@ inline T clip(T val, T minv, T maxv)
 		return val;
 }
 
+
+// TODO - some runtime environments already provide the following function (with a different name),
+// so we may want to move this into the platform specific section.
+/// Test whether a floating-point value is numeric (finite or infinite).
+template<typename T>
+inline bool isNumeric(T x)
+{
+	// We're exploiting the fact that NaNs are not equal to anything, not even themselves.
+	// Note that infinites
+	return (x == x);
+}
+
+// TODO - some runtime environments already provide the following function (with a different name),
+// so we may want to move this into the platform specific section.
+/// Test whether a floating-point value is finite.
+template<typename T>
+inline bool isFinite(T x)
+{
+	return (x >= -numeric_limits<T>::max()) &&
+	       (x <=  numeric_limits<T>::max());
+}
+
+
 // force a value's precision to a given type, even if computations are normally done with extended precision
 // (such as GNU Linux on 32-bit CPU, which uses 80-bit extended double precision)
 // TODO - we might make this code platform-specific

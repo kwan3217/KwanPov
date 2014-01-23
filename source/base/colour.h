@@ -211,6 +211,26 @@ class GenericColour
 		static T FTtoA(T /*f*/, T t) { return 1.0f - t; }
 		T FTtoA() const { return 1.0f - colour[TRANSM]; }
 
+		bool isNumeric() const
+		{
+			return pov_base::isNumeric(colour[RED]) &&
+			       pov_base::isNumeric(colour[GREEN]) &&
+			       pov_base::isNumeric(colour[BLUE]) &&
+			       pov_base::isNumeric(colour[FILTER]) &&
+			       pov_base::isNumeric(colour[TRANSM]);
+		}
+
+		bool isFinite() const
+		{
+			return pov_base::isFinite(colour[RED]) &&
+			       pov_base::isFinite(colour[GREEN]) &&
+			       pov_base::isFinite(colour[BLUE]) &&
+			       pov_base::isFinite(colour[FILTER]) &&
+			       pov_base::isFinite(colour[TRANSM]);
+		}
+
+		inline bool isSane() const { return isFinite(); }
+
 		void clear()
 		{
 			colour[RED] = 0.0;
@@ -388,6 +408,7 @@ class GenericColour
 			colour[TRANSM] /= b;
 			return *this;
 		}
+
 	private:
 		DATA colour;
 };
@@ -571,6 +592,29 @@ class GenericRGBColour
 
 		bool isZero() const { return (colour[RED] == 0) && (colour[GREEN] == 0) && (colour[BLUE] == 0); }
 
+		bool isNumeric() const
+		{
+			return pov_base::isNumeric(colour[RED]) &&
+			       pov_base::isNumeric(colour[GREEN]) &&
+			       pov_base::isNumeric(colour[BLUE]);
+		}
+
+		bool isFinite() const
+		{
+			return pov_base::isFinite(colour[RED]) &&
+			       pov_base::isFinite(colour[GREEN]) &&
+			       pov_base::isFinite(colour[BLUE]);
+		}
+
+		inline bool isSane() const { return isFinite(); }
+
+		template<typename T_INT>
+		inline void sanitize(T_INT& v)
+		{
+			if (sanitize())
+				++ v;
+		}
+
 		void clear()
 		{
 			colour[RED] = 0.0;
@@ -707,6 +751,7 @@ class GenericRGBColour
 			colour[BLUE] /= b;
 			return *this;
 		}
+
 	private:
 		DATA colour;
 };

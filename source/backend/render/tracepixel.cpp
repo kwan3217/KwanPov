@@ -283,8 +283,11 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, Colour& colour,
 				}
 				ray.subFrameTime = ticket.subFrameTime;
 				TraceRay(ray, col, 1.0, ticket, false, camera.Max_Ray_Distance);
-				colour += col;
-				numTraced++;
+				if (col.isSane())
+				{
+					colour += col;
+					numTraced++;
+				}
 			}
 		}
 		if (numTraced)
@@ -949,6 +952,7 @@ void TracePixel::InitRayContainerStateTree(Ray& ray, BBOX_TREE *node)
 void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, DBL height, unsigned int siblingRays)
 {
 	int nr;     // Number of current samples.
+	int numTraced; // Number of rays that returned a valid colour.
 	int level;  // Index into number of samples list.
 	int max_s;  // Number of samples to take before next confidence test.
 	int dxi, dyi;
@@ -967,6 +971,7 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 	S2.clear();
 
 	nr = 0;
+	numTraced = 0;
 	level = 0;
 
 	if (siblingRays > 0)
@@ -1031,25 +1036,30 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 				}
 				ray.subFrameTime = ticket.subFrameTime;
 				TraceRay(ray, C, 1.0, ticket, false, camera.Max_Ray_Distance);
-
-				colour += C;
 			}
 			else
 				C = Colour(0.0, 0.0, 0.0, 0.0, 1.0);
 
-			// Add color to color sum.
+			if (C.isSane())
+			{
+				colour += C;
+				numTraced ++;
 
-			S1.red()    += C.red();
-			S1.green()  += C.green();
-			S1.blue()   += C.blue();
-			S1.transm() += C.transm();
+				// Add color to color sum.
 
-			// Add color to squared color sum.
+				S1.red()    += C.red();
+				S1.green()  += C.green();
+				S1.blue()   += C.blue();
+				S1.transm() += C.transm();
 
-			S2.red()    += Sqr(C.red());
-			S2.green()  += Sqr(C.green());
-			S2.blue()   += Sqr(C.blue());
-			S2.transm() += Sqr(C.transm());
+				// Add color to squared color sum.
+
+				S2.red()    += Sqr(C.red());
+				S2.green()  += Sqr(C.green());
+				S2.blue()   += Sqr(C.blue());
+				S2.transm() += Sqr(C.transm());
+
+			}
 
 			nr ++;
 			seed2 = (seed2 + 1) % camera.Blur_Samples;
@@ -1057,32 +1067,36 @@ void TracePixel::TraceRayWithFocalBlur(Colour& colour, DBL x, DBL y, DBL width, 
 
 		// Get variance of samples.
 
-		n = (DBL)nr;
+		if (numTraced > 0)
+		{
+			n = (DBL)numTraced;
 
-		V1.red()    = (S2.red()    - Sqr(S1.red())    / n) / Sqr(n);
-		V1.green()  = (S2.green()  - Sqr(S1.green())  / n) / Sqr(n);
-		V1.blue()   = (S2.blue()   - Sqr(S1.blue())   / n) / Sqr(n);
-		V1.transm() = (S2.transm() - Sqr(S1.transm()) / n) / Sqr(n);
-		// TODO - the above is *not* actually the variance; the proper formula for that would be:
-		// V1       = (S2          - Sqr(S1)          / n) / (n-1);
-		// There might be something fishy here.
+			V1.red()    = (S2.red()    - Sqr(S1.red())    / n) / Sqr(n);
+			V1.green()  = (S2.green()  - Sqr(S1.green())  / n) / Sqr(n);
+			V1.blue()   = (S2.blue()   - Sqr(S1.blue())   / n) / Sqr(n);
+			V1.transm() = (S2.transm() - Sqr(S1.transm()) / n) / Sqr(n);
+			// TODO - the above is *not* actually the variance; the proper formula for that would be:
+			// V1       = (S2          - Sqr(S1)          / n) / (n-1);
+			// There might be something fishy here.
 
-		// Exit if samples are likely too be good enough.
+			// Exit if samples are likely too be good enough.
 
-		double threshold  = focalBlurData->Sample_Threshold[nr - 1];
-		double brightness = S1.greyscale() / n;
-		if (brightness > 1.0)
-			// for pixels with excessive brightness, use a relative threshold rather than an absolute one
-			threshold = threshold * Sqr(brightness);
+			double threshold  = focalBlurData->Sample_Threshold[nr - 1];
+			double brightness = S1.greyscale() / n;
+			if (brightness > 1.0)
+				// for pixels with excessive brightness, use a relative threshold rather than an absolute one
+				threshold = threshold * Sqr(brightness);
 
-		if((nr >= minSamples) &&
-		   (V1.red()  < threshold) && (V1.green()  < threshold) &&
-		   (V1.blue() < threshold) && (V1.transm() < threshold))
-			break;
+			if((nr >= minSamples) &&
+			   (V1.red()  < threshold) && (V1.green()  < threshold) &&
+			   (V1.blue() < threshold) && (V1.transm() < threshold))
+				break;
+		}
 	}
 	while(nr < maxSamples);
 
-	colour /= (DBL)nr;
+	if (numTraced > 0)
+		colour /= (DBL)numTraced;
 }
 
 void TracePixel::JitterCameraRay(Ray& ray, DBL x, DBL y, size_t ray_number)

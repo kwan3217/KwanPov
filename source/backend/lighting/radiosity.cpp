@@ -578,8 +578,8 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
 		ticket.radiosityRecursionDepth--;
 		ticket.alphaBackground = alphaBackground;
 
-		// only post-process the current sample ray if it has the appropriate importance
-		if (ticket.radiosityImportanceFound >= ticket.radiosityImportanceQueried)
+		// only post-process the current sample ray if it has the appropriate importance (and hasn't returned a bogus colour)
+		if ((ticket.radiosityImportanceFound >= ticket.radiosityImportanceQueried)  && temp_colour.isSane())
 		{
 			DBL quality = ticket.radiosityQuality;
 			if (ticket.radiosityImportanceFound < 1.0)
