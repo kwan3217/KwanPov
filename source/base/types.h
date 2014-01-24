@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 #include "base/configbase.h"
 
@@ -78,8 +79,8 @@ inline bool isNumeric(T x)
 template<typename T>
 inline bool isFinite(T x)
 {
-	return (x >= -numeric_limits<T>::max()) &&
-	       (x <=  numeric_limits<T>::max());
+	return (x >= -std::numeric_limits<T>::max()) &&
+	       (x <=  std::numeric_limits<T>::max());
 }
 
 
