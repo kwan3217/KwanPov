@@ -68,8 +68,7 @@ inline T clip(T val, T minv, T maxv)
 template<typename T>
 inline bool isNumeric(T x)
 {
-	// We're exploiting the fact that NaNs are not equal to anything, not even themselves.
-	// Note that infinites
+	// We're exploiting the fact that NaNs (and only those) are not equal to anything, not even themselves.
 	return (x == x);
 }
 
