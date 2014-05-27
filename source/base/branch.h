@@ -41,10 +41,24 @@
 #define BRANCH_MAINTAINER       "Christoph Lipka"
 #define BRANCH_CONTACT          "http://www.lipka-koeln.de"
 #define BRANCH_VERSION          "1.37-dev"
-#define BRANCH_COPYRIGHT        "Copyright 2013 Christoph Lipka."
+#define BRANCH_COPYRIGHT        "Copyright 2013-2014 Christoph Lipka."
 
-#define BRANCH_DEVELOPERS       "Christoph Lipka" // alphabetically ordered comma-separated list of strings, e.g. , "John Doe", "Frank N. Furter"
-//#define BRANCH_CONTRIBUTORS     // alphabetically ordered comma-separated list of strings, e.g. , "John Doe", "Frank N. Furter"
+///
+/// Primary developers of this branch, in alphabetical order.
+/// Comma-separated list of strings, e.g. @code
+///     #define BRANCH_DEVELOPERS "John Doe", "Frank N. Furter", "R. Daneel Olivaw"
+/// @endcode.
+///
+#define BRANCH_DEVELOPERS       "Christoph Lipka"
+
+///
+/// Additional contributors to this branch, in alphabetical order.
+/// Comma-separated list of strings, e.g. @code
+///     #define BRANCH_CONTRIBUTORS "John Doe", "Frank N. Furter", "R. Daneel Olivaw"
+/// @endcode.
+/// Leave undefined if there are no additional contributors.
+///
+#define BRANCH_CONTRIBUTORS     "Christian Froeschlin"
 
 
 // TODO FIXME - as long as it doesn't have its own installer and set of distribution files,
@@ -57,6 +71,34 @@
 #define PATHKEY     "POV-Ray"
 #define PATHVERKEY  "v3.7"
 
+
+///
+/// *************************************************************************************************************
+///
+/// @name Patches With Notable Limitations
+///
+/// The following macros enable patches which have known noteworthy limitations.
+///
+/// @{
+///
+
+///
+/// Experimental patch providing a mechanism to persist data between frames in an animation.
+/// Kudos to Christian Froeschlin, who published the basis for this patch on the povray.unofficial.patches newsgroup.
+///
+/// @note     This patch will also persist data between successive renders in a GUI.
+///           Currently, no mechanism has been implemented to force cleanup of persistent data from the GUI.
+///           Cleanup from SDL can be achieved using the @c #undef statement.
+///
+/// @warning  This patch requires parsing to be single-threaded.
+///
+#define EXPERIMENTAL_UPOV_PERSISTENT 1
+
+///
+/// @}
+///
+/// *************************************************************************************************************
+///
 
 #ifndef BRANCH_BUILD_IS_OFFICIAL
 #define BRANCH_BUILD_IS_OFFICIAL 0

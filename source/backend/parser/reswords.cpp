@@ -406,6 +406,9 @@ const RESERVED_WORD Reserved_Words[LAST_TOKEN] = {
 	{PAVEMENT_TOKEN, "pavement"},
 	{PERCENT_TOKEN, "%"},
 	{PERIOD_TOKEN, ". (period)"},
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	{PERSISTENT_TOKEN, "persistent"},
+#endif
 	{PERSPECTIVE_TOKEN, "perspective"},
 	{PGM_TOKEN, "pgm"},
 	{PHASE_TOKEN, "phase"},

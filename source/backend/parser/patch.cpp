@@ -58,6 +58,12 @@ static const Patch_Data patch_data[] = {
 	{ "upov-file_time",            0.90 }, // UberPOV-style file_time function
 	{ "upov-read-text",            1.00 }, // UberPOV-style plaintext reading
 	{ "upov-reflection-roughness", 0.90 }, // UberPOV-style blurred reflections
+
+// switchable patches
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	{ "upov-persistent",           0.10 }, // UberPOV-style persistent data between animation frames
+#endif
+
 	/*
 	{ "upov-backscatter",          0.10 }, // UberPOV-style support for backscattering (cat's eye effect)
 	{ "upov-finish",               0.10 }, // UberPOV-style alternative finish syntax

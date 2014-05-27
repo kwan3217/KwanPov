@@ -30,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/parser/parse.cpp $
- * $Revision: #8 $
- * $Change: 6126 $
- * $DateTime: 2013/11/23 21:08:40 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #include <cctype>
@@ -109,6 +109,9 @@ namespace pov
 
 const DBL INFINITE_VOLUME = BOUND_HUGE;
 
+#if EXPERIMENTAL_UPOV_PERSISTENT
+Parser::SYM_TABLE* Parser::persistent_symbols = NULL;
+#endif
 
 /*****************************************************************************
 *
@@ -190,12 +193,12 @@ void Parser::Run()
 				if(i->second[0] == '\"')
 				{
 					string tmp(i->second, 1, i->second.length() - 2);
-					Temp_Entry = Add_Symbol(1, const_cast<char *>(i->first.c_str()), STRING_ID_TOKEN);
+					Temp_Entry = Add_Symbol(SYM_TABLE_GLOBAL, const_cast<char *>(i->first.c_str()), STRING_ID_TOKEN);
 					Temp_Entry->Data = String_To_UCS2(const_cast<char *>(tmp.c_str()), false);
 				}
 				else
 				{
-					Temp_Entry = Add_Symbol(1, const_cast<char *>(i->first.c_str()), FLOAT_ID_TOKEN);
+					Temp_Entry = Add_Symbol(SYM_TABLE_GLOBAL, const_cast<char *>(i->first.c_str()), FLOAT_ID_TOKEN);
 					Temp_Entry->Data = Create_Float();
 					*(reinterpret_cast<DBL *>(Temp_Entry->Data)) = atof(i->second.c_str());
 				}
@@ -307,9 +310,14 @@ void Parser::Run()
 		if(Experimental_Flag & EF_SSLT)
 			strcat(str, str [0] ? ", subsurface light transport" : "subsurface light transport") ;
 
+#if EXPERIMENTAL_UPOV_PERSISTENT
+		if(Experimental_Flag & EF_UPOV_PERSISTENT)
+			strcat(str, str [0] ? ", persistent data" : "persistent data") ;
+#endif
+
 		Warning(0, "This rendering uses the following experimental feature(s): %s.\n"
 		           "The design and implementation of these features is likely to change in future\n"
-		           "versions of POV-Ray. Backward compatibility with the current implementation is\n"
+		           "versions of " BRANCH_NAME ". Backward compatibility with the current implementation is\n"
 		           "not guaranteed.",
 		           str);
 	}
@@ -8294,12 +8302,13 @@ ObjectPtr Parser::Parse_Object_Id ()
 *
 ******************************************************************************/
 
-void Parser::Parse_Declare(bool is_local, bool after_hash)
+void Parser::Parse_Declare(bool after_hash)
 {
 	bool deprecated = false;
 	bool deprecated_once = false;
+	bool is_local;
 	int Previous=-1;
-	int Local_Index,Local_Flag;
+	int Local_Index;
 	SYM_ENTRY *Temp_Entry = NULL;
 	bool allow_redefine = true;
 	UCS2 *deprecation_message;
@@ -8312,14 +8321,22 @@ void Parser::Parse_Declare(bool is_local, bool after_hash)
 		              "Future versions may not support 'declare' and may require '#declare'.");
 	}
 
-	Local_Flag=(Token.Token_Id==LOCAL_TOKEN);
-	if (Local_Flag)
+	switch (Token.Token_Id)
 	{
-		Local_Index=Table_Index;
-	}
-	else
-	{
-		Local_Index=1;
+		case LOCAL_TOKEN:
+			Local_Index = Table_Index;
+			is_local = true;
+			break;
+#if EXPERIMENTAL_UPOV_PERSISTENT
+		case PERSISTENT_TOKEN:
+			Local_Index = SYM_TABLE_PERSISTENT;
+			is_local = false;
+			break;
+#endif
+		default:
+			Local_Index = SYM_TABLE_GLOBAL;
+			is_local = false;
+			break;
 	}
 
 	LValue_Ok = true;
@@ -8381,7 +8398,7 @@ void Parser::Parse_Declare(bool is_local, bool after_hash)
 		CASE4 (VECTOR_4D_ID_TOKEN, RAINBOW_ID_TOKEN, FOG_ID_TOKEN, SKYSPHERE_ID_TOKEN)
 		CASE2 (MATERIAL_ID_TOKEN, SPLINE_ID_TOKEN )
 			allow_redefine  = !Token.is_array_elem;
-			if (Local_Flag && (Token.Table_Index != Table_Index))
+			if (is_local && (Token.Table_Index != Table_Index))
 			{
 				Temp_Entry = Add_Symbol (Local_Index,Token.Token_String,IDENTIFIER_TOKEN);
 				Token.NumberPtr = &(Temp_Entry->Token_Number);
@@ -8407,7 +8424,7 @@ void Parser::Parse_Declare(bool is_local, bool after_hash)
 			{
 				case VECTOR_ID_TOKEN:
 				case FLOAT_ID_TOKEN:
-					if (Local_Flag && (Token.Table_Index != Table_Index))
+					if (is_local && (Token.Table_Index != Table_Index))
 					{
 						Temp_Entry = Add_Symbol (Local_Index,Token.Token_String,IDENTIFIER_TOKEN);
 						Token.NumberPtr = &(Temp_Entry->Token_Number);
@@ -8655,7 +8672,7 @@ int Parser::Parse_RValue (int Previous, int *NumberPtr, void **DataPtr, SYM_ENTR
 				}
 			}
 			if (symbol_entry)
-				Release_Entry_Reference(Token.Table_Index, symbol_entry);
+				Release_Entry_Reference(symbol_entry, Token.Table_Index != SYM_TABLE_RESERVED);
 
 			// allow #declares again
 			Ok_To_Declare = true;

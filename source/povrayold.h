@@ -107,6 +107,10 @@ using namespace pov_base;
 #define EF_BACKILL 32
 #define EF_MESHCAM 64
 
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	#define EF_UPOV_PERSISTENT 16384
+#endif
+
 #define BF_VIDCAP  1
 #define BF_RTR     2
 

@@ -296,7 +296,7 @@ class Parser : public Task
 		ObjectPtr Parse_Object (void);
 		void Parse_Bound_Clip (vector<ObjectPtr>& objects, bool notexture = true);
 		void Parse_Default (void);
-		void Parse_Declare (bool is_local, bool after_hash);
+		void Parse_Declare (bool after_hash);
 		void Parse_Matrix (MATRIX Matrix);
 		void Destroy_Ident_Data (void *Data, int Type);
 		int Parse_RValue (int Previous, int *NumberPtr, void **DataPtr, SYM_ENTRY *sym, bool ParFlag, bool SemiFlag, bool is_local, bool allow_redefine, int old_table_index);
@@ -332,10 +332,10 @@ class Parser : public Task
 		SYM_ENTRY *Add_Symbol (int Index,const char *Name,TOKEN Number);
 		void Destroy_Macro (POV_MACRO *PMac);
 		POV_ARRAY *Parse_Array_Declare (void);
-		SYM_ENTRY *Create_Entry (int Index,const char *Name,TOKEN Number);
+		SYM_ENTRY *Create_Entry (const char *Name,TOKEN Number, bool copyString = true);
 		void Acquire_Entry_Reference (SYM_ENTRY *Entry);
-		void Release_Entry_Reference (int Index, SYM_ENTRY *Entry);
-		SYM_ENTRY *Destroy_Entry (int Index,SYM_ENTRY *Entry);
+		void Release_Entry_Reference (SYM_ENTRY *Entry, bool releaseString = true);
+		SYM_ENTRY *Destroy_Entry (SYM_ENTRY *Entry, bool releaseString = true);
 		int Parse_Ifdef_Param (void);
 		int Parse_For_Param (char**, DBL*, DBL*);
 
@@ -464,6 +464,10 @@ class Parser : public Task
 		};
 
 		SYM_TABLE *Tables[MAX_NUMBER_OF_TABLES];
+
+#if EXPERIMENTAL_UPOV_PERSISTENT
+		static SYM_TABLE *persistent_symbols;
+#endif
 
 		int Table_Index;
 
@@ -606,8 +610,8 @@ class Parser : public Task
 
 		int get_hash_value (const char *s);
 		inline void Write_Token (TOKEN Token_Id, int col);
-		void Destroy_Table (int index);
-		void init_sym_tables (void);
+		void Destroy_Sym_Table (int index, bool DestroyData = true);
+		void Init_Sym_Tables (void);
 		void Add_Sym_Table ();
 		void Remove_Symbol (int Index, const char *Name, bool is_array_elem, void **DataPtr, int ttype);
 		POV_MACRO *Parse_Macro(void);

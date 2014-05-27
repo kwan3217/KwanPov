@@ -46,6 +46,15 @@ typedef int TOKEN;
 
 typedef struct Sym_Table_Entry SYM_ENTRY;
 
+// Special symbol tables
+enum {
+	SYM_TABLE_RESERVED = 0,        // reserved words
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	SYM_TABLE_PERSISTENT,          // identifiers declared using #persistent / made persistent using #persist
+#endif
+	SYM_TABLE_GLOBAL,              // identifiers declared using #declare (or #local in top-level file), #function, #macro, etc.
+};
+
 #define TF_DEPRECATED               0x01
 #define TF_DEPRECATED_ONCE          0x02
 #define TF_DEPRECATED_SHOWN         0x04
@@ -291,6 +300,9 @@ enum TOKEN_IDS
 	ONION_TOKEN,
 	OVUS_TOKEN,
 	PERCENT_TOKEN,
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	PERSISTENT_TOKEN,
+#endif
 	PHASE_TOKEN,
 	PHONG_SIZE_TOKEN,
 	PHONG_TOKEN,

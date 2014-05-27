@@ -72,6 +72,11 @@ Testing for UberPOV:
         The "file_time" keyword can be used as a function to determine the
         last modification time of a file.
 
+      - upov-persistent (0.10):
+
+        The "#persistent" statement can be used to pass data to subsequent
+        frames of an animation.
+
       - upov-read-text (1.00):
 
         The "text" keyword can be specified in the "#read" directive, enabling
@@ -113,6 +118,30 @@ File Modification Time
     This syntax extension can be tested for using the #patch directive or
     patch() function with the patch name "upov-file_time"; the current
     implementation is version 0.9.
+
+Persistent Variables:
+---------------------
+
+  - UberPOV allows the following syntax:
+
+        #persistent IDENTIFIER = VALUE [;]
+
+    Just like #declare and #local, this statement defines a variable. However,
+    this variable will persist for all subsequent frames in an animation (for
+    command-line versions of UberPOV), or all subsequent renders in this
+    session (for GUI versions), unless explicitly undefined later.
+
+    Persistent variables can coexist with global (and local) variables of the
+    same name, with global variables taking precedence over persistent ones,
+    just like local variables take precedence over global ones.
+
+    Known caveats:
+
+      - At present, random number streams cannot be made persistent yet.
+
+    This syntax extension can be tested for using the #patch directive or
+    patch() function with the patch name "upov-persistent"; the current
+    implementation is version 0.1.
 
 Glare Desaturation:
 -------------------
