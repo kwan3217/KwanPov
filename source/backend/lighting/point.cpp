@@ -4,6 +4,12 @@
  * This module implements the point & spot light source primitive.
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Portions Copyright 2013-2014 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -24,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/povray/smp/source/backend/lighting/point.cpp $
- * $Revision: #28 $
- * $Change: 6113 $
- * $DateTime: 2013/11/20 20:39:54 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -397,6 +403,7 @@ LightSource::LightSource() : CompoundObject(LIGHT_OBJECT)
 
 	Fade_Distance = 0.0;
 	Fade_Power    = 0.0;
+	Max_Distance  = std::numeric_limits<DBL>::quiet_NaN();
 
 // TODO  Shadow_Cached_Object = NULL;
 	Projected_Through_Object= NULL;

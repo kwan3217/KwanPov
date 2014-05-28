@@ -5,7 +5,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013-2014 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -3385,11 +3385,15 @@ ObjectPtr Parser::Parse_Light_Source ()
 		END_CASE
 
 		CASE (FADE_DISTANCE_TOKEN)
-			Object->Fade_Distance = Parse_Float();
+			Object->Fade_Distance = Parse_Float(); // TODO - should be > 0.0, or 0.0 to disable
 		END_CASE
 
 		CASE (FADE_POWER_TOKEN)
-			Object->Fade_Power = Parse_Float();
+			Object->Fade_Power = Parse_Float(); // TODO - should be >= 1.0.
+		END_CASE
+
+		CASE (MAX_DISTANCE_TOKEN)
+			Object->Max_Distance = Parse_Float();
 		END_CASE
 
 		CASE (AREA_LIGHT_TOKEN)
@@ -3484,7 +3488,6 @@ ObjectPtr Parser::Parse_Light_Source ()
 
 	Parse_End ();
 
-
 	VSub(Object->Direction, Object->Points_At, Object->Center);
 
 	VLength(Len, Object->Direction);
@@ -3501,6 +3504,36 @@ ObjectPtr Parser::Parse_Light_Source ()
 		{
 			Error("Circular area light must have more than 1 point per axis");
 		}
+	}
+
+	if (isNaN(Object->Max_Distance))
+	{
+		// max_distance has not been set explicitly, compute it from fade_power, fade_distance and nominal brightness
+		// based on the globally defined threshold (= adc_bailout for now)
+
+		if ((Object->Fade_Power > 0.0) && (fabs(Object->Fade_Distance) > EPSILON))
+		{
+			DBL brightnessThreshold = sceneData->parsedAdcBailout; // TODO use a dedicated setting for this
+			DBL relativeBrightness = Object->colour.weightMaxAbs() / brightnessThreshold;
+			DBL relativeBrightnessAtFadeDistance = relativeBrightness * 2.0 - 1.0;
+			if (relativeBrightnessAtFadeDistance <= 0.0)
+				Object->Max_Distance = 1.0;
+			else
+				Object->Max_Distance = max( pow(relativeBrightnessAtFadeDistance, 1.0 / Object->Fade_Power), 1.0 );
+			Object->Max_Distance *= fabs(Object->Fade_Distance);
+
+			if (Object->Area_Light && Object->Use_Full_Area_Lighting)
+			{
+				if (Object->Circular)
+					Object->Max_Distance += max(Vector3d(Object->Axis1).length(), Vector3d(Object->Axis2).length());
+				else
+					Object->Max_Distance += max((Vector3d(Object->Axis1) + Vector3d(Object->Axis2)).length(),
+					                            (Vector3d(Object->Axis1) - Vector3d(Object->Axis2)).length());
+			}
+		}
+		else
+			// not a fading light; make it visible everywhere
+			Object->Max_Distance = std::numeric_limits<DBL>::infinity();
 	}
 
 	return (reinterpret_cast<ObjectPtr>(Object));

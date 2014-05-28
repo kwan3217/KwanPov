@@ -6,7 +6,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013-2014 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -31,11 +31,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/frame.h $
- * $Revision: #6 $
- * $Change: 6126 $
- * $DateTime: 2013/11/23 21:08:40 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #ifndef FRAME_H
@@ -1508,7 +1508,7 @@ class LightSource : public CompoundObject
 		RGBColour colour;
 		VECTOR Direction, Center, Points_At, Axis1, Axis2;
 		DBL Coeff, Radius, Falloff;
-		DBL Fade_Distance, Fade_Power;
+		DBL Fade_Distance, Fade_Power, Max_Distance;
 		int Area_Size1, Area_Size2;
 		int Adaptive_Level;
 //		ObjectBase *Shadow_Cached_Object;

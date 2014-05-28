@@ -2,6 +2,12 @@
  * types.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Portions Copyright 2013-2014 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -62,9 +68,12 @@ inline T clip(T val, T minv, T maxv)
 }
 
 
-// TODO - some runtime environments already provide the following function (with a different name),
-// so we may want to move this into the platform specific section.
+///
 /// Test whether a floating-point value is numeric (finite or infinite).
+///
+/// @todo   Some runtime environments already provide the following function (with a different name),
+///         so we may want to move this into the platform specific section.
+///
 template<typename T>
 inline bool isNumeric(T x)
 {
@@ -72,9 +81,12 @@ inline bool isNumeric(T x)
 	return (x == x);
 }
 
-// TODO - some runtime environments already provide the following function (with a different name),
-// so we may want to move this into the platform specific section.
+///
 /// Test whether a floating-point value is finite.
+///
+/// @todo   Some runtime environments already provide the following function (with a different name),
+///         so we may want to move this into the platform specific section.
+///
 template<typename T>
 inline bool isFinite(T x)
 {
@@ -82,10 +94,21 @@ inline bool isFinite(T x)
 	       (x <=  std::numeric_limits<T>::max());
 }
 
+///
+/// Test whether a floating-point value is a NaN ("Not a Number").
+///
+/// @todo   Some runtime environments may already provide the following function (with a different name),
+///         so we may want to move this into the platform specific section.
+///
+template<typename T>
+inline bool isNaN(T x) { return !isNumeric(x); }
 
-// force a value's precision to a given type, even if computations are normally done with extended precision
-// (such as GNU Linux on 32-bit CPU, which uses 80-bit extended double precision)
-// TODO - we might make this code platform-specific
+///
+/// Force a value's precision to a given type, even if computations are normally done with extended precision
+/// (such as GNU Linux on 32-bit CPU, which uses 80-bit extended double precision).
+///
+/// @todo   We might make this code platform-specific.
+///
 template<typename T>
 inline T forcePrecision(T val)
 {

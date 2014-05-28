@@ -72,6 +72,11 @@ Testing for UberPOV:
         The "file_time" keyword can be used as a function to determine the
         last modification time of a file.
 
+      - upov-light_source-max_distance (0.80):
+
+        The max_distance keyword can be used inside light_source statements to
+        affect the light source distanc-based cutoff feature.
+
       - upov-persistent (0.10):
 
         The "#persistent" statement can be used to pass data to subsequent
@@ -118,6 +123,26 @@ File Modification Time
     This syntax extension can be tested for using the #patch directive or
     patch() function with the patch name "upov-file_time"; the current
     implementation is version 0.9.
+
+Light Source Distance-Based Cutoff
+----------------------------------
+
+  - Light sources with distance-based fading (i.e. using the fade_distance
+    keyword) are cut off entirely at a certain distance to improve performance.
+    The cutoff distance is computed automatically based on nominal light source
+    brightness, fade parameters, and the global_settings adc_bailout.
+
+  - The following syntax can be used to overridde the cutoff distance for an
+    individual light source:
+
+        light_source { ... max_distance NUMBER }
+
+    This will set the cutoff distance to the specified value. This syntax can
+    also be used for non-fading light sources if desired.
+
+    This syntax extension can be tested for using the #patch directive or
+    patch() function with the patch name "upov-light_source-max_distance"; the
+    current implementation is version 0.8.
 
 Persistent Variables:
 ---------------------
