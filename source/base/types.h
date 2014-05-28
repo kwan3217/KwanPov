@@ -28,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/povray/smp/source/base/types.h $
- * $Revision: #42 $
- * $Change: 6089 $
- * $DateTime: 2013/11/11 09:18:35 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #ifndef POVRAY_BASE_TYPES_H
