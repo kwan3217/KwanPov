@@ -2,6 +2,12 @@
  * types.h
  *
  * ---------------------------------------------------------------------------
+ * UberPOV Raytracer version 1.37.
+ * Portions Copyright 2013-2014 Christoph Lipka.
+ *
+ * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+ * subject to the same licensing terms and conditions.
+ * ---------------------------------------------------------------------------
  * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
  * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
  *
@@ -22,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/povray/smp/source/base/types.h $
- * $Revision: #42 $
- * $Change: 6089 $
- * $DateTime: 2013/11/11 09:18:35 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #ifndef POVRAY_BASE_TYPES_H
@@ -34,6 +40,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 #include "base/configbase.h"
 
@@ -60,9 +67,48 @@ inline T clip(T val, T minv, T maxv)
 		return val;
 }
 
-// force a value's precision to a given type, even if computations are normally done with extended precision
-// (such as GNU Linux on 32-bit CPU, which uses 80-bit extended double precision)
-// TODO - we might make this code platform-specific
+
+///
+/// Test whether a floating-point value is numeric (finite or infinite).
+///
+/// @todo   Some runtime environments already provide the following function (with a different name),
+///         so we may want to move this into the platform specific section.
+///
+template<typename T>
+inline bool isNumeric(T x)
+{
+	// We're exploiting the fact that NaNs (and only those) are not equal to anything, not even themselves.
+	return (x == x);
+}
+
+///
+/// Test whether a floating-point value is finite.
+///
+/// @todo   Some runtime environments already provide the following function (with a different name),
+///         so we may want to move this into the platform specific section.
+///
+template<typename T>
+inline bool isFinite(T x)
+{
+	return (x >= -std::numeric_limits<T>::max()) &&
+	       (x <=  std::numeric_limits<T>::max());
+}
+
+///
+/// Test whether a floating-point value is a NaN ("Not a Number").
+///
+/// @todo   Some runtime environments may already provide the following function (with a different name),
+///         so we may want to move this into the platform specific section.
+///
+template<typename T>
+inline bool isNaN(T x) { return !isNumeric(x); }
+
+///
+/// Force a value's precision to a given type, even if computations are normally done with extended precision
+/// (such as GNU Linux on 32-bit CPU, which uses 80-bit extended double precision).
+///
+/// @todo   We might make this code platform-specific.
+///
 template<typename T>
 inline T forcePrecision(T val)
 {

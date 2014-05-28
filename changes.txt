@@ -72,6 +72,16 @@ Testing for UberPOV:
         The "file_time" keyword can be used as a function to determine the
         last modification time of a file.
 
+      - upov-light_source-max_distance (0.80):
+
+        The max_distance keyword can be used inside light_source statements to
+        affect the light source distanc-based cutoff feature.
+
+      - upov-persistent (0.10):
+
+        The "#persistent" statement can be used to pass data to subsequent
+        frames of an animation.
+
       - upov-read-text (1.00):
 
         The "text" keyword can be specified in the "#read" directive, enabling
@@ -113,6 +123,50 @@ File Modification Time
     This syntax extension can be tested for using the #patch directive or
     patch() function with the patch name "upov-file_time"; the current
     implementation is version 0.9.
+
+Light Source Distance-Based Cutoff
+----------------------------------
+
+  - Light sources with distance-based fading (i.e. using the fade_distance
+    keyword) are cut off entirely at a certain distance to improve performance.
+    The cutoff distance is computed automatically based on nominal light source
+    brightness, fade parameters, and the global_settings adc_bailout.
+
+  - The following syntax can be used to overridde the cutoff distance for an
+    individual light source:
+
+        light_source { ... max_distance NUMBER }
+
+    This will set the cutoff distance to the specified value. This syntax can
+    also be used for non-fading light sources if desired.
+
+    This syntax extension can be tested for using the #patch directive or
+    patch() function with the patch name "upov-light_source-max_distance"; the
+    current implementation is version 0.8.
+
+Persistent Variables:
+---------------------
+
+  - UberPOV allows the following syntax:
+
+        #persistent IDENTIFIER = VALUE [;]
+
+    Just like #declare and #local, this statement defines a variable. However,
+    this variable will persist for all subsequent frames in an animation (for
+    command-line versions of UberPOV), or all subsequent renders in this
+    session (for GUI versions), unless explicitly undefined later.
+
+    Persistent variables can coexist with global (and local) variables of the
+    same name, with global variables taking precedence over persistent ones,
+    just like local variables take precedence over global ones.
+
+    Known caveats:
+
+      - At present, random number streams cannot be made persistent yet.
+
+    This syntax extension can be tested for using the #patch directive or
+    patch() function with the patch name "upov-persistent"; the current
+    implementation is version 0.1.
 
 Glare Desaturation:
 -------------------

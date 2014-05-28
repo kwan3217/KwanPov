@@ -11,7 +11,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013-2014 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -36,11 +36,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/parser/tokenize.cpp $
- * $Revision: #8 $
- * $Change: 6114 $
- * $DateTime: 2013/11/20 20:51:05 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #include <ctype.h>
@@ -120,7 +120,7 @@ void Parser::Initialize_Tokenizer()
 	Cond_Stack[0].Cond_Type    = ROOT_COND;
 	Cond_Stack[0].Switch_Value = 0.0;
 
-	init_sym_tables();
+	Init_Sym_Tables();
 	Max_Trace_Level = MAX_TRACE_LEVEL_DEFAULT;
 	Had_Max_Trace_Level = false;
 
@@ -227,7 +227,15 @@ void Parser::Terminate_Tokenizer()
 
 	while(Table_Index >= 0)
 	{
-		Destroy_Table(Table_Index--);
+#if EXPERIMENTAL_UPOV_PERSISTENT
+		// The persistent data table is not actually destroyed during termination
+		if (Table_Index == SYM_TABLE_PERSISTENT)
+		{
+			Destroy_Sym_Table(Table_Index--, false);
+			continue;
+		}
+#endif
+		Destroy_Sym_Table(Table_Index--);
 	}
 
 	if(Input_File->In_File != NULL)
@@ -359,7 +367,7 @@ void Parser::Get_Token ()
 			Input_File->In_File = NULL ;
 			Got_EOF=false;
 
-			Destroy_Table(Table_Index--);
+			Destroy_Sym_Table(Table_Index--); // destroy symbol table local to this file
 
 			Input_File = &Include_Files[--Include_File_Index];
 			if (Token.FileHandle == NULL)
@@ -1300,7 +1308,7 @@ void Parser::Read_Symbol()
 	}
 
 	/* If its a reserved keyword, write it and return */
-	if ( (Temp_Entry = Find_Symbol(0,String)) != NULL)
+	if ( (Temp_Entry = Find_Symbol(SYM_TABLE_RESERVED,String)) != NULL)
 	{
 		Write_Token (Temp_Entry->Token_Number, Token.Token_Col_No);
 		return;
@@ -2107,6 +2115,9 @@ void Parser::Parse_Directive(int After_Hash)
 		END_CASE
 
 		CASE2 (DECLARE_TOKEN,LOCAL_TOKEN)
+#if EXPERIMENTAL_UPOV_PERSISTENT
+		CASE (PERSISTENT_TOKEN)
+#endif
 			if (Skipping)
 			{
 				UNGET
@@ -2114,7 +2125,12 @@ void Parser::Parse_Directive(int After_Hash)
 			}
 			else
 			{
-				Parse_Declare(Token.Token_Id == LOCAL_TOKEN, After_Hash);
+#if EXPERIMENTAL_UPOV_PERSISTENT
+				if (Token.Token_Id == PERSISTENT_TOKEN)
+					Experimental_Flag |= EF_UPOV_PERSISTENT;
+#endif
+
+				Parse_Declare(After_Hash);
 				Curr_Type = Cond_Stack[CS_Index].Cond_Type;
 				if (Token.Unget_Token)
 				{
@@ -2329,7 +2345,7 @@ void Parser::Parse_Directive(int After_Hash)
    Both streams are now directed into the debug stream. */
 		CASE(RENDER_TOKEN)
 		CASE(STATISTICS_TOKEN)
-				Warning(0, "#render and #statistics streams are no longer available.\nRedirecting output to #debug stream.");
+			Warning(0, "#render and #statistics streams are no longer available.\nRedirecting output to #debug stream.");
 			// Intentional, redirect output to debug stream.
 		CASE(DEBUG_TOKEN)
 			if (Skipping)
@@ -2717,7 +2733,7 @@ int Parser::get_hash_value(const char *s)
 *
 * FUNCTION
 *
-*   init_sym_tables
+*   Init_Sym_Tables
 *
 * INPUT
 *
@@ -2735,18 +2751,49 @@ int Parser::get_hash_value(const char *s)
 *
 ******************************************************************************/
 
-void Parser::init_sym_tables()
+void Parser::Init_Sym_Tables()
 {
 	int i;
 
+	// Set up reserved words table
+
 	Add_Sym_Table();
+	assert(Table_Index == SYM_TABLE_RESERVED);
 
 	for (i = 0; i < LAST_TOKEN; i++)
 	{
-		Add_Symbol(0,Reserved_Words[i].Token_Name,Reserved_Words[i].Token_Number);
+		Add_Symbol(SYM_TABLE_RESERVED,Reserved_Words[i].Token_Name,Reserved_Words[i].Token_Number);
 	}
 
+#if EXPERIMENTAL_UPOV_PERSISTENT
+
+	// Set up persistent data table
+
+	if (persistent_symbols)
+	{
+		// Table already exists, just hook it up
+
+		++ Table_Index;
+		assert(Table_Index == SYM_TABLE_PERSISTENT);
+
+		Tables[SYM_TABLE_PERSISTENT] = persistent_symbols;
+	}
+	else
+	{
+		// Table doe not exist, create and keep a reference to it
+
+		Add_Sym_Table();
+		assert(Table_Index == SYM_TABLE_PERSISTENT);
+
+		persistent_symbols = Tables[SYM_TABLE_PERSISTENT];
+	}
+
+#endif
+
+	// Set up global data table
+
 	Add_Sym_Table();
+	assert(Table_Index == SYM_TABLE_GLOBAL);
 }
 
 void Parser::Add_Sym_Table()
@@ -2770,11 +2817,18 @@ void Parser::Add_Sym_Table()
 
 }
 
-void Parser::Destroy_Table(int index)
+void Parser::Destroy_Sym_Table(int index, bool destroyData)
 {
 	int i;
 	SYM_TABLE *Table = Tables[index];
 	SYM_ENTRY *Entry;
+	bool releaseStrings = (index != SYM_TABLE_RESERVED);
+
+	if (!destroyData)
+	{
+		Tables[index] = NULL;
+		return;
+	}
 
 	for(i = SYM_TABLE_SIZE - 1; i >= 0; i--)
 	{
@@ -2782,7 +2836,7 @@ void Parser::Destroy_Table(int index)
 
 		while(Entry)
 		{
-			Entry = Destroy_Entry(index, Entry);
+			Entry = Destroy_Entry(Entry, releaseStrings);
 		}
 
 		Table->Table[i] = NULL;
@@ -2792,7 +2846,7 @@ void Parser::Destroy_Table(int index)
 
 }
 
-SYM_ENTRY *Parser::Create_Entry (int Index,const char *Name,TOKEN Number)
+SYM_ENTRY *Parser::Create_Entry (const char *Name,TOKEN Number, bool copyString)
 {
 	SYM_ENTRY *New;
 
@@ -2803,7 +2857,7 @@ SYM_ENTRY *Parser::Create_Entry (int Index,const char *Name,TOKEN Number)
 	New->Flags               = 0;
 	New->Deprecation_Message = NULL;
 	New->ref_count           = 1;
-	if (Index != 0)
+	if (copyString)
 		New->Token_Name = POV_STRDUP(Name);
 	else
 		New->Token_Name = const_cast<char*>(Name);
@@ -2820,7 +2874,7 @@ void Parser::Acquire_Entry_Reference (SYM_ENTRY *Entry)
 	Entry->ref_count ++;
 }
 
-void Parser::Release_Entry_Reference (int Index, SYM_ENTRY *Entry)
+void Parser::Release_Entry_Reference (SYM_ENTRY *Entry, bool releaseString)
 {
 	if (Entry == NULL)
 		return;
@@ -2830,7 +2884,7 @@ void Parser::Release_Entry_Reference (int Index, SYM_ENTRY *Entry)
 
 	if (Entry->ref_count == 0)
 	{
-		if(Index != 0) // NB reserved words reference hard-coded token names in code segment, rather than allocated on heap
+		if(releaseString) // NB reserved words reference hard-coded token names in code segment, rather than allocated on heap
 		{
 			POV_FREE(Entry->Token_Name);
 			Destroy_Ident_Data (Entry->Data, Entry->Token_Number); // TODO - shouldn't this be outside the if() block?
@@ -2842,7 +2896,7 @@ void Parser::Release_Entry_Reference (int Index, SYM_ENTRY *Entry)
 	}
 }
 
-SYM_ENTRY *Parser::Destroy_Entry (int Index, SYM_ENTRY *Entry)
+SYM_ENTRY *Parser::Destroy_Entry (SYM_ENTRY *Entry, bool releaseString)
 {
 	SYM_ENTRY *Next;
 
@@ -2859,7 +2913,7 @@ SYM_ENTRY *Parser::Destroy_Entry (int Index, SYM_ENTRY *Entry)
 
 	if (Entry->ref_count == 0)
 	{
-		if(Index != 0) // NB reserved words reference hard-coded token names in code segment, rather than allocated on heap
+		if(releaseString) // NB reserved words reference hard-coded token names in code segment, rather than allocated on heap
 		{
 			POV_FREE(Entry->Token_Name);
 			Destroy_Ident_Data (Entry->Data, Entry->Token_Number); // TODO - shouldn't this be outside the if() block?
@@ -2887,7 +2941,7 @@ SYM_ENTRY *Parser::Add_Symbol (int Index,const char *Name,TOKEN Number)
 {
 	SYM_ENTRY *New;
 
-	New = Create_Entry (Index,Name,Number);
+	New = Create_Entry (Name,Number, Index != SYM_TABLE_RESERVED);
 	Add_Entry(Index,New);
 
 	return(New);
@@ -2948,7 +3002,7 @@ void Parser::Remove_Symbol (int Index, const char *Name, bool is_array_elem, voi
 			if (strcmp(Name, Entry->Token_Name) == 0)
 			{
 				*EntryPtr = Entry->next;
-				Destroy_Entry(Index, Entry);
+				Destroy_Entry(Entry, Index != SYM_TABLE_RESERVED);
 				return;
 			}
 
@@ -2981,13 +3035,13 @@ Parser::POV_MACRO *Parser::Parse_Macro()
 
 	EXPECT
 		CASE (IDENTIFIER_TOKEN)
-			Table_Entry = Add_Symbol (1,Token.Token_String,TEMPORARY_MACRO_ID_TOKEN);
+			Table_Entry = Add_Symbol (SYM_TABLE_GLOBAL,Token.Token_String,TEMPORARY_MACRO_ID_TOKEN);
 			EXIT
 		END_CASE
 
 		CASE (MACRO_ID_TOKEN)
-			Remove_Symbol(1,Token.Token_String,false,NULL,0);
-			Table_Entry = Add_Symbol (1,Token.Token_String,TEMPORARY_MACRO_ID_TOKEN);
+			Remove_Symbol(SYM_TABLE_GLOBAL,Token.Token_String,false,NULL,0);
+			Table_Entry = Add_Symbol (SYM_TABLE_GLOBAL,Token.Token_String,TEMPORARY_MACRO_ID_TOKEN);
 			EXIT
 		END_CASE
 
@@ -3112,7 +3166,7 @@ void Parser::Invoke_Macro()
 
 		for (i=0; i<PMac->Num_Of_Pars; i++)
 		{
-			Table_Entries[i]=Create_Entry(1,PMac->Par_Name[i],IDENTIFIER_TOKEN);
+			Table_Entries[i]=Create_Entry(PMac->Par_Name[i],IDENTIFIER_TOKEN);
 			if (!Parse_RValue(IDENTIFIER_TOKEN, &(Table_Entries[i]->Token_Number), &(Table_Entries[i]->Data), NULL, true, false, true, true, Local_Index))
 			{
 				Error("Expected %d parameters but only %d found.",PMac->Num_Of_Pars,i);
@@ -3202,7 +3256,7 @@ void Parser::Return_From_Macro()
 	}
 
 	// Always destroy macro locals
-	Destroy_Table(Table_Index--);
+	Destroy_Sym_Table(Table_Index--);
 }
 
 void Parser::Destroy_Macro(POV_MACRO *PMac)
@@ -3342,7 +3396,7 @@ void Parser::Parse_Fopen(void)
 	New->Out_File=NULL;
 
 	GET(IDENTIFIER_TOKEN)
-	Entry = Add_Symbol (1,Token.Token_String,FILE_ID_TOKEN);
+	Entry = Add_Symbol (SYM_TABLE_GLOBAL,Token.Token_String,FILE_ID_TOKEN);
 	Entry->Data=reinterpret_cast<void *>(New);
 
 	asciitemp = Parse_C_String(true);
@@ -3409,7 +3463,7 @@ void Parser::Parse_Fclose(void)
 			Got_EOF=false;
 			Data->In_File = NULL;
 			Data->Out_File = NULL;
-			Remove_Symbol (1,Token.Token_String,false,NULL,0);
+			Remove_Symbol (SYM_TABLE_GLOBAL,Token.Token_String,false,NULL,0);
 			EXIT
 		END_CASE
 
@@ -3448,7 +3502,7 @@ void Parser::Parse_Read()
 		CASE (IDENTIFIER_TOKEN)
 			if (!End_File)
 			{
-				Temp_Entry = Add_Symbol (1,Token.Token_String,IDENTIFIER_TOKEN);
+				Temp_Entry = Add_Symbol (SYM_TABLE_GLOBAL,Token.Token_String,IDENTIFIER_TOKEN);
 				End_File=Parse_Read_Value (User_File,Token.Token_Id, &(Temp_Entry->Token_Number), &(Temp_Entry->Data), csv);
 				Token.is_array_elem = false;
 				if (csv)
@@ -3511,7 +3565,7 @@ void Parser::Parse_Read()
 		delete User_File->In_File;
 		Got_EOF=false;
 		User_File->In_File = NULL;
-		Remove_Symbol (1,File_Id,false,NULL,0);
+		Remove_Symbol (SYM_TABLE_GLOBAL,File_Id,false,NULL,0);
 	}
 	POV_FREE(File_Id);
 }

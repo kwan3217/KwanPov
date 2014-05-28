@@ -5,7 +5,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013-2014 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -30,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/base/colour.h $
- * $Revision: #3 $
- * $Change: 6114 $
- * $DateTime: 2013/11/20 20:51:05 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #ifndef POVRAY_BASE_COLOUR_H
@@ -210,6 +210,26 @@ class GenericColour
 		void AtoFT(T alpha) { colour[FILTER] = 0.0f; colour[TRANSM] = 1.0f - alpha; }
 		static T FTtoA(T /*f*/, T t) { return 1.0f - t; }
 		T FTtoA() const { return 1.0f - colour[TRANSM]; }
+
+		bool isNumeric() const
+		{
+			return pov_base::isNumeric(colour[RED]) &&
+			       pov_base::isNumeric(colour[GREEN]) &&
+			       pov_base::isNumeric(colour[BLUE]) &&
+			       pov_base::isNumeric(colour[FILTER]) &&
+			       pov_base::isNumeric(colour[TRANSM]);
+		}
+
+		bool isFinite() const
+		{
+			return pov_base::isFinite(colour[RED]) &&
+			       pov_base::isFinite(colour[GREEN]) &&
+			       pov_base::isFinite(colour[BLUE]) &&
+			       pov_base::isFinite(colour[FILTER]) &&
+			       pov_base::isFinite(colour[TRANSM]);
+		}
+
+		inline bool isSane() const { return isFinite(); }
 
 		void clear()
 		{
@@ -388,6 +408,7 @@ class GenericColour
 			colour[TRANSM] /= b;
 			return *this;
 		}
+
 	private:
 		DATA colour;
 };
@@ -571,6 +592,29 @@ class GenericRGBColour
 
 		bool isZero() const { return (colour[RED] == 0) && (colour[GREEN] == 0) && (colour[BLUE] == 0); }
 
+		bool isNumeric() const
+		{
+			return pov_base::isNumeric(colour[RED]) &&
+			       pov_base::isNumeric(colour[GREEN]) &&
+			       pov_base::isNumeric(colour[BLUE]);
+		}
+
+		bool isFinite() const
+		{
+			return pov_base::isFinite(colour[RED]) &&
+			       pov_base::isFinite(colour[GREEN]) &&
+			       pov_base::isFinite(colour[BLUE]);
+		}
+
+		inline bool isSane() const { return isFinite(); }
+
+		template<typename T_INT>
+		inline void sanitize(T_INT& v)
+		{
+			if (sanitize())
+				++ v;
+		}
+
 		void clear()
 		{
 			colour[RED] = 0.0;
@@ -707,6 +751,7 @@ class GenericRGBColour
 			colour[BLUE] /= b;
 			return *this;
 		}
+
 	private:
 		DATA colour;
 };

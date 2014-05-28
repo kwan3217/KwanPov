@@ -3,7 +3,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013-2014 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -28,11 +28,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/render/trace.cpp $
- * $Revision: #10 $
- * $Change: 6125 $
- * $DateTime: 2013/11/23 18:42:59 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 #include <boost/thread.hpp>
@@ -1099,15 +1099,21 @@ void Trace::ComputeLightedTexture(Colour& resultcolour, const TEXTURE *texture, 
 							ticket.stochasticCount = n;
 
 						ticket.stochasticDepth ++;
+						unsigned int numTraced = 0;
 						for (int j = 0; j < n; j ++)
 						{
-							tempCol.clear();
+							tempCol.clear(); // TODO obsolete
 							ComputeReflection(layer->Finish, tmpIPoint, ray, (*listWNRX)[i].normal, rawnormal, tempCol, (*listWNRX)[i].weight, ticket, (*listWNRX)[i].blur);
-							rflCol += tempCol;
+							if (tempCol.isSane())
+							{
+								rflCol += tempCol;
+								numTraced ++;
+							}
 						}
 						ticket.stochasticDepth --;
 						ticket.stochasticCount = saveStochasticCount;
-						rflCol /= n;
+						if (numTraced > 0)
+							rflCol /= numTraced;
 					}
 					else
 					{
@@ -1293,7 +1299,7 @@ void Trace::ComputeReflection(const FINISH* finish, const Vector3d& ipoint, cons
 		TraceRay(nray, tmpCol, weight, ticket, false);
 		RGBColour tmpCol2(tmpCol);
 		ComputeIridColour(finish, Vector3d(nray.Direction), Vector3d(ray.Direction), normal, ipoint, tmpCol2);
-		colour += Colour(tmpCol2);
+		colour = Colour(tmpCol2);
 	}
 	else
 	{
@@ -1412,6 +1418,7 @@ bool Trace::ComputeRefraction(const FINISH* finish, Interior *interior, const Ve
 		else
 		{
 			RGBColour sumcol;
+			int numTraced = 0;
 
 			for(unsigned int i = 0; i < dispersionelements; i++)
 			{
@@ -1423,10 +1430,17 @@ bool Trace::ComputeRefraction(const FINISH* finish, Interior *interior, const Ve
 
 				(void)TraceRefractionRay(finish, ipoint, ray, nray, spectralBand.GetDispersionIOR(ior, dispersion), n, normal, rawnormal, localnormal, tempcolour, weight, ticket);
 
-				sumcol += RGBColour(tempcolour) * spectralBand.GetHue();
+				if (tempcolour.isSane())
+				{
+					sumcol += RGBColour(tempcolour) * spectralBand.GetHue();
+					numTraced ++;
+				}
 			}
 
-			colour = Colour(sumcol / double(dispersionelements));
+			if (numTraced > 0)
+				colour = Colour(sumcol / double(numTraced));
+			else
+				colour.clear();
 		}
 	}
 
@@ -1445,7 +1459,7 @@ bool Trace::TraceRefractionRay(const FINISH* finish, const Vector3d& ipoint, con
 		// Total internal reflection occures.
 		threadData->Stats()[Internal_Reflected_Rays_Traced]++;
 		ComputeReflection(finish, ipoint, ray, normal, rawnormal, tempcolour, weight, ticket);
-		colour += tempcolour;
+		colour = tempcolour;
 
 		return true;
 	}
@@ -1457,7 +1471,7 @@ bool Trace::TraceRefractionRay(const FINISH* finish, const Vector3d& ipoint, con
 	// Trace a refracted ray.
 	threadData->Stats()[Refracted_Rays_Traced]++;
 
-	colour.clear();
+	colour.clear(); // TODO obsolete
 	TraceRay(nray, colour, weight, ticket, false);
 
 	return false;
@@ -1933,6 +1947,12 @@ void Trace::ComputeOneLightRay(const LightSource &lightsource, double& lightsour
 {
 	double attenuation;
 	ComputeOneWhiteLightRay(lightsource, lightsourcedepth, lightsourceray, ipoint);
+
+	if (lightsourcedepth > lightsource.Max_Distance)
+	{
+		lightcolour.clear();
+		return;
+	}
 
 	// Get the light source colour.
 	lightcolour = lightsource.colour;
@@ -3759,6 +3779,8 @@ void Trace::ComputeDiffuseAmbientContribution1(const Intersection& out, const Ve
 	ambientray.subFrameTime = ticket.subFrameTime;
 	RGBColour ambientcolour;
 	TraceRay(ambientray, ambientcolour, weight, ticket, false);
+	if (!ambientcolour.isSane())
+		return;
 
 	// Don't calculate anything more if there's no light input
 	if((fabs(ambientcolour.red())   < EPSILON) &&
@@ -3992,7 +4014,8 @@ void Trace::ComputeSubsurfaceScattering(const FINISH *Finish, const RGBColour& l
 					Assign_Vector(doubleRefractedEyeRay.Origin, unscatteredIn.IPoint);
 					Assign_Vector(doubleRefractedEyeRay.Direction, *(doubleRefractedEye));
 					TraceRay(doubleRefractedEyeRay, tempcolor, weight, ticket, false);
-					Total_Colour += RGBColour(DblRGBColour(tempcolor) * att);
+					if (tempcolor.isSane())
+						Total_Colour += RGBColour(DblRGBColour(tempcolor) * att);
 				}
 			}
 			else

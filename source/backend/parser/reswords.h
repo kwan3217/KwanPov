@@ -6,7 +6,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
+ * Portions Copyright 2013-2014 Christoph Lipka.
  *
  * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
  * subject to the same licensing terms and conditions.
@@ -31,11 +31,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/parser/reswords.h $
- * $Revision: #5 $
- * $Change: 6116 $
- * $DateTime: 2013/11/21 21:10:39 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 namespace pov
@@ -45,6 +45,15 @@ typedef struct Reserved_Word_Struct RESERVED_WORD;
 typedef int TOKEN;
 
 typedef struct Sym_Table_Entry SYM_ENTRY;
+
+// Special symbol tables
+enum {
+	SYM_TABLE_RESERVED = 0,        // reserved words
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	SYM_TABLE_PERSISTENT,          // identifiers declared using #persistent / made persistent using #persist
+#endif
+	SYM_TABLE_GLOBAL,              // identifiers declared using #declare (or #local in top-level file), #function, #macro, etc.
+};
 
 #define TF_DEPRECATED               0x01
 #define TF_DEPRECATED_ONCE          0x02
@@ -278,6 +287,7 @@ enum TOKEN_IDS
 	MATERIAL_MAP_TOKEN,
 	MAX_INTERSECTIONS_TOKEN,
 	MAX_TRACE_LEVEL_TOKEN,
+	MAX_DISTANCE_TOKEN,
 	MERGE_TOKEN,
 	METALLIC_TOKEN,
 	MM_PER_UNIT_TOKEN,
@@ -291,6 +301,9 @@ enum TOKEN_IDS
 	ONION_TOKEN,
 	OVUS_TOKEN,
 	PERCENT_TOKEN,
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	PERSISTENT_TOKEN,
+#endif
 	PHASE_TOKEN,
 	PHONG_SIZE_TOKEN,
 	PHONG_TOKEN,

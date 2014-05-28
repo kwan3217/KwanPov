@@ -3,7 +3,7 @@
  *
  * ---------------------------------------------------------------------------
  * UberPOV Ray Tracer version 1.37.
- * Copyright 2013 Christoph Lipka.
+ * Copyright 2013-2014 Christoph Lipka.
  *
  * UberPOV is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -26,11 +26,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/parser/patch.cpp $
- * $Revision: #6 $
- * $Change: 6117 $
- * $DateTime: 2013/11/21 21:16:31 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -52,20 +52,25 @@ typedef struct {
 
 // List of patches supported by this branch
 static const Patch_Data patch_data[] = {
-	{ "upov",                    137.00 }, // UberPOV version number
+	{ "upov",                         137.00 }, // UberPOV version number
 
-	{ "upov-blink",                0.90 }, // UberPOV-style blink keyword
-	{ "upov-file_time",            0.90 }, // UberPOV-style file_time function
-	{ "upov-read-text",            1.00 }, // UberPOV-style plaintext reading
-	{ "upov-reflection-roughness", 0.90 }, // UberPOV-style blurred reflections
+	{ "upov-blink",                     0.90 }, // UberPOV-style blink keyword
+	{ "upov-file_time",                 0.90 }, // UberPOV-style file_time function
+	{ "upov-light_source-max_distance", 0.80 }, // UberPOV-style distance-based cutoff of light sources
+#if EXPERIMENTAL_UPOV_PERSISTENT
+	{ "upov-persistent",                0.10 }, // UberPOV-style persistent data between animation frames
+#endif
+	{ "upov-read-text",                 1.00 }, // UberPOV-style plaintext reading
+	{ "upov-reflection-roughness",      0.90 }, // UberPOV-style blurred reflections
+
 	/*
-	{ "upov-backscatter",          0.10 }, // UberPOV-style support for backscattering (cat's eye effect)
-	{ "upov-finish",               0.10 }, // UberPOV-style alternative finish syntax
-	{ "upov-halo",                 0.10 }, // UberPOV-style support for backside illumination halos
-	{ "upov-sky_sphere",           0.10 }, // UberPOV sky sphere improvements
-	{ "John Doe's Patch",          1.01 },
+	{ "upov-backscatter",               0.10 }, // UberPOV-style support for backscattering (cat's eye effect)
+	{ "upov-finish",                    0.10 }, // UberPOV-style alternative finish syntax
+	{ "upov-halo",                      0.10 }, // UberPOV-style support for backside illumination halos
+	{ "upov-sky_sphere",                0.10 }, // UberPOV sky sphere improvements
+	{ "John Doe's Patch",               1.01 },
 	*/
-	{ NULL,                        0.99 }, // end of file, and version number of the patch providing the "#patch" directive and "patch()" function
+	{ NULL,                             0.99 }, // end of file, and version number of the patch providing the "#patch" directive and "patch()" function
 };
 
 unsigned int GetPatchVersion(char* patchName)
