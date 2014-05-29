@@ -7,7 +7,7 @@ and all others who contributed to that fantastic piece of software!
 This document is a WIP
 --------------------------------------
 
-Last edit: 2013-11-17
+Last edit: 2014-05-29
 
 License
 --------------------------------------
