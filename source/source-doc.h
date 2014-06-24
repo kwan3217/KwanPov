@@ -1,8 +1,9 @@
 //******************************************************************************
 ///
-/// @file base/colour.cpp
+/// @file source-doc.h
 ///
-/// Implementations related to colour storage and computations.
+/// Pseudo source file containing source code documentation that does not fit
+/// in one specific actual source file.
 ///
 /// @copyright
 /// @parblock
@@ -31,20 +32,18 @@
 ///
 /// @endparblock
 ///
+//*******************************************************************************
+
+#error This file should not actually be included.
+
 //******************************************************************************
+// Namespaces
 
-// configbase.h must always be the first POV file included within base *.cpp files
-#include "base/configbase.h"
-#include "base/colour.h"
+/// @namespace pov
+/// Code for the actual render engine (back-end).
 
-// this must be the last file included
-#include "base/povdebug.h"
+/// @namespace pov_base
+/// Code shared between back-end and front-end.
 
-namespace pov_base
-{
-
-/// @file
-/// @note   All implementations related to colour storage and computations are currently defined inline in
-///         @ref base/colour.h for performance reasons.
-
-}
+/// @namespace pov_frontend
+/// Code for the actual render back-end.

@@ -30,11 +30,11 @@
  * DKBTrace was originally written by David K. Buck.
  * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
  * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/render/ray.cpp $
- * $Revision: #2 $
- * $Change: 6125 $
- * $DateTime: 2013/11/23 18:42:59 $
- * $Author: clipka $
+ * $File: N/A $
+ * $Revision: N/A $
+ * $Change: N/A $
+ * $DateTime: N/A $
+ * $Author: N/A $
  *******************************************************************************/
 
 // frame.h must always be the first POV file included (pulls in platform config)
@@ -51,23 +51,18 @@
 namespace pov
 {
 
-Ray::Ray(RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace) :
-	subFrameTime(0.5)
+Ray::Ray(TraceTicket& ticket, RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace) :
+	ticket(ticket)
 {
-	Make_Vector(Origin, 0.0, 0.0, 0.0);
-	Make_Vector(Direction, 0.0, 0.0, 0.0);
-
 	SetFlags(rt, shadowTest, photon, radiosity, monochromatic, pretrace);
 	hollowRay = true;
 	ClearInteriors();
 }
 
-Ray::Ray(const VECTOR ov, const VECTOR dv, RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace) :
-	subFrameTime(0.5)
+Ray::Ray(TraceTicket& ticket, const Vector3d& ov, const Vector3d& dv, RayType rt, bool shadowTest, bool photon, bool radiosity, bool monochromatic, bool pretrace) :
+	BasicRay(ov, dv),
+	ticket(ticket)
 {
-	Assign_Vector(Origin, ov);
-	Assign_Vector(Direction, dv);
-
 	SetFlags(rt, shadowTest, photon, radiosity, monochromatic, pretrace);
 	hollowRay = true;
 	ClearInteriors();
