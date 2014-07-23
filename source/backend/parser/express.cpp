@@ -49,22 +49,23 @@
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/parser/parse.h"
-#include "backend/parser/patch.h"
-#include "backend/math/vector.h"
+
 #include "backend/colour/colour_old.h"
-#include "backend/math/splines.h"
-#include "backend/math/matrices.h"
-#include "backend/pattern/pattern.h"
-#include "backend/texture/pigment.h"
-#include "backend/texture/normal.h"
-#include "backend/texture/texture.h"
-#include "backend/shape/hfield.h"
-#include "backend/scene/objects.h"
-#include "backend/vm/fncode.h"
-#include "backend/vm/fnpovfpu.h"
 #include "backend/math/mathutil.h"
+#include "backend/math/matrices.h"
+#include "backend/math/splines.h"
+#include "backend/math/vector.h"
+#include "backend/parser/patch.h"
+#include "backend/pattern/pattern.h"
+#include "backend/scene/objects.h"
+#include "backend/shape/hfield.h"
 #include "backend/support/fileutil.h"
 #include "backend/support/imageutil.h"
+#include "backend/texture/normal.h"
+#include "backend/texture/pigment.h"
+#include "backend/texture/texture.h"
+#include "backend/vm/fncode.h"
+#include "backend/vm/fnpovfpu.h"
 #include "base/fileinputoutput.h"
 
 // this must be the last file included
@@ -1301,7 +1302,7 @@ void Parser::Parse_Num_Factor (EXPRESS Express,int *Terms)
 
         CASE (COLOUR_ID_TOKEN)
             *Terms=5;
-            RGBFTColour(*reinterpret_cast<TransColour *>(Token.Data)).Get(Express, *Terms);
+            (*reinterpret_cast<RGBFTColour *>(Token.Data)).Get(Express, *Terms);
             EXIT
         END_CASE
 
@@ -2706,14 +2707,32 @@ void Parser::Parse_Colour (TransColour& colour, bool expectFT)
 {
     RGBFTColour tempColour;
     Parse_Colour (tempColour, expectFT);
-    colour = TransColour(tempColour);
+    colour = ToTransColour(tempColour);
 }
 
 void Parser::Parse_Colour (RGBColour& colour)
 {
+    RGBFTColour tempColour;
+    Parse_Colour (tempColour, false);
+    colour = tempColour.rgb();
+}
+
+void Parser::Parse_Colour (MathColour& colour)
+{
     TransColour tempColour;
     Parse_Colour (tempColour, false);
     colour = tempColour.colour();
+}
+
+void Parser::Parse_Wavelengths (MathColour& colour)
+{
+#if (NUM_COLOUR_CHANNELS == 3)
+    RGBFTColour tempColour;
+    Parse_Colour (tempColour, false);
+    colour = ToMathColour(tempColour.rgb());
+#else
+    #error TODO!
+#endif
 }
 
 /*****************************************************************************
@@ -2795,9 +2814,9 @@ void Parser::Parse_BlendMapData<TexturePtr> (int Blend_Type, TexturePtr& rData)
 template<typename MAP_T>
 shared_ptr<MAP_T> Parser::Parse_Blend_Map (int Blend_Type,int Pat_Type)
 {
-    shared_ptr<MAP_T>   New;
-    MAP_T::Entry        Temp_Ent;
-    MAP_T::Vector       tempList;
+    shared_ptr<MAP_T>       New;
+    typename MAP_T::Entry   Temp_Ent;
+    typename MAP_T::Vector  tempList;
     bool old_allow_id = Allow_Identifier_In_Call;
     Allow_Identifier_In_Call = false;
 
@@ -2832,7 +2851,7 @@ shared_ptr<MAP_T> Parser::Parse_Blend_Map (int Blend_Type,int Pat_Type)
                             break;
                     }
 
-                    Parse_BlendMapData<MAP_T::Data> (Blend_Type, Temp_Ent.Vals);
+                    Parse_BlendMapData<typename MAP_T::Data> (Blend_Type, Temp_Ent.Vals);
                     tempList.push_back(Temp_Ent);
 
                     GET (RIGHT_SQUARE_TOKEN);
@@ -2869,7 +2888,8 @@ template<> GenericPigmentBlendMapPtr Parser::Parse_Blend_Map<GenericPigmentBlend
             return Parse_Blend_Map<PigmentBlendMap> (Blend_Type, Pat_Type);
         default:
             assert(false);
-            return NULL;
+            // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+            return GenericPigmentBlendMapPtr();
     }
 }
 
@@ -2883,7 +2903,8 @@ template<> GenericNormalBlendMapPtr Parser::Parse_Blend_Map<GenericNormalBlendMa
             return Parse_Blend_Map<NormalBlendMap> (Blend_Type, Pat_Type);
         default:
             assert(false);
-            return NULL;
+            // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+            return GenericNormalBlendMapPtr(); 
     }
 }
 
@@ -3013,8 +3034,8 @@ void Parser::Parse_BlendListData_Default<TexturePtr> (const ColourBlendMapData& 
 template<typename MAP_T>
 shared_ptr<MAP_T> Parser::Parse_Blend_List (int Count, ColourBlendMapConstPtr Def_Map, int Blend_Type)
 {
-    shared_ptr<MAP_T>   New;
-    MAP_T::Vector       tempList;
+    shared_ptr<MAP_T>       New;
+    typename MAP_T::Vector  tempList;
     int i;
     bool old_allow_id = Allow_Identifier_In_Call;
     Allow_Identifier_In_Call = false;
@@ -3122,7 +3143,7 @@ shared_ptr<MAP_T> Parser::Parse_Blend_List (int Count, ColourBlendMapConstPtr De
 
     if ((Blend_Type==NORMAL_TYPE) && (i==0))
     {
-        return (NULL);
+        return shared_ptr<MAP_T>(); // empty pointer
     }
 
     while (i < Count)
@@ -3137,7 +3158,7 @@ shared_ptr<MAP_T> Parser::Parse_Blend_List (int Count, ColourBlendMapConstPtr De
 
     Allow_Identifier_In_Call = old_allow_id;
 
-    return (New);
+    return New;
 }
 
 template<>
@@ -3217,9 +3238,9 @@ template TextureBlendMapPtr Parser::Parse_Blend_List<TextureBlendMap>   (int Cou
 template<typename MAP_T>
 shared_ptr<MAP_T> Parser::Parse_Item_Into_Blend_List (int Blend_Type)
 {
-    shared_ptr<MAP_T>   New;
-    MAP_T::Entry        Temp_Ent;
-    MAP_T::Vector       tempList;
+    shared_ptr<MAP_T>       New;
+    typename MAP_T::Entry   Temp_Ent;
+    typename MAP_T::Vector  tempList;
     int Type;
     bool old_allow_id = Allow_Identifier_In_Call;
     Allow_Identifier_In_Call = false;
@@ -3239,7 +3260,7 @@ shared_ptr<MAP_T> Parser::Parse_Item_Into_Blend_List (int Blend_Type)
     return (New);
 }
 
-template<> GenericPigmentBlendMapPtr  Parser::Parse_Item_Into_Blend_List<GenericPigmentBlendMap> (int Blend_Type)
+template<> GenericPigmentBlendMapPtr Parser::Parse_Item_Into_Blend_List<GenericPigmentBlendMap> (int Blend_Type)
 {
     switch (Blend_Type)
     {
@@ -3249,11 +3270,12 @@ template<> GenericPigmentBlendMapPtr  Parser::Parse_Item_Into_Blend_List<Generic
             return Parse_Item_Into_Blend_List<PigmentBlendMap> (Blend_Type);
         default:
             assert(false);
-            return NULL;
+            // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+            return GenericPigmentBlendMapPtr();
     }
 }
 
-template<> GenericNormalBlendMapPtr  Parser::Parse_Item_Into_Blend_List<GenericNormalBlendMap> (int Blend_Type)
+template<> GenericNormalBlendMapPtr Parser::Parse_Item_Into_Blend_List<GenericNormalBlendMap> (int Blend_Type)
 {
     switch (Blend_Type)
     {
@@ -3263,7 +3285,8 @@ template<> GenericNormalBlendMapPtr  Parser::Parse_Item_Into_Blend_List<GenericN
             return Parse_Item_Into_Blend_List<NormalBlendMap> (Blend_Type);
         default:
             assert(false);
-            return NULL;
+            // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+            return GenericNormalBlendMapPtr();
     }
 }
 
@@ -3303,7 +3326,7 @@ template TextureBlendMapPtr Parser::Parse_Item_Into_Blend_List<TextureBlendMap> 
 template<>
 ColourBlendMapPtr Parser::Parse_Colour_Map<ColourBlendMap> ()
 {
-    ColourBlendMapPtr New = NULL;
+    ColourBlendMapPtr New;
     int c,p;
     EXPRESS Express;
     int Terms;
@@ -3349,7 +3372,7 @@ ColourBlendMapPtr Parser::Parse_Colour_Map<ColourBlendMap> ()
                                 {
                                     RGBFTColour rgbft;
                                     rgbft.Set(Express, Terms);
-                                    Temp_Ent.Vals = TransColour (rgbft);
+                                    Temp_Ent.Vals = ToTransColour (rgbft);
                                     tempList.push_back(Temp_Ent);
                                 }
                                 else
@@ -3416,35 +3439,40 @@ template<>
 PigmentBlendMapPtr Parser::Parse_Colour_Map<PigmentBlendMap> ()
 {
     Error("Internal Error: Parse_Colour_Map called for non-colour blend map");
-    return NULL;
+    // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+    return PigmentBlendMapPtr();
 }
 
 template<>
 GenericNormalBlendMapPtr Parser::Parse_Colour_Map<GenericNormalBlendMap> ()
 {
     Error("Internal Error: Parse_Colour_Map called for non-colour blend map");
-    return NULL;
+    // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+    return GenericNormalBlendMapPtr();
 }
 
 template<>
 SlopeBlendMapPtr Parser::Parse_Colour_Map<SlopeBlendMap> ()
 {
     Error("Internal Error: Parse_Colour_Map called for non-colour blend map");
-    return NULL;
+    // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+    return SlopeBlendMapPtr();
 }
 
 template<>
 NormalBlendMapPtr Parser::Parse_Colour_Map<NormalBlendMap> ()
 {
     Error("Internal Error: Parse_Colour_Map called for non-colour blend map");
-    return NULL;
+    // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+    return NormalBlendMapPtr();
 }
 
 template<>
 TextureBlendMapPtr Parser::Parse_Colour_Map<TextureBlendMap> ()
 {
     Error("Internal Error: Parse_Colour_Map called for non-colour blend map");
-    return NULL;
+    // unreachable code to satisfy the compiler's demands for a return value; an empty pointer will do
+    return TextureBlendMapPtr();
 }
 
 

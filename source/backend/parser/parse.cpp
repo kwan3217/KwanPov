@@ -188,7 +188,7 @@ void Parser::Run()
 
         Frame_Init ();
 
-        for(map<string, string>::const_iterator i(sceneData->declaredVariables.begin()); i != sceneData->declaredVariables.end(); i++)
+        for(SceneData::DeclaredVariablesMap::const_iterator i(sceneData->declaredVariables.begin()); i != sceneData->declaredVariables.end(); i++)
         {
             if(i->second.length() > 0)
             {
@@ -231,7 +231,7 @@ void Parser::Run()
             sceneData->lightGroupLightSources[i]->lightGroupLight = true;
         }
     }
-    catch(bad_alloc&)
+    catch(std::bad_alloc&)
     {
         try
         {
@@ -2492,7 +2492,7 @@ ObjectPtr Parser::Parse_Isosurface()
                     switch(Token.Token_Id)
                     {
                         CASE(BOX_TOKEN)
-                            Object->container = auto_ptr<ContainedByShape>(new ContainedByBox());
+                            Object->container = shared_ptr<ContainedByShape>(new ContainedByBox());
 
                             Parse_Begin();
 
@@ -2528,7 +2528,7 @@ ObjectPtr Parser::Parse_Isosurface()
                         END_CASE
 
                         CASE(SPHERE_TOKEN)
-                            Object->container = auto_ptr<ContainedByShape>(new ContainedBySphere());
+                            Object->container = shared_ptr<ContainedByShape>(new ContainedBySphere());
 
                             Parse_Begin();
 
@@ -3184,7 +3184,7 @@ ObjectPtr Parser::Parse_Light_Source ()
 
     Parse_Comma();
 
-    Parse_Colour (Object->colour);
+    Parse_Colour(Object->colour);
 
     EXPECT
         /* NK phmap */
@@ -3472,7 +3472,7 @@ ObjectPtr Parser::Parse_Light_Source ()
         }
     }
 
-    if (isNaN(Object->Max_Distance))
+    if (!POV_ISFINITE(Object->Max_Distance))
     {
         // max_distance has not been set explicitly, compute it from fade_power, fade_distance and nominal brightness
         // based on the globally defined threshold (= adc_bailout for now)
@@ -3499,7 +3499,7 @@ ObjectPtr Parser::Parse_Light_Source ()
         }
         else
             // not a fading light; make it visible everywhere
-            Object->Max_Distance = std::numeric_limits<DBL>::infinity();
+            Object->Max_Distance = std::numeric_limits<DBL>::max();
     }
 
     return (reinterpret_cast<ObjectPtr>(Object));
@@ -4905,7 +4905,7 @@ ObjectPtr Parser::Parse_Parametric(void)
                     switch(Token.Token_Id)
                     {
                         CASE(BOX_TOKEN)
-                            Object->container = auto_ptr<ContainedByShape>(new ContainedByBox());
+                            Object->container = shared_ptr<ContainedByShape>(new ContainedByBox());
 
                             Parse_Begin();
 
@@ -4941,7 +4941,7 @@ ObjectPtr Parser::Parse_Parametric(void)
                         END_CASE
 
                         CASE(SPHERE_TOKEN)
-                            Object->container = auto_ptr<ContainedByShape>(new ContainedBySphere());
+                            Object->container = shared_ptr<ContainedByShape>(new ContainedBySphere());
 
                             Parse_Begin();
 
@@ -6665,21 +6665,18 @@ void Parser::Parse_Frame ()
                 Parse_Colour (sceneData->backgroundColour);
                 if (sceneData->EffectiveLanguageVersion() < 370)
                 {
-                    sceneData->backgroundColour.filter() = 0.0f;
                     if (sceneData->outputAlpha)
-                        sceneData->backgroundColour.transm() = 1.0f;
+                        sceneData->backgroundColour.SetFT(0.0f, 1.0f);
                     else
-                        sceneData->backgroundColour.transm() = 0.0f;
+                        sceneData->backgroundColour.SetFT(0.0f, 0.0f);
                 }
                 else
                 {
                     if (!sceneData->outputAlpha)
                     {
                         // if we're not outputting an alpha channel, precompose the scene background against a black "background behind the background"
-                        // (NB: We're deliberately ignoring filter here, as it would wind up being ignored anyway due to how the rendering code works.)
-                        sceneData->backgroundColour.colour() *= (1.0 - sceneData->backgroundColour.transm());
-                        sceneData->backgroundColour.filter() = 0.0f;
-                        sceneData->backgroundColour.transm() = 0.0f;
+                        sceneData->backgroundColour.colour() *= sceneData->backgroundColour.Opacity();
+                        sceneData->backgroundColour.SetFT(0.0f, 0.0f);
                     }
                 }
                 Parse_End();
@@ -6817,7 +6814,7 @@ void Parser::Parse_Global_Settings()
     Parse_Begin();
     EXPECT
         CASE (IRID_WAVELENGTH_TOKEN)
-            Parse_Colour (sceneData->iridWavelengths);
+            Parse_Wavelengths (sceneData->iridWavelengths);
         END_CASE
         CASE (CHARSET_TOKEN)
             EXPECT
@@ -7232,6 +7229,10 @@ void Parser::Parse_Global_Settings()
 
                 CASE (SUBSURFACE_TOKEN)
                     sceneData->radiositySettings.subsurface = ((int)Parse_Float() != 0);
+                END_CASE
+
+                CASE (BRILLIANCE_TOKEN)
+                    sceneData->radiositySettings.brilliance = ((int)Parse_Float() != 0);
                 END_CASE
 
                 OTHERWISE
@@ -7682,8 +7683,8 @@ ObjectPtr Parser::Parse_Object_Mods (ObjectPtr Object)
         CASE(BLINK_TOKEN)
             Object->subFrameTimeStart = Parse_Float();
             Parse_Comma();
-            Object->subFrameTimeEnd = Allow_Float(numeric_limits<float>::max());
-            if (Object->subFrameTimeEnd == numeric_limits<float>::max())
+            Object->subFrameTimeEnd = Allow_Float(std::numeric_limits<float>::max());
+            if (Object->subFrameTimeEnd == std::numeric_limits<float>::max())
             {
                 // "blink FLOAT" is taken as specifying a duration, with the object being visible at the beginning of the frame
                 Object->subFrameTimeEnd   = Object->subFrameTimeStart;
@@ -8462,7 +8463,7 @@ void Parser::Parse_Declare(bool after_hash)
 int Parser::Parse_RValue (int Previous, int *NumberPtr, void **DataPtr, SYM_ENTRY *sym, bool ParFlag, bool SemiFlag, bool is_local, bool allow_redefine, int old_table_index)
 {
     EXPRESS Local_Express;
-    TransColour *Local_Colour;
+    RGBFTColour *Local_Colour;
     PIGMENT *Local_Pigment;
     TNORMAL *Local_Tnormal;
     FINISH *Local_Finish;
@@ -8662,7 +8663,7 @@ int Parser::Parse_RValue (int Previous, int *NumberPtr, void **DataPtr, SYM_ENTR
                         *NumberPtr    = COLOUR_ID_TOKEN;
                         Test_Redefine(Previous,NumberPtr,*DataPtr, allow_redefine);
                         *DataPtr      = reinterpret_cast<void *>(Create_Colour());
-                        *(reinterpret_cast<TransColour *>(*DataPtr)) = TransColour(RGBFTColour(Local_Express));
+                        (*reinterpret_cast<RGBFTColour *>(*DataPtr)).Set(Local_Express, 5);
                         break;
                 }
             }
@@ -8938,7 +8939,7 @@ void Parser::Destroy_Ident_Data(void *Data, int Type)
     switch(Type)
     {
         case COLOUR_ID_TOKEN:
-            Destroy_Colour(reinterpret_cast<TransColour *>(Data));
+            Destroy_Colour(reinterpret_cast<RGBFTColour *>(Data));
             break;
         case VECTOR_ID_TOKEN:
             delete reinterpret_cast<Vector3d *>(Data);
@@ -9443,9 +9444,9 @@ void Parser::Post_Process (ObjectPtr Object, ObjectPtr Parent)
         }
 
         // promote blink settings to child, unless it has its own settings
-        if (Object->subFrameTimeStart == -numeric_limits<float>::max())
+        if (Object->subFrameTimeStart == -std::numeric_limits<float>::max())
             Object->subFrameTimeStart = Parent->subFrameTimeStart;
-        if (Object->subFrameTimeEnd == numeric_limits<float>::max())
+        if (Object->subFrameTimeEnd == std::numeric_limits<float>::max())
             Object->subFrameTimeEnd = Parent->subFrameTimeEnd;
     }
 
@@ -10014,7 +10015,7 @@ void *Parser::Copy_Identifier (void *Data, int Type)
     switch (Type)
     {
         case COLOUR_ID_TOKEN:
-            New = reinterpret_cast<void *>(Copy_Colour(reinterpret_cast<TransColour *>(Data)));
+            New = reinterpret_cast<void *>(Copy_Colour(reinterpret_cast<RGBFTColour *>(Data)));
             break;
         case VECTOR_ID_TOKEN:
             vp = new Vector3d();
@@ -10150,8 +10151,7 @@ void Parser::Convert_Filter_To_Transmit(PIGMENT *Pigment)
     switch (Pigment->Type)
     {
         case PLAIN_PATTERN:
-            Pigment->colour.transm() += Pigment->colour.filter();
-            Pigment->colour.filter() =  0;
+            Pigment->colour.SetFT(0.0, 1.0 - Pigment->colour.Opacity());
             break;
 
         default:
@@ -10174,8 +10174,7 @@ void ColourBlendMap::ConvertFilterToTransmit()
 {
     for (Vector::iterator i = Blend_Map_Entries.begin(); i != Blend_Map_Entries.end(); i++)
     {
-        i->Vals.transm() += i->Vals.filter();
-        i->Vals.filter() = 0;
+        i->Vals.SetFT(0.0, 1.0 - i->Vals.Opacity());
     }
 }
 

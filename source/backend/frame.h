@@ -78,8 +78,35 @@ namespace pov
 {
 
 using namespace pov_base;
+
+// from <algorithm>; we don't want to always type the namespace for these.
 using std::min;
 using std::max;
+
+// from <cmath>; we don't want to always type the namespace for these.
+using std::abs;
+using std::acos;
+using std::asin;
+using std::atan;
+using std::atan2;
+using std::ceil;
+using std::cos;
+using std::cosh;
+using std::exp;
+using std::fabs;
+using std::floor;
+using std::fmod;
+using std::frexp;
+using std::ldexp;
+using std::log;
+using std::log10;
+using std::modf;
+using std::pow;
+using std::sin;
+using std::sinh;
+using std::sqrt;
+using std::tan;
+using std::tanh;
 
 /// @name FixedSimpleVector Sizes
 /// @{
@@ -201,7 +228,7 @@ inline void Destroy_Vector_4D(VECTOR_4D *x)
         POV_FREE(x);
 }
 
-inline void Destroy_Colour(TransColour *x)
+inline void Destroy_Colour(RGBFTColour *x)
 {
     if(x != NULL)
         delete x;
@@ -1099,10 +1126,10 @@ class Media
         DBL Jitter;
         DBL Eccentricity;
         DBL sc_ext;
-        RGBColour Absorption;
-        RGBColour Emission;
-        RGBColour Extinction;
-        RGBColour Scattering;
+        MathColour Absorption;
+        MathColour Emission;
+        MathColour Extinction;
+        MathColour Scattering;
 
         DBL Ratio;
         DBL Confidence;
@@ -1134,7 +1161,7 @@ class Interior
         SNGL IOR, Dispersion;
         SNGL Caustics, Old_Refract;
         SNGL Fade_Distance, Fade_Power;
-        RGBColour Fade_Colour;
+        MathColour Fade_Colour;
         vector<Media> media;
         shared_ptr<SubsurfaceInterior> subsurface;
 
@@ -1286,18 +1313,19 @@ struct Texture_Struct : public Pattern_Struct
 
 struct Finish_Struct
 {
-    SNGL Diffuse, DiffuseBack, RawDiffuse, RawDiffuseBack, Brilliance;
+    SNGL Diffuse, DiffuseBack, Brilliance, BrillianceOut, BrillianceAdjust, BrillianceAdjustRad;
     SNGL Specular, Roughness;
     SNGL Phong, Phong_Size;
     SNGL Irid, Irid_Film_Thickness, Irid_Turb;
     SNGL Temp_Caustics, Temp_IOR, Temp_Dispersion, Temp_Refract, Reflect_Exp, Reflect_Blur;
     unsigned int Reflect_Count;
     SNGL Crand, Metallic;
-    RGBColour Ambient, Emission, Reflection_Max, Reflection_Min;
-    RGBColour SubsurfaceTranslucency, SubsurfaceAnisotropy;
-    //RGBColour SigmaPrimeS, SigmaA;
+    MathColour Ambient, Emission, Reflection_Max, Reflection_Min;
+    MathColour SubsurfaceTranslucency, SubsurfaceAnisotropy;
+    //MathColour SigmaPrimeS, SigmaA;
     SNGL Reflection_Falloff;  // Added by MBP 8/27/98
-    int Reflection_Type;  // Added by MBP 9/5/98
+    bool Reflection_Fresnel;
+    bool Fresnel;
     SNGL Reflect_Metallic; // MBP
     int Conserve_Energy;  // added by NK Dec 19 1999
     bool UseSubsurface;   // whether to use subsurface light transport

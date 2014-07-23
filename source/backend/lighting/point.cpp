@@ -360,7 +360,8 @@ LightSource::LightSource() : CompoundObject(LIGHT_OBJECT)
 {
     Set_Flag(this, NO_SHADOW_FLAG);
 
-    colour = RGBColour(1.0);
+    colour = MathColour(1.0);
+
     Direction = Vector3d(0.0, 0.0, 0.0);
     Center    = Vector3d(0.0, 0.0, 0.0);
     Points_At = Vector3d(0.0, 0.0, 1.0);
@@ -373,7 +374,13 @@ LightSource::LightSource() : CompoundObject(LIGHT_OBJECT)
 
     Fade_Distance = 0.0;
     Fade_Power    = 0.0;
+#if defined(HAVE_NAN)
     Max_Distance  = std::numeric_limits<DBL>::quiet_NaN();
+#elif defined(HAVE_INF)
+    Max_Distance  = std::numeric_limits<DBL>::infinity();
+#else
+    #error Need support for NaNs or Infinities.
+#endif
 
     Projected_Through_Object= NULL;
 

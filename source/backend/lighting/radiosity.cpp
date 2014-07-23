@@ -111,20 +111,23 @@ const DBL WEIGHT_ERROR_BOUND_OFFSET = 0.25;
 const int PRETRACE_STEP_FINAL  = 0;         // dummy value to use instead of pretrace step during final render
 const int PRETRACE_STEP_LOADED = SCHAR_MAX; // dummy value to use instead of pretrace step for samples loaded from file
 
+#define BRILLIANCE_EPSILON 1e-5
+
 // structure used to gather weighted average during tree traversal
 struct WT_AVG
 {
-    RGBColour Weights_Times_Illuminances; // Aggregates during traversal
-    DBL Weights;                          // Aggregates during traversal
-    int Weights_Count;                    // Count of points used, aggregates during trav
-    int Good_Count;                       // Count of points used, aggregates during trav
-    Vector3d P, N;                        // Point and Normal:  input to traverse
-    DBL Current_Error_Bound;              // see Radiosity_Error_Bound
-    int Pass;                             // Current pass (FINAL_TRACE for final render)
-    int TileId;                           // Current tile
+    MathColour Weights_Times_Illuminances;  // Aggregates during traversal
+    DBL Weights;                            // Aggregates during traversal
+    int Weights_Count;                      // Count of points used, aggregates during trav
+    int Good_Count;                         // Count of points used, aggregates during trav
+    Vector3d P, N;                          // Point and Normal:  input to traverse
+    DBL Brilliance;                         // Surface brilliance
+    DBL Current_Error_Bound;                // see Radiosity_Error_Bound
+    int Pass;                               // Current pass (FINAL_TRACE for final render)
+    int TileId;                             // Current tile
 
     /* [CLi] obsolete
-    RGBColour Weight_Times_Illuminance[MAX_NEAREST_COUNT];
+    MathColour Weight_Times_Illuminance[MAX_NEAREST_COUNT];
     DBL Weight[MAX_NEAREST_COUNT];
     DBL Distance[MAX_NEAREST_COUNT];
     */
@@ -380,12 +383,13 @@ void RadiosityFunction::AfterTile()
     cacheBlockPool = NULL;
 }
 
-void RadiosityFunction::ComputeAmbient(const Vector3d& ipoint, const Vector3d& raw_normal, const Vector3d& layer_normal, RGBColour& ambient_colour, DBL weight, TraceTicket& ticket)
+void RadiosityFunction::ComputeAmbient(const Vector3d& ipoint, const Vector3d& raw_normal, const Vector3d& layer_normal, DBL brilliance, MathColour& ambient_colour, DBL weight, TraceTicket& ticket)
 {
     DBL temp_error_bound = errorBound;
     const RecursionParameters& param = recursionParameters[ticket.radiosityRecursionDepth];
     const RadiosityRecursionSettings& recSettings = recursionSettings[ticket.radiosityRecursionDepth];
     DBL reuse;
+    DBL tmpBrilliance = (settings.brilliance? brilliance : 1.0);
 
     Vector3d effectiveNormal(settings.normal ? layer_normal : raw_normal);
 
@@ -396,7 +400,7 @@ void RadiosityFunction::ComputeAmbient(const Vector3d& ipoint, const Vector3d& r
     if(weight < WEIGHT_ERROR_BOUND_OFFSET)
         temp_error_bound += (WEIGHT_ERROR_BOUND_OFFSET - weight);
 
-    reuse = radiosityCache.FindReusableBlock(threadData->Stats(), temp_error_bound * recSettings.errorBoundFactor, ipoint, effectiveNormal, ambient_colour, ticket.radiosityRecursionDepth, pretraceStep, tileId);
+    reuse = radiosityCache.FindReusableBlock(threadData->Stats(), temp_error_bound * recSettings.errorBoundFactor, ipoint, effectiveNormal, tmpBrilliance, ambient_colour, ticket.radiosityRecursionDepth, pretraceStep, tileId);
 
     if (ticket.radiosityRecursionDepth == 0)
     {
@@ -425,8 +429,8 @@ void RadiosityFunction::ComputeAmbient(const Vector3d& ipoint, const Vector3d& r
     }
     else
     {
-        RGBColour tmpColour;
-        double quality = GatherLight(ipoint, raw_normal, effectiveNormal, tmpColour, ticket);
+        MathColour tmpColour;
+        double quality = GatherLight(ipoint, raw_normal, effectiveNormal, tmpBrilliance, tmpColour, ticket);
 
         // If we already found samples nearby (and we just decided to take more), make use of them.
         if (reuse > 0)
@@ -503,14 +507,14 @@ bool RadiosityFunction::CheckRadiosityTraceLevel(const TraceTicket& ticket)
 *
 ******************************************************************************/
 
-double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& raw_normal, const Vector3d& layer_normal, RGBColour& illuminance, TraceTicket& ticket)
+double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& raw_normal, const Vector3d& layer_normal, DBL brilliance, MathColour& illuminance, TraceTicket& ticket)
 {
     unsigned int cur_sample_count;
 
     Vector3d direction, up, min_dist_vec;
     int save_Max_Trace_Level;
-    RGBColour dxs, dys, dzs;
-    RGBColour colour_sums, temp_colour;
+    MathColour dxs, dys, dzs;
+    MathColour colour_sums, temp_colour;
     DBL inverse_distance_sum, mean_dist,
         smallest_dist,
         sum_of_inverse_dist, sum_of_dist, gradient_count;
@@ -563,7 +567,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
     unsigned int okCountRaw = 0;
     bool use_raw_normal = similar(raw_normal, layer_normal); // if the normal isn't pertubed, go for the raw normal right away because it makes life easier
     double qualitySum = 0.0;
-    param.directionGenerator.InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal);
+    param.directionGenerator.InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal, brilliance);
     for(unsigned int i = 0, hit = 0; i < cur_sample_count; i++)
     {
         bool ray_ok = param.directionGenerator.GetDirection(direction);
@@ -571,7 +575,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
         {
             // out of good sample directions, but we may still re-try with the raw normal
             use_raw_normal = true;
-            param.directionGenerator.InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal);
+            param.directionGenerator.InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal, brilliance);
             ray_ok = param.directionGenerator.GetDirection(direction);
         }
         if (!ray_ok)
@@ -586,9 +590,10 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
         ticket.radiosityImportanceQueried = (float)i / (float)(cur_sample_count-1);
         bool alphaBackground = ticket.alphaBackground;
         ticket.alphaBackground = false;
-        TransColour temp_full_colour;
-        DBL depth = trace.TraceRay(nray, temp_full_colour, weight, false); // Go down in recursion, trace the result, and come back up
-        RGBColour temp_colour = temp_full_colour.colour();
+        MathColour temp_full_colour;
+        ColourChannel dummyTransm;
+        DBL depth = trace.TraceRay(nray, temp_full_colour, dummyTransm, weight, false); // Go down in recursion, trace the result, and come back up
+        MathColour temp_colour = temp_full_colour;
         ticket.radiosityRecursionDepth--;
         ticket.alphaBackground = alphaBackground;
 
@@ -727,7 +732,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
         // TODO CLARIFY - [CLi] not perfectly sure yet when to use raw_normal instead of layer_normal; maybe just interpolate
         unsigned int okCountNonRaw = okCount - okCountRaw;
         bool fileUnderRawNormal = (okCountRaw > okCountNonRaw);
-        radiosityCache.AddBlock(cacheBlockPool, &(threadData->Stats()), ipoint, (fileUnderRawNormal ? raw_normal : layer_normal), min_dist_vec,
+        radiosityCache.AddBlock(cacheBlockPool, &(threadData->Stats()), ipoint, (fileUnderRawNormal ? raw_normal : layer_normal), brilliance, min_dist_vec,
                                 dxs, dys, dzs, illuminance, mean_dist, smallest_dist, qualitySum/okCount,
                                 ticket.radiosityRecursionDepth, pretraceStep, tileId);
     }
@@ -775,7 +780,7 @@ void RadiosityFunction::SampleDirectionGenerator::Reset(unsigned int samplePoolC
         sampleDirections = GetSubRandomCosWeightedDirectionGenerator(0, samplePoolCount);
 }
 
-void RadiosityFunction::SampleDirectionGenerator::InitSequence(unsigned int& sample_count, const Vector3d& raw_normal, const Vector3d& layer_normal, bool use_raw_normal)
+void RadiosityFunction::SampleDirectionGenerator::InitSequence(unsigned int& sample_count, const Vector3d& raw_normal, const Vector3d& layer_normal, bool use_raw_normal, DBL br)
 {
     size_t sequenceSize = sampleDirections->CycleLength();
     sample_count = (unsigned int)min((size_t)sample_count, sequenceSize);
@@ -814,6 +819,8 @@ void RadiosityFunction::SampleDirectionGenerator::InitSequence(unsigned int& sam
         offY = Vector3d(0,0,1);
     frameX = cross(frameY, offY).normalized();
     frameZ = cross(frameX, frameY).normalized();
+
+    brilliance = br;
 }
 
 bool RadiosityFunction::SampleDirectionGenerator::GetDirection(Vector3d& direction)
@@ -832,8 +839,24 @@ bool RadiosityFunction::SampleDirectionGenerator::GetDirection(Vector3d& directi
     //    as well (think walls or boxes)
     do
     {
-        ///Increase_Counter(stats[Gather_Performed_Count]);
+        //Increase_Counter(stats[Gather_Performed_Count]);
         random_vec = (*sampleDirections)();
+
+        // Tweak the direction vector according to the brilliance specified.
+        random_vec.y() = fabs(random_vec.y());
+        if (brilliance != 1.0)
+        {
+            DBL yOld        =  random_vec.y();
+            DBL yOldSqr     =  Sqr(yOld);
+            DBL yNewSqr     =  pow(yOldSqr, 2.0/(1.0 + brilliance));
+            DBL rOldSqr     =  1.0 - yOldSqr;
+            DBL rNewSqr     =  1.0 - yNewSqr;
+            DBL rFactor     =  sqrt(rNewSqr/rOldSqr);
+            random_vec.x()  *= rFactor;
+            random_vec.z()  *= rFactor;
+            random_vec.y()  =  sqrt(yNewSqr);
+        }
+
         if(frameY[Y] > 1.0 - RAD_EPSILON)
             // within 2.56 degree of Y, so we'll cheat a bit by using precomputed vectors as-is
             direction = random_vec;
@@ -908,8 +931,8 @@ bool RadiosityCache::Load(const Path& inputFile)
         Vector3d point;
         Vector3d normal;
         Vector3d to_nearest;
-        RGBColour dx, dy, dz;
-        RGBColour illuminance;
+        MathColour dx, dy, dz;
+        MathColour illuminance;
         double harmonic_mean;
         double nearest;
         int goodreads = 0;
@@ -941,14 +964,20 @@ bool RadiosityCache::Load(const Path& inputFile)
                 }
                 case 'C':
                 {
+#if (NUM_COLOUR_CHANNELS == 3)
+                    RGBColour tempCol;
                     count = sscanf(line, "C%d %lf %lf %lf %s %f %f %f %lf %lf %s\n", // tw
                         &depth,
                         &point[X], &point[Y], &point[Z],
                         normal_string,
-                        &illuminance.red(), &illuminance.green(), &illuminance.blue(),
+                        &tempCol.red(), &tempCol.green(), &tempCol.blue(),
                         &harmonic_mean,
                         &nearest, to_nearest_string
                     );
+                    illuminance = ToMathColour(tempCol);
+#else
+                    #error TODO!
+#endif
                     if ( count == 11 )
                     {
                         depth = depth - 1; // file format still uses 1-based bounce depth counting
@@ -968,7 +997,7 @@ bool RadiosityCache::Load(const Path& inputFile)
 
                         line_num++;
 
-                        AddBlock(pool, NULL, point, normal, to_nearest, dx, dy, dz, illuminance, harmonic_mean, nearest, 1.0 /* TODO FIXME */, depth, PRETRACE_STEP_LOADED, 0);
+                        AddBlock(pool, NULL, point, normal, 1.0 /* TODO FIXME - brilliance */, to_nearest, dx, dy, dz, illuminance, harmonic_mean, nearest, 1.0 /* TODO FIXME - quality */, depth, PRETRACE_STEP_LOADED, 0);
                         goodreads++;
                     }
                     break;
@@ -1171,8 +1200,8 @@ RadiosityCache::BlockPool::~BlockPool()
 }
 
 
-void RadiosityCache::AddBlock(BlockPool* pool, RenderStatistics* stats, const Vector3d& point, const Vector3d& normal, const Vector3d& toNearestSurface,
-                              const RGBColour& dx, const RGBColour& dy, const RGBColour& dz, const RGBColour& illuminance,
+void RadiosityCache::AddBlock(BlockPool* pool, RenderStatistics* stats, const Vector3d& point, const Vector3d& normal, DBL brilliance, const Vector3d& toNearestSurface,
+                              const MathColour& dx, const MathColour& dy, const MathColour& dz, const MathColour& illuminance,
                               DBL harmonicMeanDistance, DBL nearestDistance, DBL quality, int bounceDepth, int pretraceStep, int tileId)
 {
     ot_block_struct*    block = pool->NewBlock();
@@ -1191,6 +1220,7 @@ void RadiosityCache::AddBlock(BlockPool* pool, RenderStatistics* stats, const Ve
     block->dy = dy;
     block->dz = dz;
 #endif
+    block->Brilliance = SNGL(brilliance);
     block->Harmonic_Mean_Distance = SNGL(harmonicMeanDistance);
     block->Nearest_Distance = SNGL(nearestDistance);
     block->Quality = SNGL(quality);
@@ -1433,7 +1463,7 @@ void RadiosityCache::InsertBlock(ot_node_struct *node, ot_block_struct *block)
 *
 ******************************************************************************/
 
-DBL RadiosityCache::FindReusableBlock(RenderStatistics& stats, DBL errorbound, const Vector3d& ipoint, const Vector3d& snormal, RGBColour& illuminance, int recursionDepth, int pretraceStep, int tileId)
+DBL RadiosityCache::FindReusableBlock(RenderStatistics& stats, DBL errorbound, const Vector3d& ipoint, const Vector3d& snormal, DBL brilliance, MathColour& illuminance, int recursionDepth, int pretraceStep, int tileId)
 {
     if(octree.root != NULL)
     {
@@ -1443,6 +1473,7 @@ DBL RadiosityCache::FindReusableBlock(RenderStatistics& stats, DBL errorbound, c
 
         gather.P = ipoint;
         gather.N = snormal;
+        gather.Brilliance = brilliance;
 
         gather.Weights_Count = 0;
         gather.Good_Count = 0;
@@ -1535,6 +1566,10 @@ bool RadiosityCache::AverageNearBlock(ot_block_struct *block, void *void_info)
 
     // for the sake of reproducibility, do not use samples gathered during the same pass in other tiles
     if ((block->Pass == info->Pass) && (block->TileId != info->TileId))
+        return true; // we always return true
+
+    // do not use samples gathered for a different surface brilliance
+    if (fabs(block->Brilliance - info->Brilliance) > BRILLIANCE_EPSILON) // TODO FIXME - make this a relative value
         return true; // we always return true
 
     Vector3d delta(info->P - block->Point);   // a = b - c, which is test p minus old pt
@@ -1693,12 +1728,7 @@ bool RadiosityCache::AverageNearBlock(ot_block_struct *block, void *void_info)
 
                         // This is the block where we use the gradient to improve the prediction
 #ifdef RAD_GRADIENT
-                        RGBColour d((block->dx * delta[X]) + (block->dy * delta[Y]) + (block->dz * delta[Z]));
-#else
-                        RGBColour d(0.0f);
-#endif
-
-                        RGBColour prediction;
+                        MathColour d((block->dx * delta[X]) + (block->dy * delta[Y]) + (block->dz * delta[Z]));
 
                         // NK 6-May-2003 removed clipping - not sure why it was here in the
                         // first place, but it sure causes problems for HDR scenes, and removing
@@ -1714,7 +1744,10 @@ bool RadiosityCache::AverageNearBlock(ot_block_struct *block, void *void_info)
                         if((d.blue() + block->Illuminance.blue() < 0.0) && (block->Illuminance.blue() > 0.0))
                             d.blue() = -block->Illuminance.blue();
 
-                        prediction = block->Illuminance + d;
+                        MathColour prediction = block->Illuminance + d;
+#else
+                        MathColour prediction = block->Illuminance;
+#endif
 
 #ifdef SHOW_SAMPLE_SPOTS
                         // TODO FIXME - distance_maximum no longer exists

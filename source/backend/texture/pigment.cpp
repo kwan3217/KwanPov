@@ -114,11 +114,9 @@ PIGMENT *Create_Pigment ()
     New = new PIGMENT;
 
     Init_TPat_Fields(New);
-    New->Blend_Map  = NULL;
 
     New->colour.Clear();
     New->Quick_Colour.Invalidate();
-    New->Blend_Map = NULL;
 
     return (New);
 }
@@ -270,8 +268,12 @@ void Post_Pigment(PIGMENT *Pigment, bool* pHasFilter)
 
     switch (Pigment->Type)
     {
-        case PLAIN_PATTERN:
         case NO_PATTERN:
+
+            assert(false); // should have been forced to PLAIN_PATTERN by now
+            break;
+
+        case PLAIN_PATTERN:
         case BITMAP_PATTERN:
 
             break;
@@ -288,8 +290,8 @@ void Post_Pigment(PIGMENT *Pigment, bool* pHasFilter)
                         break;
 
                     default:
-                        Pigment->Blend_Map = tr1::static_pointer_cast<GenericPigmentBlendMap, ColourBlendMap>(
-                                                 tr1::const_pointer_cast<ColourBlendMap, const ColourBlendMap>(
+                        Pigment->Blend_Map = std::tr1::static_pointer_cast<GenericPigmentBlendMap, ColourBlendMap>(
+                                                 std::tr1::const_pointer_cast<ColourBlendMap, const ColourBlendMap>(
                                                      Pigment->pattern->GetDefaultBlendMap()));
                         break;
                 }
@@ -302,8 +304,7 @@ void Post_Pigment(PIGMENT *Pigment, bool* pHasFilter)
 
     hasFilter = false;
 
-    if ((fabs(Pigment->colour.filter()) > EPSILON) ||
-        (fabs(Pigment->colour.transm()) > EPSILON))
+    if (!Pigment->colour.TransmittedColour().IsNearZero(EPSILON))
     {
         hasFilter = true;
     }
@@ -335,7 +336,7 @@ void ColourBlendMap::Post(bool& rHasFilter)
 {
     for(Vector::const_iterator i = Blend_Map_Entries.begin(); i != Blend_Map_Entries.end(); i++)
     {
-        if ((fabs(i->Vals.filter())>EPSILON) || (fabs(i->Vals.transm())>EPSILON))
+        if (!i->Vals.TransmittedColour().IsNearZero(EPSILON))
         {
             rHasFilter = true;
             break;
@@ -409,6 +410,7 @@ bool Compute_Pigment (TransColour& colour, const PIGMENT *Pigment, const Vector3
         {
             case NO_PATTERN:
 
+                assert(false); // should have been forced to PLAIN_PATTERN in Post_Pigment
                 colour.Clear();
 
                 break;
@@ -575,7 +577,7 @@ static void Do_Average_Pigments (TransColour& colour, const PIGMENT *Pigment, co
     Pigment->Blend_Map->ComputeAverage(colour, EPoint, Intersect, ray, Thread);
 }
 
-void Evaluate_Density_Pigment(vector<PIGMENT*>& Density, const Vector3d& p, RGBColour& c, TraceThreadData *ttd)
+void Evaluate_Density_Pigment(vector<PIGMENT*>& Density, const Vector3d& p, MathColour& c, TraceThreadData *ttd)
 {
     TransColour lc;
 
@@ -596,9 +598,9 @@ void Evaluate_Density_Pigment(vector<PIGMENT*>& Density, const Vector3d& p, RGBC
 
 //******************************************************************************
 
-ColourBlendMap::ColourBlendMap() : BlendMap(COLOUR_TYPE) {}
+ColourBlendMap::ColourBlendMap() : BlendMap<TransColour>(COLOUR_TYPE) {}
 
-ColourBlendMap::ColourBlendMap(int n, const ColourBlendMap::Entry aEntries[]) : BlendMap(COLOUR_TYPE)
+ColourBlendMap::ColourBlendMap(int n, const ColourBlendMap::Entry aEntries[]) : BlendMap<TransColour>(COLOUR_TYPE)
 {
     Blend_Map_Entries.reserve(n);
     for (int i = 0; i < n; i ++)
@@ -606,7 +608,7 @@ ColourBlendMap::ColourBlendMap(int n, const ColourBlendMap::Entry aEntries[]) : 
 }
 
 
-PigmentBlendMap::PigmentBlendMap(int type) : BlendMap(type) {}
+PigmentBlendMap::PigmentBlendMap(int type) : BlendMap<PIGMENT*>(type) {}
 
 PigmentBlendMap::~PigmentBlendMap()
 {

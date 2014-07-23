@@ -77,6 +77,7 @@
 namespace pov
 {
 
+/// Round up to a power of two.
 inline unsigned int MakePowerOfTwo(unsigned int i)
 {
     unsigned int ii = 0;
@@ -261,17 +262,17 @@ bool ViewData::GetNextRectangle(POVRect& rect, unsigned int& serial, BlockInfo*&
 {
     boost::mutex::scoped_lock lock(nextBlockMutex);
 
-    set<unsigned int> newPostponedList;
+    BlockIdSet newPostponedList;
 
     if (stride != 0)
     {
         unsigned int oldNextBlock = nextBlock;
 
         bool usePostponed = false;
-        for(set<unsigned int>::iterator i = blockPostponedList.begin(); i != blockPostponedList.end(); i ++)
+        for(BlockIdSet::iterator i = blockPostponedList.begin(); i != blockPostponedList.end(); i ++)
         {
             usePostponed = true;
-            for(set<unsigned int>::iterator busy = blockBusyList.begin(); busy != blockBusyList.end(); busy ++)
+            for(BlockIdSet::iterator busy = blockBusyList.begin(); busy != blockBusyList.end(); busy ++)
             {
                 if((*i >= *busy) && ((*i - *busy) % stride == 0))
                 {
@@ -302,7 +303,7 @@ bool ViewData::GetNextRectangle(POVRect& rect, unsigned int& serial, BlockInfo*&
                 if((blockSkipList.empty() == true) || (blockSkipList.find((unsigned int)tempNextBlock) == blockSkipList.end()))
                 {
                     bool avoid = false;
-                    for(set<unsigned int>::iterator busy = blockBusyList.begin(); busy != blockBusyList.end(); busy ++)
+                    for(BlockIdSet::iterator busy = blockBusyList.begin(); busy != blockBusyList.end(); busy ++)
                     {
                         if((tempNextBlock >= *busy) && ((tempNextBlock - *busy) % stride == 0))
                         {
@@ -381,7 +382,7 @@ bool ViewData::GetNextRectangle(POVRect& rect, unsigned int& serial, BlockInfo*&
     pixelsPending += rect.GetArea();
 
     blockBusyList.insert(serial);
-    for(set<unsigned int>::iterator i = newPostponedList.begin(); i != newPostponedList.end(); i ++)
+    for(BlockIdSet::iterator i = newPostponedList.begin(); i != newPostponedList.end(); i ++)
         blockPostponedList.insert(*i);
 
     blockInfo = blockInfoList[serial];
@@ -543,7 +544,7 @@ void ViewData::CompletedRectangle(const POVRect& rect, unsigned int serial, floa
     }
 }
 
-void ViewData::SetNextRectangle(const set<unsigned int>& bsl, unsigned int fs)
+void ViewData::SetNextRectangle(const BlockIdSet& bsl, unsigned int fs)
 {
     blockSkipList = bsl;
     blockBusyList.clear(); // safety catch; shouldn't be necessary
@@ -680,7 +681,7 @@ void View::StartRender(POVMS_Object& renderOptions)
     unsigned int previewendsize = 0;
     unsigned int nextblock = 0;
     bool highReproducibility = false;
-    shared_ptr<set<unsigned int> > blockskiplist(new set<unsigned int>());
+    shared_ptr<ViewData::BlockIdSet> blockskiplist(new ViewData::BlockIdSet());
 
     if(renderControlThread == NULL)
 #ifndef USE_OFFICIAL_BOOST
@@ -1382,7 +1383,7 @@ void View::SendStatistics(TaskQueue&)
     viewThreadData.clear();
 }
 
-void View::SetNextRectangle(TaskQueue&, shared_ptr<set<unsigned int> > bsl, unsigned int fs)
+void View::SetNextRectangle(TaskQueue&, shared_ptr<ViewData::BlockIdSet> bsl, unsigned int fs)
 {
     viewData.SetNextRectangle(*bsl, fs);
 }
@@ -1446,7 +1447,7 @@ const Camera *RTRData::CompletedFrame()
         // test >= in case of weirdness due to the timed wait we use with the boost::condition
         if (++numRenderThreadsCompleted >= numRenderThreads)
         {
-            viewData.SetNextRectangle(set<unsigned int>(), 0);
+            viewData.SetNextRectangle(ViewData::BlockIdSet(), 0);
             try
             {
                 POVMS_Message pixelblockmsg(kPOVObjectClass_PixelData, kPOVMsgClass_ViewImage, kPOVMsgIdent_PixelBlockSet);

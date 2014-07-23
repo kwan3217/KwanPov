@@ -292,7 +292,7 @@ class LightSource : public CompoundObject
 {
     public:
         size_t index;
-        RGBColour colour;
+        MathColour colour;
         Vector3d Direction, Center, Points_At, Axis1, Axis2;
         DBL Coeff, Radius, Falloff;
         DBL Fade_Distance, Fade_Power, Max_Distance;
@@ -338,6 +338,7 @@ struct ContainedByShape
     virtual bool Intersect(const Ray& ray, const TRANSFORM* pTrans, DBL& rDepth1, DBL& rDepth2, int& rSide1, int& sSide2) const = 0;
     virtual bool Inside(const Vector3d& IPoint) const = 0;
     virtual void Normal(const Vector3d& IPoint, const TRANSFORM* pTrans, int side, Vector3d& rNormal) const = 0;
+    virtual ContainedByShape* Copy() const = 0;
 };
 
 /// Class used for containing inherently infinite objects (isosurface, parametric) in a box.
@@ -352,6 +353,7 @@ struct ContainedByBox : public ContainedByShape
     virtual bool Intersect(const Ray& ray, const TRANSFORM* pTrans, DBL& rDepth1, DBL& rDepth2, int& rSide1, int& sSide2) const;
     virtual bool Inside(const Vector3d& IPoint) const;
     virtual void Normal(const Vector3d& IPoint, const TRANSFORM* pTrans, int side, Vector3d& rNormal) const;
+    virtual ContainedByShape* Copy() const;
 };
 
 /// Class used for containing inherently infinite objects (isosurface, parametric) in a sphere.
@@ -366,6 +368,7 @@ struct ContainedBySphere : public ContainedByShape
     virtual bool Intersect(const Ray& ray, const TRANSFORM* pTrans, DBL& rDepth1, DBL& rDepth2, int& rSide1, int& sSide2) const;
     virtual bool Inside(const Vector3d& IPoint) const;
     virtual void Normal(const Vector3d& IPoint, const TRANSFORM* pTrans, int side, Vector3d& rNormal) const;
+    virtual ContainedByShape* Copy() const;
 };
 
 

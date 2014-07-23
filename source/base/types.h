@@ -45,6 +45,7 @@
 #define POVRAY_BASE_TYPES_H
 
 #include <algorithm>
+#include <limits>
 #include <vector>
 #include <limits>
 
@@ -53,8 +54,34 @@
 namespace pov_base
 {
 
+// from <algorithm>; we don't want to always type the namespace for these.
 using std::min;
 using std::max;
+
+// from <cmath>; we don't want to always type the namespace for these.
+using std::abs;
+using std::acos;
+using std::asin;
+using std::atan;
+using std::atan2;
+using std::ceil;
+using std::cos;
+using std::cosh;
+using std::exp;
+using std::fabs;
+using std::floor;
+using std::fmod;
+using std::frexp;
+using std::ldexp;
+using std::log;
+using std::log10;
+using std::modf;
+using std::pow;
+using std::sin;
+using std::sinh;
+using std::sqrt;
+using std::tan;
+using std::tanh;
 
 // Get minimum/maximum of three values.
 template<typename T>
@@ -82,41 +109,6 @@ inline T clipToType(T2 val)
 {
     return (T)clip<T2>(val, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 }
-
-///
-/// Test whether a floating-point value is numeric (finite or infinite).
-///
-/// @todo   Some runtime environments already provide the following function (with a different name),
-///         so we may want to move this into the platform specific section.
-///
-template<typename T>
-inline bool isNumeric(T x)
-{
-    // We're exploiting the fact that NaNs (and only those) are not equal to anything, not even themselves.
-    return (x == x);
-}
-
-///
-/// Test whether a floating-point value is finite.
-///
-/// @todo   Some runtime environments already provide the following function (with a different name),
-///         so we may want to move this into the platform specific section.
-///
-template<typename T>
-inline bool isFinite(T x)
-{
-    return (x >= -std::numeric_limits<T>::max()) &&
-           (x <=  std::numeric_limits<T>::max());
-}
-
-///
-/// Test whether a floating-point value is a NaN ("Not a Number").
-///
-/// @todo   Some runtime environments may already provide the following function (with a different name),
-///         so we may want to move this into the platform specific section.
-///
-template<typename T>
-inline bool isNaN(T x) { return !isNumeric(x); }
 
 ///
 /// Force a value's precision to a given type, even if computations are normally done with extended precision

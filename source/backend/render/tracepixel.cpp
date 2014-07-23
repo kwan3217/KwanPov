@@ -296,7 +296,8 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, RGBTColour& col
 
             if (CreateCameraRay(ray, x, y, width, height, rayno) == true)
             {
-                TransColour col;
+                MathColour col;
+                ColourChannel transm = 0.0;
 
                 ticket.subFrameTime = (*threadData->stochasticRandomGenerator)();
                 if (siblingRays > 0)
@@ -304,10 +305,10 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, RGBTColour& col
                     ticket.stochasticCount = siblingRays;
                     ticket.stochasticDepth = 1;
                 }
-                TraceRay(ray, col, 1.0, false, camera.Max_Ray_Distance);
+                TraceRay(ray, col, transm, 1.0, false, camera.Max_Ray_Distance);
                 if (col.IsSane())
                 {
-                    colour += RGBTColour(col);
+                    colour += RGBTColour(ToRGBColour(col), transm);
                     numTraced++;
                 }
             }
@@ -1046,9 +1047,10 @@ void TracePixel::TraceRayWithFocalBlur(RGBTColour& colour, DBL x, DBL y, DBL wid
                     ticket.stochasticCount *= siblingRays;
                     ticket.stochasticDepth ++;
                 }
-                TransColour tempC;
-                TraceRay(ray, tempC, 1.0, false, camera.Max_Ray_Distance);
-                C = RGBTColour(tempC);
+                MathColour tempC;
+                ColourChannel tempT = 0.0;
+                TraceRay(ray, tempC, tempT, 1.0, false, camera.Max_Ray_Distance);
+                C = RGBTColour(ToRGBColour(tempC), tempT);
             }
             else
                 C = RGBTColour(0.0, 0.0, 0.0, 1.0);

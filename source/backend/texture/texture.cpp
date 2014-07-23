@@ -1171,21 +1171,23 @@ FINISH *Create_Finish()
     New->Reflection_Max.Clear();
     New->Reflection_Min.Clear();
 
-    New->Reflection_Type    = 0;
-    New->Reflection_Falloff = 1;    /* Added by MBP 8/27/98 */
-    New->Diffuse            = 0.6;
-    New->DiffuseBack        = 0.0;
-    New->RawDiffuse         = New->Diffuse;
-    New->RawDiffuseBack     = New->DiffuseBack;
-    New->Brilliance         = 1.0;
-    New->Phong              = 0.0;
-    New->Phong_Size         = 40.0;
-    New->Specular           = 0.0;
-    New->Roughness          = 1.0 / 0.05;
+    New->Reflection_Fresnel     = false;
+    New->Reflection_Falloff     = 1;    /* Added by MBP 8/27/98 */
+    New->Diffuse                = 0.6;
+    New->DiffuseBack            = 0.0;
+    New->Brilliance             = 1.0;
+    New->BrillianceOut          = 1.0;
+    New->BrillianceAdjust       = 1.0;
+    New->BrillianceAdjustRad    = 1.0;
+    New->Phong                  = 0.0;
+    New->Phong_Size             = 40.0;
+    New->Specular               = 0.0;
+    New->Roughness              = 1.0 / 0.05;
 
     New->Crand = 0.0;
 
     New->Metallic = 0.0;
+    New->Fresnel  = false;
 
     New->Irid                = 0.0;
     New->Irid_Film_Thickness = 0.0;
@@ -1273,7 +1275,6 @@ TEXTURE *Create_Texture()
     New = new TEXTURE;
 
     Init_TPat_Fields(New);
-    New->Blend_Map  = NULL;
 
     New->Next = NULL;
     New->References = 1;
@@ -2332,7 +2333,7 @@ void AVX_FMA4_DNoise(Vector3d& result, const Vector3d& EPoint)
 
 //******************************************************************************
 
-TextureBlendMap::TextureBlendMap() : BlendMap(TEXTURE_TYPE) {}
+TextureBlendMap::TextureBlendMap() : BlendMap<TexturePtr>(TEXTURE_TYPE) {}
 
 TextureBlendMap::~TextureBlendMap()
 {

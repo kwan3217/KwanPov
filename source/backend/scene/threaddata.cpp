@@ -41,6 +41,8 @@
 ///
 //******************************************************************************
 
+#include <limits>
+
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/scene/threaddata.h"
