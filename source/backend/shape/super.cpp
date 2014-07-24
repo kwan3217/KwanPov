@@ -1,38 +1,40 @@
-/*******************************************************************************
- * super.cpp
- *
- * This module implements functions that manipulate superellipsoids.
- *
- * Original code written by Alexander Enzmann.
- * Adaption to POV-Ray by Dieter Bayer [DB].
- *
- * ---------------------------------------------------------------------------
- * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
- * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
- *
- * POV-Ray is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * POV-Ray is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * ---------------------------------------------------------------------------
- * POV-Ray is based on the popular DKB raytracer version 2.12.
- * DKBTrace was originally written by David K. Buck.
- * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
- * ---------------------------------------------------------------------------
- * $File: //depot/public/povray/3.x/source/backend/shape/super.cpp $
- * $Revision: #1 $
- * $Change: 6069 $
- * $DateTime: 2013/11/06 11:59:40 $
- * $Author: chrisc $
- *******************************************************************************/
+//******************************************************************************
+///
+/// @file backend/shape/super.cpp
+///
+/// This module implements functions that manipulate superellipsoids.
+///
+/// Original code written by Alexander Enzmann.
+/// Adaption to POV-Ray by Dieter Bayer [DB].
+///
+/// @copyright
+/// @parblock
+///
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+///
+/// POV-Ray is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU Affero General Public License as
+/// published by the Free Software Foundation, either version 3 of the
+/// License, or (at your option) any later version.
+///
+/// POV-Ray is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU Affero General Public License for more details.
+///
+/// You should have received a copy of the GNU Affero General Public License
+/// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+///
+/// ----------------------------------------------------------------------------
+///
+/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// DKBTrace was originally written by David K. Buck.
+/// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
+///
+/// @endparblock
+///
+//*******************************************************************************
 
 /****************************************************************************
 *
@@ -106,12 +108,12 @@ const int PLANECOUNT = 9;
 ******************************************************************************/
 
 const DBL planes[PLANECOUNT][4] =
-	{{1, 1, 0, 0}, {1,-1, 0, 0},
-	 {1, 0, 1, 0}, {1, 0,-1, 0},
-	 {0, 1, 1, 0}, {0, 1,-1, 0},
-	 {1, 0, 0, 0},
-	 {0, 1, 0, 0},
-	 {0, 0, 1, 0}};
+    {{1, 1, 0, 0}, {1,-1, 0, 0},
+     {1, 0, 1, 0}, {1, 0,-1, 0},
+     {0, 1, 1, 0}, {0, 1,-1, 0},
+     {1, 0, 0, 0},
+     {0, 1, 0, 0},
+     {0, 0, 1, 0}};
 
 
 
@@ -126,19 +128,19 @@ const DBL planes[PLANECOUNT][4] =
 *   Object      - Object
 *   Ray         - Ray
 *   Depth_Stack - Intersection stack
-*   
+*
 * OUTPUT
 *
 *   Depth_Stack
-*   
+*
 * RETURNS
 *
 *   int - true, if a intersection was found
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Determine ray/superellipsoid intersection and clip intersection found.
@@ -151,15 +153,15 @@ const DBL planes[PLANECOUNT][4] =
 
 bool Superellipsoid::All_Intersections(const Ray& ray, IStack& Depth_Stack, TraceThreadData *Thread)
 {
-	Thread->Stats()[Ray_Superellipsoid_Tests]++;
+    Thread->Stats()[Ray_Superellipsoid_Tests]++;
 
-	if (Intersect(ray, Depth_Stack, Thread))
-	{
-		Thread->Stats()[Ray_Superellipsoid_Tests_Succeeded]++;
+    if (Intersect(ray, Depth_Stack, Thread))
+    {
+        Thread->Stats()[Ray_Superellipsoid_Tests_Succeeded]++;
 
-		return(true);
-	}
-	return(false);
+        return(true);
+    }
+    return(false);
 }
 
 
@@ -175,19 +177,19 @@ bool Superellipsoid::All_Intersections(const Ray& ray, IStack& Depth_Stack, Trac
 *   Ray            - Ray
 *   Superellipsoid - Superellipsoid
 *   Depth_Stack    - Depth stack
-*   
+*
 * OUTPUT
 *
 *   Intersection
-*   
+*
 * RETURNS
 *
 *   int - true if intersections were found.
-*   
+*
 * AUTHOR
 *
 *   Alexander Enzmann, Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Determine ray/superellipsoid intersection.
@@ -198,154 +200,154 @@ bool Superellipsoid::All_Intersections(const Ray& ray, IStack& Depth_Stack, Trac
 *
 ******************************************************************************/
 
-bool Superellipsoid::Intersect(const Ray& ray, IStack& Depth_Stack, TraceThreadData *Thread)
+bool Superellipsoid::Intersect(const BasicRay& ray, IStack& Depth_Stack, TraceThreadData *Thread)
 {
-	int i, cnt, Found = false;
-	DBL dists[PLANECOUNT+2];
-	DBL t, t1, t2, v0, v1, len;
-	VECTOR P, D, P0, P1, P2, P3;
+    int i, cnt, Found = false;
+    DBL dists[PLANECOUNT+2];
+    DBL t, t1, t2, v0, v1, len;
+    Vector3d P, D, P0, P1, P2, P3;
 
-	/* Transform the ray into the superellipsoid space. */
+    /* Transform the ray into the superellipsoid space. */
 
-	MInvTransPoint(P, ray.Origin, Trans);
+    MInvTransPoint(P, ray.Origin, Trans);
 
-	MInvTransDirection(D, ray.Direction, Trans);
+    MInvTransDirection(D, ray.Direction, Trans);
 
-	VLength(len, D);
+    len = D.length();
 
-	VInverseScaleEq(D, len);
+    D /= len;
 
-	/* Intersect superellipsoid's bounding box. */
+    /* Intersect superellipsoid's bounding box. */
 
-	if (!intersect_box(P, D, &t1, &t2))
-	{
-		return(false);
-	}
+    if (!intersect_box(P, D, &t1, &t2))
+    {
+        return(false);
+    }
 
-	/* Test if superellipsoid lies 'behind' the ray origin. */
+    /* Test if superellipsoid lies 'behind' the ray origin. */
 
-	if (t2 < DEPTH_TOLERANCE)
-	{
-		return(false);
-	}
+    if (t2 < DEPTH_TOLERANCE)
+    {
+        return(false);
+    }
 
-	cnt = 0;
+    cnt = 0;
 
-	if (t1 < DEPTH_TOLERANCE)
-	{
-		t1 = DEPTH_TOLERANCE;
-	}
+    if (t1 < DEPTH_TOLERANCE)
+    {
+        t1 = DEPTH_TOLERANCE;
+    }
 
-	dists[cnt++] = t1;
-	dists[cnt++] = t2;
+    dists[cnt++] = t1;
+    dists[cnt++] = t2;
 
-	/* Intersect ray with planes cutting superellipsoids in pieces. */
+    /* Intersect ray with planes cutting superellipsoids in pieces. */
 
-	cnt = find_ray_plane_points(P, D, cnt, dists, t1, t2);
+    cnt = find_ray_plane_points(P, D, cnt, dists, t1, t2);
 
-	if (cnt <= 1)
-	{
-		return(false);
-	}
+    if (cnt <= 1)
+    {
+        return(false);
+    }
 
-	VEvaluateRay(P0, P, dists[0], D);
+    VEvaluateRay(P0, P, dists[0], D);
 
-	v0 = evaluate_superellipsoid(P0);
+    v0 = evaluate_superellipsoid(P0);
 
-	if (fabs(v0) < ZERO_TOLERANCE)
-	{
-		if (insert_hit(ray, dists[0] / len, Depth_Stack, Thread))
-		{
-			if (Type & IS_CHILD_OBJECT)
-			{
-				Found = true;
-			}
-			else
-			{
-				return(true);
-			}
-		}
-	}
+    if (fabs(v0) < ZERO_TOLERANCE)
+    {
+        if (insert_hit(ray, dists[0] / len, Depth_Stack, Thread))
+        {
+            if (Type & IS_CHILD_OBJECT)
+            {
+                Found = true;
+            }
+            else
+            {
+                return(true);
+            }
+        }
+    }
 
-	for (i = 1; i < cnt; i++)
-	{
-		VEvaluateRay(P1, P, dists[i], D);
+    for (i = 1; i < cnt; i++)
+    {
+        VEvaluateRay(P1, P, dists[i], D);
 
-		v1 = evaluate_superellipsoid(P1);
+        v1 = evaluate_superellipsoid(P1);
 
-		if (fabs(v1) < ZERO_TOLERANCE)
-		{
-			if (insert_hit(ray, dists[i] / len, Depth_Stack, Thread))
-			{
-				if (Type & IS_CHILD_OBJECT)
-				{
-					Found = true;
-				}
-				else
-				{
-					return(true);
-				}
-			}
-		}
-		else
-		{
-			if (v0 * v1 < 0.0)
-			{
-				/* Opposite signs, there must be a root between */
+        if (fabs(v1) < ZERO_TOLERANCE)
+        {
+            if (insert_hit(ray, dists[i] / len, Depth_Stack, Thread))
+            {
+                if (Type & IS_CHILD_OBJECT)
+                {
+                    Found = true;
+                }
+                else
+                {
+                    return(true);
+                }
+            }
+        }
+        else
+        {
+            if (v0 * v1 < 0.0)
+            {
+                /* Opposite signs, there must be a root between */
 
-				solve_hit1(v0, P0, v1, P1, P2);
+                solve_hit1(v0, P0, v1, P1, P2);
 
-				VSub(P3, P2, P);
+                P3 = P2 - P;
 
-				VLength(t, P3);
+                t = P3.length();
 
-				if (insert_hit(ray, t / len, Depth_Stack, Thread))
-				{
-					if (Type & IS_CHILD_OBJECT)
-					{
-						Found = true;
-					}
-					else
-					{
-						return(true);
-					}
-				}
-			}
-			else
-			{
-				/* 
-				 * Although there was no sign change, we may actually be approaching
-				 * the surface. In this case, we are being fooled by the shape of the
-				 * surface into thinking there isn't a root between sample points. 
-				 */
+                if (insert_hit(ray, t / len, Depth_Stack, Thread))
+                {
+                    if (Type & IS_CHILD_OBJECT)
+                    {
+                        Found = true;
+                    }
+                    else
+                    {
+                        return(true);
+                    }
+                }
+            }
+            else
+            {
+                /*
+                 * Although there was no sign change, we may actually be approaching
+                 * the surface. In this case, we are being fooled by the shape of the
+                 * surface into thinking there isn't a root between sample points.
+                 */
 
-				if (check_hit2(P, D, dists[i-1], P0, v0, dists[i], &t, P2))
-				{
-					if (insert_hit(ray, t / len, Depth_Stack, Thread))
-					{
-						if (Type & IS_CHILD_OBJECT)
-						{
-							Found = true;
-						}
-						else
-						{
-							return(true);
-						}
-					}
-					else
-					{
-						break;
-					}
-				}
-			}
-		}
+                if (check_hit2(P, D, dists[i-1], P0, v0, dists[i], &t, P2))
+                {
+                    if (insert_hit(ray, t / len, Depth_Stack, Thread))
+                    {
+                        if (Type & IS_CHILD_OBJECT)
+                        {
+                            Found = true;
+                        }
+                        else
+                        {
+                            return(true);
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
 
-		v0 = v1;
+        v0 = v1;
 
-		Assign_Vector(P0, P1);
-	}
+        P0 = P1;
+    }
 
-	return(Found);
+    return(Found);
 }
 
 
@@ -360,17 +362,17 @@ bool Superellipsoid::Intersect(const Ray& ray, IStack& Depth_Stack, TraceThreadD
 *
 *   IPoint - Intersection point
 *   Object - Object
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
 *
 *   int - true if inside
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Test if a point lies inside the superellipsoid.
@@ -381,25 +383,25 @@ bool Superellipsoid::Intersect(const Ray& ray, IStack& Depth_Stack, TraceThreadD
 *
 ******************************************************************************/
 
-bool Superellipsoid::Inside(const VECTOR IPoint, TraceThreadData *Thread) const
+bool Superellipsoid::Inside(const Vector3d& IPoint, TraceThreadData *Thread) const
 {
-	DBL val;
-	VECTOR P;
+    DBL val;
+    Vector3d P;
 
-	/* Transform the point into the superellipsoid space. */
+    /* Transform the point into the superellipsoid space. */
 
-	MInvTransPoint(P, IPoint, Trans);
+    MInvTransPoint(P, IPoint, Trans);
 
-	val = evaluate_superellipsoid(P);
+    val = evaluate_superellipsoid(P);
 
-	if (val < EPSILON)
-	{
-		return(!Test_Flag(this, INVERTED_FLAG));
-	}
-	else
-	{
-		return(Test_Flag(this, INVERTED_FLAG));
-	}
+    if (val < EPSILON)
+    {
+        return(!Test_Flag(this, INVERTED_FLAG));
+    }
+    else
+    {
+        return(Test_Flag(this, INVERTED_FLAG));
+    }
 }
 
 
@@ -415,17 +417,17 @@ bool Superellipsoid::Inside(const VECTOR IPoint, TraceThreadData *Thread) const
 *   Result - Normal vector
 *   Object - Object
 *   Inter  - Intersection found
-*   
+*
 * OUTPUT
 *
 *   Result
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Calculate the normal of the superellipsoid in a given point.
@@ -436,42 +438,42 @@ bool Superellipsoid::Inside(const VECTOR IPoint, TraceThreadData *Thread) const
 *
 ******************************************************************************/
 
-void Superellipsoid::Normal(VECTOR Result, Intersection *Inter, TraceThreadData *Thread) const
+void Superellipsoid::Normal(Vector3d& Result, Intersection *Inter, TraceThreadData *Thread) const
 {
-	VECTOR const& E = Power;
-	VECTOR P;
+    Vector3d const& E = Power;
+    Vector3d P;
 
-	/* Transform the point into the superellipsoid space. */
-	MInvTransPoint(P, Inter->IPoint, Trans);
+    /* Transform the point into the superellipsoid space. */
+    MInvTransPoint(P, Inter->IPoint, Trans);
 
-	DBL r, z2n = 0;
-	if (P[Z] != 0)
-	{
-		z2n = power(fabs(P[Z]), E[Z]);
-		P[Z] = z2n / P[Z];
-	}
+    DBL r, z2n = 0;
+    if (P[Z] != 0)
+    {
+        z2n = power(fabs(P[Z]), E[Z]);
+        P[Z] = z2n / P[Z];
+    }
 
-	if (fabs(P[X]) > fabs(P[Y]))
-	{
-		r = power(fabs(P[Y] / P[X]), E[X]);
+    if (fabs(P[X]) > fabs(P[Y]))
+    {
+        r = power(fabs(P[Y] / P[X]), E[X]);
 
-		P[X] = (1-z2n)  /  P[X];
-		P[Y] = P[Y] ? (1-z2n) * r / P[Y] : 0;
-	}
-	else if (P[Y] != 0)
-	{
-		r = power(fabs(P[X] / P[Y]), E[X]);
+        P[X] = (1-z2n)  /  P[X];
+        P[Y] = P[Y] ? (1-z2n) * r / P[Y] : 0;
+    }
+    else if (P[Y] != 0)
+    {
+        r = power(fabs(P[X] / P[Y]), E[X]);
 
-		P[X] = P[X] ? (1-z2n) * r / P[X] : 0;
-		P[Y] = (1-z2n) / P[Y];
-	}
-	if(P[Z])
-		P[Z] *= (1 + r);
+        P[X] = P[X] ? (1-z2n) * r / P[X] : 0;
+        P[Y] = (1-z2n) / P[Y];
+    }
+    if(P[Z])
+        P[Z] *= (1 + r);
 
-	/* Transform the normalt out of the superellipsoid space. */
-	MTransNormal(Result, P, Trans);
+    /* Transform the normalt out of the superellipsoid space. */
+    MTransNormal(Result, P, Trans);
 
-	VNormalize(Result, Result);
+    Result.normalize();
 }
 
 
@@ -507,9 +509,9 @@ void Superellipsoid::Normal(VECTOR Result, Intersection *Inter, TraceThreadData 
 *
 ******************************************************************************/
 
-void Superellipsoid::Translate(const VECTOR, const TRANSFORM *tr)
+void Superellipsoid::Translate(const Vector3d&, const TRANSFORM *tr)
 {
-	Transform(tr);
+    Transform(tr);
 }
 
 
@@ -524,17 +526,17 @@ void Superellipsoid::Translate(const VECTOR, const TRANSFORM *tr)
 *
 *   Object - Object
 *   Vector - Rotation vector
-*   
+*
 * OUTPUT
 *
 *   Object
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Rotate a superellipsoid.
@@ -545,9 +547,9 @@ void Superellipsoid::Translate(const VECTOR, const TRANSFORM *tr)
 *
 ******************************************************************************/
 
-void Superellipsoid::Rotate(const VECTOR, const TRANSFORM *tr)
+void Superellipsoid::Rotate(const Vector3d&, const TRANSFORM *tr)
 {
-	Transform(tr);
+    Transform(tr);
 }
 
 
@@ -562,17 +564,17 @@ void Superellipsoid::Rotate(const VECTOR, const TRANSFORM *tr)
 *
 *   Object - Object
 *   Vector - Scaling vector
-*   
+*
 * OUTPUT
 *
 *   Object
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Scale a superellipsoid.
@@ -583,9 +585,9 @@ void Superellipsoid::Rotate(const VECTOR, const TRANSFORM *tr)
 *
 ******************************************************************************/
 
-void Superellipsoid::Scale(const VECTOR, const TRANSFORM *tr)
+void Superellipsoid::Scale(const Vector3d&, const TRANSFORM *tr)
 {
-	Transform(tr);
+    Transform(tr);
 }
 
 
@@ -600,17 +602,17 @@ void Superellipsoid::Scale(const VECTOR, const TRANSFORM *tr)
 *
 *   Object - Object
 *   Trans  - Transformation to apply
-*   
+*
 * OUTPUT
 *
 *   Object
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Transform a superellipsoid and recalculate its bounding box.
@@ -623,46 +625,9 @@ void Superellipsoid::Scale(const VECTOR, const TRANSFORM *tr)
 
 void Superellipsoid::Transform(const TRANSFORM *tr)
 {
-	Compose_Transforms(Trans, tr);
+    Compose_Transforms(Trans, tr);
 
-	Compute_BBox();
-}
-
-
-
-/*****************************************************************************
-*
-* FUNCTION
-*
-*   Invert_Superellipsoid
-*
-* INPUT
-*
-*   Object - Object
-*   
-* OUTPUT
-*
-*   Object
-*   
-* RETURNS
-*   
-* AUTHOR
-*
-*   Dieter Bayer
-*   
-* DESCRIPTION
-*
-*   Invert a superellipsoid.
-*
-* CHANGES
-*
-*   Oct 1994 : Creation.
-*
-******************************************************************************/
-
-void Superellipsoid::Invert()
-{
-	Invert_Flag(this, INVERTED_FLAG);
+    Compute_BBox();
 }
 
 
@@ -674,17 +639,17 @@ void Superellipsoid::Invert()
 *   Create_Superellipsoid
 *
 * INPUT
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
 *
 *   SUPERELLIPSOID * - new superellipsoid
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Create a new superellipsoid.
@@ -697,9 +662,9 @@ void Superellipsoid::Invert()
 
 Superellipsoid::Superellipsoid() : ObjectBase(SUPERELLIPSOID_OBJECT)
 {
-	Trans = Create_Transform();
+    Trans = Create_Transform();
 
-	Make_Vector(Power, 2.0, 2.0, 2.0);
+    Power = Vector3d(2.0, 2.0, 2.0);
 }
 
 
@@ -713,17 +678,17 @@ Superellipsoid::Superellipsoid() : ObjectBase(SUPERELLIPSOID_OBJECT)
 * INPUT
 *
 *   Object - Object
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
 *
 *   void * - New superellipsoid
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Copy a superellipsoid structure.
@@ -736,13 +701,13 @@ Superellipsoid::Superellipsoid() : ObjectBase(SUPERELLIPSOID_OBJECT)
 
 ObjectPtr Superellipsoid::Copy()
 {
-	Superellipsoid *New = new Superellipsoid();
+    Superellipsoid *New = new Superellipsoid();
 
-	Destroy_Transform(New->Trans);
-	*New = *this;
-	New->Trans = Copy_Transform(Trans);
+    Destroy_Transform(New->Trans);
+    *New = *this;
+    New->Trans = Copy_Transform(Trans);
 
-	return(New);
+    return(New);
 }
 
 
@@ -756,17 +721,17 @@ ObjectPtr Superellipsoid::Copy()
 * INPUT
 *
 *   Object - Object
-*   
+*
 * OUTPUT
 *
 *   Object
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Destroy a superellipsoid.
@@ -779,7 +744,7 @@ ObjectPtr Superellipsoid::Copy()
 
 Superellipsoid::~Superellipsoid()
 {
-	Destroy_Transform(Trans);
+    Destroy_Transform(Trans);
 }
 
 
@@ -793,17 +758,17 @@ Superellipsoid::~Superellipsoid()
 * INPUT
 *
 *   Superellipsoid - Superellipsoid
-*   
+*
 * OUTPUT
 *
 *   Superellipsoid
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Calculate the bounding box of a superellipsoid.
@@ -816,9 +781,9 @@ Superellipsoid::~Superellipsoid()
 
 void Superellipsoid::Compute_BBox()
 {
-	Make_BBox(BBox, -1.0001, -1.0001, -1.0001, 2.0002, 2.0002, 2.0002);
+    Make_BBox(BBox, -1.0001, -1.0001, -1.0001, 2.0002, 2.0002, 2.0002);
 
-	Recompute_BBox(&BBox, Trans);
+    Recompute_BBox(&BBox, Trans);
 }
 
 
@@ -833,19 +798,19 @@ void Superellipsoid::Compute_BBox()
 *
 *   P, D       - Ray origin and direction
 *   dmin, dmax - Intersection depths
-*   
+*
 * OUTPUT
 *
 *   dmin, dmax
-*   
+*
 * RETURNS
 *
 *   int - true, if hit
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Intersect a ray with an axis aligned unit box.
@@ -856,149 +821,149 @@ void Superellipsoid::Compute_BBox()
 *
 ******************************************************************************/
 
-bool Superellipsoid::intersect_box(const VECTOR P, const VECTOR D, DBL *dmin, DBL *dmax)
+bool Superellipsoid::intersect_box(const Vector3d& P, const Vector3d& D, DBL *dmin, DBL *dmax)
 {
-	DBL tmin = 0.0, tmax = 0.0;
+    DBL tmin = 0.0, tmax = 0.0;
 
-	/* Left/right. */
+    /* Left/right. */
 
-	if (fabs(D[X]) > EPSILON)
-	{
-		if (D[X] > EPSILON)
-		{
-			*dmin = (MIN_VALUE - P[X]) / D[X];
+    if (fabs(D[X]) > EPSILON)
+    {
+        if (D[X] > EPSILON)
+        {
+            *dmin = (MIN_VALUE - P[X]) / D[X];
 
-			*dmax = (MAX_VALUE - P[X]) / D[X];
+            *dmax = (MAX_VALUE - P[X]) / D[X];
 
-			if (*dmax < EPSILON) return(false);
-		}
-		else
-		{
-			*dmax = (MIN_VALUE - P[X]) / D[X];
+            if (*dmax < EPSILON) return(false);
+        }
+        else
+        {
+            *dmax = (MIN_VALUE - P[X]) / D[X];
 
-			if (*dmax < EPSILON) return(false);
+            if (*dmax < EPSILON) return(false);
 
-			*dmin = (MAX_VALUE - P[X]) / D[X];
-		}
+            *dmin = (MAX_VALUE - P[X]) / D[X];
+        }
 
-		if (*dmin > *dmax) return(false);
-	}
-	else
-	{
-		if ((P[X] < MIN_VALUE) || (P[X] > MAX_VALUE))
-		{
-			return(false);
-		}
+        if (*dmin > *dmax) return(false);
+    }
+    else
+    {
+        if ((P[X] < MIN_VALUE) || (P[X] > MAX_VALUE))
+        {
+            return(false);
+        }
 
-		*dmin = -BOUND_HUGE;
-		*dmax =  BOUND_HUGE;
-	}
+        *dmin = -BOUND_HUGE;
+        *dmax =  BOUND_HUGE;
+    }
 
-	/* Top/bottom. */
+    /* Top/bottom. */
 
-	if (fabs(D[Y]) > EPSILON)
-	{
-		if (D[Y] > EPSILON)
-		{
-			tmin = (MIN_VALUE - P[Y]) / D[Y];
+    if (fabs(D[Y]) > EPSILON)
+    {
+        if (D[Y] > EPSILON)
+        {
+            tmin = (MIN_VALUE - P[Y]) / D[Y];
 
-			tmax = (MAX_VALUE - P[Y]) / D[Y];
-		}
-		else
-		{
-			tmax = (MIN_VALUE - P[Y]) / D[Y];
+            tmax = (MAX_VALUE - P[Y]) / D[Y];
+        }
+        else
+        {
+            tmax = (MIN_VALUE - P[Y]) / D[Y];
 
-			tmin = (MAX_VALUE - P[Y]) / D[Y];
-		}
+            tmin = (MAX_VALUE - P[Y]) / D[Y];
+        }
 
-		if (tmax < *dmax)
-		{
-			if (tmax < EPSILON) return(false);
+        if (tmax < *dmax)
+        {
+            if (tmax < EPSILON) return(false);
 
-			if (tmin > *dmin)
-			{
-				if (tmin > tmax) return(false);
+            if (tmin > *dmin)
+            {
+                if (tmin > tmax) return(false);
 
-				*dmin = tmin;
-			}
-			else
-			{
-				if (*dmin > tmax) return(false);
-			}
+                *dmin = tmin;
+            }
+            else
+            {
+                if (*dmin > tmax) return(false);
+            }
 
-			*dmax = tmax;
-		}
-		else
-		{
-			if (tmin > *dmin)
-			{
-				if (tmin > *dmax) return(false);
+            *dmax = tmax;
+        }
+        else
+        {
+            if (tmin > *dmin)
+            {
+                if (tmin > *dmax) return(false);
 
-				*dmin = tmin;
-			}
-		}
-	}
-	else
-	{
-		if ((P[Y] < MIN_VALUE) || (P[Y] > MAX_VALUE))
-		{
-			return(false);
-		}
-	}
+                *dmin = tmin;
+            }
+        }
+    }
+    else
+    {
+        if ((P[Y] < MIN_VALUE) || (P[Y] > MAX_VALUE))
+        {
+            return(false);
+        }
+    }
 
-	/* Front/back. */
+    /* Front/back. */
 
-	if (fabs(D[Z]) > EPSILON)
-	{
-		if (D[Z] > EPSILON)
-		{
-			tmin = (MIN_VALUE - P[Z]) / D[Z];
+    if (fabs(D[Z]) > EPSILON)
+    {
+        if (D[Z] > EPSILON)
+        {
+            tmin = (MIN_VALUE - P[Z]) / D[Z];
 
-			tmax = (MAX_VALUE - P[Z]) / D[Z];
-		}
-		else
-		{
-			tmax = (MIN_VALUE - P[Z]) / D[Z];
+            tmax = (MAX_VALUE - P[Z]) / D[Z];
+        }
+        else
+        {
+            tmax = (MIN_VALUE - P[Z]) / D[Z];
 
-			tmin = (MAX_VALUE - P[Z]) / D[Z];
-		}
+            tmin = (MAX_VALUE - P[Z]) / D[Z];
+        }
 
-		if (tmax < *dmax)
-		{
-			if (tmax < EPSILON) return(false);
+        if (tmax < *dmax)
+        {
+            if (tmax < EPSILON) return(false);
 
-			if (tmin > *dmin)
-			{
-				if (tmin > tmax) return(false);
+            if (tmin > *dmin)
+            {
+                if (tmin > tmax) return(false);
 
-				*dmin = tmin;
-			}
-			else
-			{
-				if (*dmin > tmax) return(false);
-			}
+                *dmin = tmin;
+            }
+            else
+            {
+                if (*dmin > tmax) return(false);
+            }
 
-			*dmax = tmax;
-		}
-		else
-		{
-			if (tmin > *dmin)
-			{
-				if (tmin > *dmax) return(false);
+            *dmax = tmax;
+        }
+        else
+        {
+            if (tmin > *dmin)
+            {
+                if (tmin > *dmax) return(false);
 
-				*dmin = tmin;
-			}
-		}
-	}
-	else
-	{
-		if ((P[Z] < MIN_VALUE) || (P[Z] > MAX_VALUE))
-		{
-			return(false);
-		}
-	}
+                *dmin = tmin;
+            }
+        }
+    }
+    else
+    {
+        if ((P[Z] < MIN_VALUE) || (P[Z] > MAX_VALUE))
+        {
+            return(false);
+        }
+    }
 
-	return(true);
+    return(true);
 }
 
 
@@ -1010,17 +975,17 @@ bool Superellipsoid::intersect_box(const VECTOR P, const VECTOR D, DBL *dmin, DB
 *   evaluate_g
 *
 * INPUT
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
 *
 *   DBL
-*   
+*
 * AUTHOR
 *
 *   Massimo Valentini
-*   
+*
 * DESCRIPTION
 *
 * CHANGES
@@ -1029,24 +994,24 @@ bool Superellipsoid::intersect_box(const VECTOR P, const VECTOR D, DBL *dmin, DB
 
 DBL Superellipsoid::evaluate_g(DBL x, DBL y, DBL e)
 {
-	DBL g = 0;
+    DBL g = 0;
 
-	if (x > y)
-	{
-		g = 1 + power(y/x, e);
-		if(g != 1)
-			g = power(g, 1/e);
-		g *= x;
-	}
-	else if (y != 0)
-	{
-		g = 1 + power(x/y, e);
-		if(g != 1)
-			g = power(g, 1/e);
-		g *= y;
-	}
+    if (x > y)
+    {
+        g = 1 + power(y/x, e);
+        if(g != 1)
+            g = power(g, 1/e);
+        g *= x;
+    }
+    else if (y != 0)
+    {
+        g = 1 + power(x/y, e);
+        if(g != 1)
+            g = power(g, 1/e);
+        g *= y;
+    }
 
-	return g;
+    return g;
 }
 
 
@@ -1061,17 +1026,17 @@ DBL Superellipsoid::evaluate_g(DBL x, DBL y, DBL e)
 *
 *   P          - Point to evaluate
 *   Superellipsoid - Pointer to superellipsoid
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
 *
 *   DBL
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Get superellipsoid value in the given point.
@@ -1083,9 +1048,9 @@ DBL Superellipsoid::evaluate_g(DBL x, DBL y, DBL e)
 *
 ******************************************************************************/
 
-DBL Superellipsoid::evaluate_superellipsoid(const VECTOR P) const
+DBL Superellipsoid::evaluate_superellipsoid(const Vector3d& P) const
 {
-	return evaluate_g(evaluate_g(fabs(P[X]), fabs(P[Y]), Power[X]), fabs(P[Z]), Power[Z]) - 1;
+    return evaluate_g(evaluate_g(fabs(P[X]), fabs(P[Y]), Power[X]), fabs(P[Z]), Power[Z]) - 1;
 }
 
 
@@ -1100,17 +1065,17 @@ DBL Superellipsoid::evaluate_superellipsoid(const VECTOR P) const
 *
 *   x - Argument
 *   e - Power
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
 *
 *   DBL
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Raise x to the power of e.
@@ -1123,40 +1088,40 @@ DBL Superellipsoid::evaluate_superellipsoid(const VECTOR P) const
 
 DBL Superellipsoid::power(DBL x, DBL  e)
 {
-	register int i;
-	register DBL b;
+    register int i;
+    register DBL b;
 
-	b = x;
+    b = x;
 
-	i = (int)e;
+    i = (int)e;
 
-	/* Test if we have an integer power. */
+    /* Test if we have an integer power. */
 
-	if (e == (DBL)i)
-	{
-		switch (i)
-		{
-			case 0: return(1.0);
+    if (e == (DBL)i)
+    {
+        switch (i)
+        {
+            case 0: return(1.0);
 
-			case 1: return(b);
+            case 1: return(b);
 
-			case 2: return(Sqr(b));
+            case 2: return(Sqr(b));
 
-			case 3: return(Sqr(b) * b);
+            case 3: return(Sqr(b) * b);
 
-			case 4: b *= b; return(Sqr(b));
+            case 4: b *= b; return(Sqr(b));
 
-			case 5: b *= b; return(Sqr(b) * x);
+            case 5: b *= b; return(Sqr(b) * x);
 
-			case 6: b *= b; return(Sqr(b) * b);
+            case 6: b *= b; return(Sqr(b) * b);
 
-			default: return(pow(x, e));
-		}
-	}
-	else
-	{
-		return(pow(x, e));
-	}
+            default: return(pow(x, e));
+        }
+    }
+    else
+    {
+        return(pow(x, e));
+    }
 }
 
 
@@ -1173,19 +1138,19 @@ DBL Superellipsoid::power(DBL x, DBL  e)
 *   Ray         - Ray
 *   Depth       - Intersection depth
 *   Depth_Stack - Intersection stack
-*   
+*
 * OUTPUT
 *
 *   Depth_Stack
-*   
+*
 * RETURNS
 *
 *   int - true, if intersection is valid
-*   
+*
 * AUTHOR
 *
 *   Dieter Bayer
-*   
+*
 * DESCRIPTION
 *
 *   Push an intersection onto the depth stack if it is valid.
@@ -1196,23 +1161,23 @@ DBL Superellipsoid::power(DBL x, DBL  e)
 *
 ******************************************************************************/
 
-bool Superellipsoid::insert_hit(const Ray &ray, DBL Depth, IStack& Depth_Stack, TraceThreadData *Thread)
+bool Superellipsoid::insert_hit(const BasicRay &ray, DBL Depth, IStack& Depth_Stack, TraceThreadData *Thread)
 {
-	VECTOR IPoint;
+    Vector3d IPoint;
 
-	if ((Depth > DEPTH_TOLERANCE) && (Depth < MAX_DISTANCE))
-	{
-		VEvaluateRay(IPoint, ray.Origin, Depth, ray.Direction);
+    if ((Depth > DEPTH_TOLERANCE) && (Depth < MAX_DISTANCE))
+    {
+        IPoint = ray.Evaluate(Depth);
 
-		if (Clip.empty() || Point_In_Clip(IPoint, Clip, Thread))
-		{
-			Depth_Stack->push(Intersection(Depth, IPoint, this));
+        if (Clip.empty() || Point_In_Clip(IPoint, Clip, Thread))
+        {
+            Depth_Stack->push(Intersection(Depth, IPoint, this));
 
-			return(true);
-		}
-	}
+            return(true);
+        }
+    }
 
-	return(false);
+    return(false);
 }
 
 
@@ -1224,15 +1189,15 @@ bool Superellipsoid::insert_hit(const Ray &ray, DBL Depth, IStack& Depth_Stack, 
 *   compdists
 *
 * INPUT
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Alexander Enzmann
-*   
+*
 * DESCRIPTION
 *
 *   Compare two slabs.
@@ -1245,24 +1210,24 @@ bool Superellipsoid::insert_hit(const Ray &ray, DBL Depth, IStack& Depth_Stack, 
 
 int Superellipsoid::compdists(const void *in_a, const void *in_b)
 {
-	DBL a, b;
+    DBL a, b;
 
-	a = *reinterpret_cast<const DBL *>(in_a);
-	b = *reinterpret_cast<const DBL *>(in_b);
+    a = *reinterpret_cast<const DBL *>(in_a);
+    b = *reinterpret_cast<const DBL *>(in_b);
 
-	if (a < b)
-	{
-		return(-1);
-	}
+    if (a < b)
+    {
+        return(-1);
+    }
 
-	if (a == b)
-	{
-		return(0);
-	}
-	else
-	{
-		return(1);
-	}
+    if (a == b)
+    {
+        return(0);
+    }
+    else
+    {
+        return(1);
+    }
 }
 
 
@@ -1274,15 +1239,15 @@ int Superellipsoid::compdists(const void *in_a, const void *in_b)
 *   find_ray_plane_points
 *
 * INPUT
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Alexander Enzmann
-*   
+*
 * DESCRIPTION
 *
 *   Find all the places where the ray intersects the set of
@@ -1295,46 +1260,46 @@ int Superellipsoid::compdists(const void *in_a, const void *in_b)
 *
 ******************************************************************************/
 
-int Superellipsoid::find_ray_plane_points(const VECTOR P, const VECTOR D, int cnt, DBL *dists, DBL mindist, DBL maxdist) const
+int Superellipsoid::find_ray_plane_points(const Vector3d& P, const Vector3d& D, int cnt, DBL *dists, DBL mindist, DBL maxdist) const
 {
-	int i;
-	DBL t, d;
+    int i;
+    DBL t, d;
 
-	/* Since min and max dist are the distance to two of the bounding planes
-	   we are considering, there is a high probablity of missing them due to
-	   round off error. Therefore we adjust min and max. */
+    /* Since min and max dist are the distance to two of the bounding planes
+       we are considering, there is a high probablity of missing them due to
+       round off error. Therefore we adjust min and max. */
 
-	t = EPSILON * (maxdist - mindist);
+    t = EPSILON * (maxdist - mindist);
 
-	mindist -= t;
-	maxdist += t;
+    mindist -= t;
+    maxdist += t;
 
-	/* Check the sets of planes that cut apart the superquadric. */
+    /* Check the sets of planes that cut apart the superquadric. */
 
-	for (i = 0; i < PLANECOUNT; i++)
-	{
-		d = (D[0] * planes[i][0] + D[1] * planes[i][1] + D[2] * planes[i][2]);
+    for (i = 0; i < PLANECOUNT; i++)
+    {
+        d = (D[0] * planes[i][0] + D[1] * planes[i][1] + D[2] * planes[i][2]);
 
-		if (fabs(d) < EPSILON)
-		{
-			/* Can't possibly get a hit for this combination of ray and plane. */
+        if (fabs(d) < EPSILON)
+        {
+            /* Can't possibly get a hit for this combination of ray and plane. */
 
-			continue;
-		}
+            continue;
+        }
 
-		t = (planes[i][3] - (P[0] * planes[i][0] + P[1] * planes[i][1] + P[2] * planes[i][2])) / d;
+        t = (planes[i][3] - (P[0] * planes[i][0] + P[1] * planes[i][1] + P[2] * planes[i][2])) / d;
 
-		if ((t >= mindist) && (t <= maxdist))
-		{
-			dists[cnt++] = t;
-		}
-	}
+        if ((t >= mindist) && (t <= maxdist))
+        {
+            dists[cnt++] = t;
+        }
+    }
 
-	/* Sort the results for further processing. */
+    /* Sort the results for further processing. */
 
-	QSORT(reinterpret_cast<void *>(dists), cnt, sizeof(DBL), compdists);
+    QSORT(reinterpret_cast<void *>(dists), cnt, sizeof(DBL), compdists);
 
-	return(cnt);
+    return(cnt);
 }
 
 
@@ -1346,15 +1311,15 @@ int Superellipsoid::find_ray_plane_points(const VECTOR P, const VECTOR D, int cn
 *   solve_hit1
 *
 * INPUT
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Alexander Enzmann
-*   
+*
 * DESCRIPTION
 *
 *   Home in on the root of a superquadric using a combination of
@@ -1368,116 +1333,116 @@ int Superellipsoid::find_ray_plane_points(const VECTOR P, const VECTOR D, int cn
 *
 ******************************************************************************/
 
-void Superellipsoid::solve_hit1(DBL v0, const VECTOR tP0, DBL v1, const VECTOR tP1, VECTOR P) const
+void Superellipsoid::solve_hit1(DBL v0, const Vector3d& tP0, DBL v1, const Vector3d& tP1, Vector3d& P) const
 {
-	int i;
-	DBL x, v2, v3;
-	VECTOR P0, P1, P2, P3;
+    int i;
+    DBL x, v2, v3;
+    Vector3d P0, P1, P2, P3;
 
-	Assign_Vector(P0, tP0);
-	Assign_Vector(P1, tP1);
+    P0 = tP0;
+    P1 = tP1;
 
-	/* The sign of v0 and v1 changes between P0 and P1, this
-	   means there is an intersection point in there somewhere. */
+    /* The sign of v0 and v1 changes between P0 and P1, this
+       means there is an intersection point in there somewhere. */
 
-	for (i = 0; i < MAX_ITERATIONS; i++)
-	{
-		if (fabs(v0) < ZERO_TOLERANCE)
-		{
-			/* Near point is close enough to an intersection - just use it. */
+    for (i = 0; i < MAX_ITERATIONS; i++)
+    {
+        if (fabs(v0) < ZERO_TOLERANCE)
+        {
+            /* Near point is close enough to an intersection - just use it. */
 
-			Assign_Vector(P, P0);
+            P = P0;
 
-			break;
-		}
+            break;
+        }
 
-		if (fabs(v1) < ZERO_TOLERANCE)
-		{
-			/* Far point is close enough to an intersection. */
+        if (fabs(v1) < ZERO_TOLERANCE)
+        {
+            /* Far point is close enough to an intersection. */
 
-			Assign_Vector(P, P1);
+            P = P1;
 
-			break;
-		}
+            break;
+        }
 
-		/* Look at the chord connecting P0 and P1. */
+        /* Look at the chord connecting P0 and P1. */
 
-		/* Assume a line between the points. */
+        /* Assume a line between the points. */
 
-		x = fabs(v0) / fabs(v1 - v0);
+        x = fabs(v0) / fabs(v1 - v0);
 
-		VSub(P2, P1, P0);
+        P2 = P1 - P0;
 
-		VAddScaled(P2, P0, x, P2);
+        P2 = P0 + x * P2;
 
-		v2 = evaluate_superellipsoid(P2);
+        v2 = evaluate_superellipsoid(P2);
 
-		/* Look at the midpoint between P0 and P1. */
+        /* Look at the midpoint between P0 and P1. */
 
-		VSub(P3, P1, P0);
+        P3 = P1 - P0;
 
-		VAddScaled(P3, P0, 0.5, P3);
+        P3 = P0 + 0.5 * P3;
 
-		v3 = evaluate_superellipsoid(P3);
+        v3 = evaluate_superellipsoid(P3);
 
-		if( v2 * v3 < 0.0 )
-		{
-			/* We can move both ends. */
+        if( v2 * v3 < 0.0 )
+        {
+            /* We can move both ends. */
 
-			v0 = v2;
-			Assign_Vector(P0, P2);
+            v0 = v2;
+            P0 = P2;
 
-			v1 = v3;
-			Assign_Vector(P1, P3);
-		}
-		else
-		{
-			if( fabs(v2) < fabs(v3) )
-			{
-				/* secant method is doing better */
-				if( v0 * v2 < 0)
-				{
-					v1 = v2;
-					Assign_Vector(P1, P2);
-				}
-				else
-				{
-					v0 = v2;
-					Assign_Vector(P0, P2);
-				}
-			}
-			else
-			{
-				/* bisection method is doing better */
-				if( v0 * v3 < 0)
-				{
-					v1 = v3;
-					Assign_Vector(P1, P3);
-				}
-				else
-				{
-					v0 = v3;
-					Assign_Vector(P0, P3);
-				}
-			}
-		}
-	}
+            v1 = v3;
+            P1 = P3;
+        }
+        else
+        {
+            if( fabs(v2) < fabs(v3) )
+            {
+                /* secant method is doing better */
+                if( v0 * v2 < 0)
+                {
+                    v1 = v2;
+                    P1 = P2;
+                }
+                else
+                {
+                    v0 = v2;
+                    P0 = P2;
+                }
+            }
+            else
+            {
+                /* bisection method is doing better */
+                if( v0 * v3 < 0)
+                {
+                    v1 = v3;
+                    P1 = P3;
+                }
+                else
+                {
+                    v0 = v3;
+                    P0 = P3;
+                }
+            }
+        }
+    }
 
-	if (i == MAX_ITERATIONS)
-	{
-		// The loop never quite closed in on the result - just use the point
-		// closest to zero.  This really shouldn't happen since the max number
-		// of iterations is enough to converge with straight bisection.
+    if (i == MAX_ITERATIONS)
+    {
+        // The loop never quite closed in on the result - just use the point
+        // closest to zero.  This really shouldn't happen since the max number
+        // of iterations is enough to converge with straight bisection.
 
-		if (fabs(v0) < fabs(v1))
-		{
-			Assign_Vector(P, P0);
-		}
-		else
-		{
-			Assign_Vector(P, P1);
-		}
-	}
+        if (fabs(v0) < fabs(v1))
+        {
+            P = P0;
+        }
+        else
+        {
+            P = P1;
+        }
+    }
 }
 
 
@@ -1490,15 +1455,15 @@ void Superellipsoid::solve_hit1(DBL v0, const VECTOR tP0, DBL v1, const VECTOR t
 *   check_hit2
 *
 * INPUT
-*   
+*
 * OUTPUT
-*   
+*
 * RETURNS
-*   
+*
 * AUTHOR
 *
 *   Alexander Enzmann
-*   
+*
 * DESCRIPTION
 *
 *   Try to find the root of a superquadric using Newtons method.
@@ -1509,80 +1474,80 @@ void Superellipsoid::solve_hit1(DBL v0, const VECTOR tP0, DBL v1, const VECTOR t
 *
 ******************************************************************************/
 
-bool Superellipsoid::check_hit2(const VECTOR P, const VECTOR D, DBL t0, VECTOR P0, DBL v0, DBL t1, DBL *t, VECTOR Q) const
+bool Superellipsoid::check_hit2(const Vector3d& P, const Vector3d& D, DBL t0, Vector3d& P0, DBL v0, DBL t1, DBL *t, Vector3d& Q) const
 {
-	int i;
-	DBL dt0, dt1, v1, deltat, maxdelta;
-	VECTOR P1;
+    int i;
+    DBL dt0, dt1, v1, deltat, maxdelta;
+    Vector3d P1;
 
-	dt0 = t0;
-	dt1 = t0 + 0.0001 * (t1 - t0);
+    dt0 = t0;
+    dt1 = t0 + 0.0001 * (t1 - t0);
 
-	maxdelta = t1 - t0;
+    maxdelta = t1 - t0;
 
-	for (i = 0; (dt0 < t1) && (i < MAX_ITERATIONS); i++)
-	{
-		VEvaluateRay(P1, P, dt1, D);
+    for (i = 0; (dt0 < t1) && (i < MAX_ITERATIONS); i++)
+    {
+        VEvaluateRay(P1, P, dt1, D);
 
-		v1 = evaluate_superellipsoid(P1);
+        v1 = evaluate_superellipsoid(P1);
 
-		if (v0 * v1 < 0)
-		{
-			/* Found a crossing point, go back and use normal root solving. */
+        if (v0 * v1 < 0)
+        {
+            /* Found a crossing point, go back and use normal root solving. */
 
-			solve_hit1(v0, P0, v1, P1, Q);
+            solve_hit1(v0, P0, v1, P1, Q);
 
-			VSub(P0, Q, P);
+            P0 = Q - P;
 
-			VLength(*t, P0);
+            *t = P0.length();
 
-			return(true);
-		}
-		else
-		{
-			if (fabs(v1) < ZERO_TOLERANCE)
-			{
-				VEvaluateRay(Q, P, dt1, D);
+            return(true);
+        }
+        else
+        {
+            if (fabs(v1) < ZERO_TOLERANCE)
+            {
+                VEvaluateRay(Q, P, dt1, D);
 
-				*t = dt1;
+                *t = dt1;
 
-				return(true);
-			}
-			else
-			{
-				if (((v0 > 0.0) && (v1 > v0)) || ((v0 < 0.0) && (v1 < v0)))
-				{
-					/* We definitely failed */
+                return(true);
+            }
+            else
+            {
+                if (((v0 > 0.0) && (v1 > v0)) || ((v0 < 0.0) && (v1 < v0)))
+                {
+                    /* We definitely failed */
 
-					break;
-				}
-				else
-				{
-					if (v1 == v0)
-					{
-						break;
-					}
-					else
-					{
-						deltat = v1 * (dt1 - dt0) / (v1 - v0);
-					}
-				}
-			}
-		}
+                    break;
+                }
+                else
+                {
+                    if (v1 == v0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        deltat = v1 * (dt1 - dt0) / (v1 - v0);
+                    }
+                }
+            }
+        }
 
-		if (fabs(deltat) > maxdelta)
-		{
-			break;
-		}
+        if (fabs(deltat) > maxdelta)
+        {
+            break;
+        }
 
-		v0 = v1;
+        v0 = v1;
 
-		dt0 = dt1;
+        dt0 = dt1;
 
-		dt1 -= deltat;
-	}
+        dt1 -= deltat;
+    }
 
-	return(false);
+    return(false);
 }
 
 }

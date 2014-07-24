@@ -1,48 +1,52 @@
-/*******************************************************************************
- * fileutil.h
- *
- * This module contains all defines, typedefs, and prototypes for fileutil.cpp.
- *
- * ---------------------------------------------------------------------------
- * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
- *
- * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
- * subject to the same licensing terms and conditions.
- * ---------------------------------------------------------------------------
- * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
- * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
- *
- * POV-Ray is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * POV-Ray is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * ---------------------------------------------------------------------------
- * POV-Ray is based on the popular DKB raytracer version 2.12.
- * DKBTrace was originally written by David K. Buck.
- * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
- * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/source/backend/support/fileutil.h $
- * $Revision: #1 $
- * $Change: 5916 $
- * $DateTime: 2013/07/17 19:49:27 $
- * $Author: clipka $
- *******************************************************************************/
+//******************************************************************************
+///
+/// @file backend/support/fileutil.h
+///
+/// This module contains all defines, typedefs, and prototypes for
+/// `fileutil.cpp`.
+///
+/// @copyright
+/// @parblock
+///
+/// UberPOV Raytracer version 1.37.
+/// Portions Copyright 2013-2014 Christoph Lipka.
+///
+/// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+/// subject to the same licensing terms and conditions.
+///
+/// ----------------------------------------------------------------------------
+///
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+///
+/// POV-Ray is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU Affero General Public License as
+/// published by the Free Software Foundation, either version 3 of the
+/// License, or (at your option) any later version.
+///
+/// POV-Ray is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU Affero General Public License for more details.
+///
+/// You should have received a copy of the GNU Affero General Public License
+/// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+///
+/// ----------------------------------------------------------------------------
+///
+/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// DKBTrace was originally written by David K. Buck.
+/// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
+///
+/// @endparblock
+///
+//*******************************************************************************
 
 #ifndef POV_UTIL_H
 #define POV_UTIL_H
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "base/povms.h"
 #include "base/stringutilities.h"
 #include "base/fileinputoutput.h"
 #include "backend/parser/parse.h"
