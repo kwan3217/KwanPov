@@ -67,15 +67,29 @@
 #define BRANCH_CONTRIBUTORS     "Christian Froeschlin"
 
 
-// TODO FIXME - as long as it doesn't have its own installer and set of distribution files,
-// and instead relies on the files coming with POV-Ray proper, UberPOV hijacks POV-Ray's
-// registry section and directory trees.
+#ifdef STANDALONE_BUILD
+    // This is a build for standalone operation without (or independent of) an official POV-Ray installation.
 
-#define REGKEY      "POV-Ray"
-#define REGVERKEY   "v3.7"
+    #define BRANCH_INI  "uberpov.ini"
 
-#define PATHKEY     "POV-Ray"
-#define PATHVERKEY  "v3.7"
+    #define REGKEY      "UberPOV"
+    #define REGVERKEY   "v1.37"
+
+    #define PATHKEY     "UberPOV"
+    #define PATHVERKEY  "v1.37"
+
+#else
+    // This is a build for piggyback operation alongside an official POV-Ray installation.
+
+    #define BRANCH_INI  "povray.ini"
+
+    #define REGKEY      "POV-Ray"
+    #define REGVERKEY   "v3.7"
+
+    #define PATHKEY     "POV-Ray"
+    #define PATHVERKEY  "v3.7"
+
+#endif
 
 
 ///

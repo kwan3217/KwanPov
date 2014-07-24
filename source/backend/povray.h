@@ -95,9 +95,18 @@ bool povray_terminated();
 
 #ifdef BRANCH_NAME
 
-#undef POV_RAY_IS_OFFICIAL
-#define POV_RAY_IS_OFFICIAL 0
+#if POV_RAY_IS_OFFICIAL == 1
+#error A branch build cannot be an official POV-Ray build.
+#endif
 #define POV_RAY_IS_BRANCH   1
+
+#ifdef STANDALONE_BUILD
+    #define STANDALONE_VER ".stalone"
+    #define REGCURRENT_VERSION BRANCH_VERSION
+#else
+    #define STANDALONE_VER ""
+    #define REGCURRENT_VERSION POV_RAY_VERSION "-" BRANCH_NAME "-" BRANCH_VERSION
+#endif
 
 #else
 
@@ -109,6 +118,9 @@ bool povray_terminated();
 #define BRANCH_COPYRIGHT            POV_RAY_COPYRIGHT
 #define BRANCH_BUILD_IS_OFFICIAL    POV_RAY_IS_OFFICIAL
 #define POV_RAY_IS_BRANCH           0
+
+#define STANDALONE_VER ""
+#define REGCURRENT_VERSION POV_RAY_VERSION
 
 #endif
 

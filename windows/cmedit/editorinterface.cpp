@@ -846,7 +846,7 @@ HWND CreateTabWindow (HWND MainWindowHandle, HWND StatusWindowHandle, const char
   GetVersionEx (&VersionInfo) ;
 
   InsertPath = FixPath (DocumentsPath + "Insert Menu") ;
-  POVRayIniPath = FixPath (DocumentsPath + "ini\\povray.ini") ;
+  POVRayIniPath = FixPath (DocumentsPath + "ini\\" BRANCH_INI) ;
 
   icex.dwSize = sizeof (INITCOMMONCONTROLSEX) ;
   icex.dwICC = ICC_WIN95_CLASSES ;
