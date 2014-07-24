@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013 Christoph Lipka.
+/// Portions Copyright 2013-2014 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -7233,6 +7233,10 @@ void Parser::Parse_Global_Settings()
 
                 CASE (BRILLIANCE_TOKEN)
                     sceneData->radiositySettings.brilliance = ((int)Parse_Float() != 0);
+                END_CASE
+
+                CASE (NO_CACHE_TOKEN)
+                    sceneData->radiositySettings.cache = ((int)Allow_Float(1.0) == 0);
                 END_CASE
 
                 OTHERWISE

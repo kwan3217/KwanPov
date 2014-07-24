@@ -7,6 +7,14 @@
 /// @copyright
 /// @parblock
 ///
+/// UberPOV Raytracer version 1.37.
+/// Portions Copyright 2013-2014 Christoph Lipka.
+///
+/// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+/// subject to the same licensing terms and conditions.
+///
+/// ----------------------------------------------------------------------------
+///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
 /// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
 ///
@@ -120,6 +128,7 @@ class SceneRadiositySettings
         float   defaultImportance;
         bool    subsurface;                 // whether to use subsurface scattering for radiosity sampling rays
         bool    brilliance;                 // whether to respect brilliance in radiosity computations
+        bool    cache;                      // whether to actually cache any samples
 
         SceneRadiositySettings() {
             radiosityEnabled    = false;
@@ -147,6 +156,7 @@ class SceneRadiositySettings
             defaultImportance   = 1.0;
             subsurface          = false;
             brilliance          = false;
+            cache               = true;
         }
 
         RadiosityRecursionSettings* GetRecursionSettings (bool final) const;
@@ -250,10 +260,11 @@ class RadiosityFunction : public Trace::RadiosityFunctor
         //      rs      - the radiosity settings as parsed from the scene file
         //      rc      - the radiosity cache to retrieve previously computed samples from, and store newly computed samples in
         //      cf      - the cooperate functor (whatever that is - some thing that handles inter-thread communication?)
-        //      pts     - number of the current pretrace step (PRETRACE_FIRST to PRETRACE_MAX, or FINAL_TRACE for main render)
+        //      ft      - whether this is the main render (final trace)
         //      camera  - position of the camera
+        //      rep     - whether reproducibility is a requirement
         RadiosityFunction(shared_ptr<SceneData> sd, TraceThreadData *td,
-                          const SceneRadiositySettings& rs, RadiosityCache& rc, Trace::CooperateFunctor& cf, bool ft, const Vector3d& camera);
+                          const SceneRadiositySettings& rs, RadiosityCache& rc, Trace::CooperateFunctor& cf, bool ft, const Vector3d& camera, bool rep);
         virtual ~RadiosityFunction();
 
         // looks up the ambient value for a certain point
@@ -282,12 +293,16 @@ class RadiosityFunction : public Trace::RadiosityFunctor
                 /// constructor
                 SampleDirectionGenerator();
                 /// Called before each tile
-                void Reset(unsigned int samplePoolCount);
+                virtual void Reset(unsigned int samplePoolCount) = 0;
                 /// Called before each sample
                 void InitSequence(unsigned int& sample_count, const Vector3d& raw_normal, const Vector3d& layer_normal, bool use_raw_normal, DBL brilliance);
                 /// Called to get the next sampling ray direction
                 bool GetDirection(Vector3d& direction);
+                /// Called to get a raw sampling ray direction
+                virtual void GetCosWeightedDirection(Vector3d& direction) = 0;
             protected:
+                /// Number of unique directions available. 0 = virtually unlimited
+                size_t cycleLength;
                 /// number of remaining directions to try
                 size_t remainingDirections;
                 /// whether we're using the raw surface normal instead of the pertubed normal
@@ -302,14 +317,42 @@ class RadiosityFunction : public Trace::RadiosityFunctor
                 Vector3d frameY;
                 /// direction we'll map the precomputed sample directions' Z axis to
                 Vector3d frameZ;
+        };
+
+        class SubRandomSampleDirectionGenerator : public SampleDirectionGenerator
+        {
+            public:
+                /// constructor
+                SubRandomSampleDirectionGenerator();
+                /// Called before each tile
+                virtual void Reset(unsigned int samplePoolCount);
+                /// Called to get a raw sampling ray direction
+                virtual void GetCosWeightedDirection(Vector3d& direction);
+            protected:
                 /// Generator for sampling directions
                 SequentialVectorGeneratorPtr sampleDirections;
+        };
+
+        class RandomSampleDirectionGenerator : public SampleDirectionGenerator
+        {
+            public:
+                /// constructor
+                RandomSampleDirectionGenerator(SequentialDoubleGeneratorPtr source);
+                /// Called before each tile
+                virtual void Reset(unsigned int samplePoolCount);
+                /// Called to get a raw sampling ray direction
+                virtual void GetCosWeightedDirection(Vector3d& direction);
+            protected:
+                /// Generator for sampling directions
+                SequentialDoubleGeneratorPtr randomSource;
         };
 
         // structure to store precomputed effective parameters for each recursion depth
         struct RecursionParameters
         {
-            SampleDirectionGenerator directionGenerator;    // sample generator for this recursion depth
+            RecursionParameters() : directionGenerator(NULL) {}
+            ~RecursionParameters() { if (directionGenerator != NULL) delete directionGenerator; }
+            SampleDirectionGenerator* directionGenerator;   // sample generator for this recursion depth
             IntStatsIndex statsId;                          // statistics id for per-pass per-recursion statistics
             IntStatsIndex queryCountStatsId;                // statistics id for per-recursion statistics
             FPStatsIndex weightStatsId;                     // statistics id for per-recursion statistics
@@ -337,6 +380,7 @@ class RadiosityFunction : public Trace::RadiosityFunctor
         long topLevelQueryCount;
         float topLevelReuse;
         int tileId;
+        bool reproducibility;
 
         double GatherLight(const Vector3d& IPoint, const Vector3d& Raw_Normal, const Vector3d& LayNormal, DBL brilliance, MathColour& Illuminance, TraceTicket& ticket);
 };

@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013 Christoph Lipka.
+/// Portions Copyright 2013-2014 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -331,9 +331,7 @@ class Trace
         RandomDoubleSequence::Generator randomNumberGenerator;
         /// Sub-random uniform 3d points on sphere sequence.
         SequentialVectorGeneratorPtr ssltUniformDirectionGenerator;
-        /// sub-random uniform numbers sequence
-        vector<SequentialVector2dGeneratorPtr> stochasticDirectionGenerator;
-        /// sub-random cos-weighted 3d points on hemisphere sequence
+        /// Pseudo-random uniform number sequence.
         SequentialDoubleGeneratorPtr stochasticRandomGenerator;
         /// Thread data.
         TraceThreadData *threadData;
@@ -341,8 +339,6 @@ class Trace
         CooperateFunctor& cooperate;
         MediaFunctor& media;
         RadiosityFunctor& radiosity;
-
-        SequentialVector2dGeneratorPtr GetStochasticDirectionGenerator(unsigned int depth);
 
     ///
     //*****************************************************************************

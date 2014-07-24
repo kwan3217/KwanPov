@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013 Christoph Lipka.
+/// Portions Copyright 2013-2014 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -102,8 +102,7 @@ Trace::Trace(shared_ptr<SceneData> sd, TraceThreadData *td, const QualityFlags& 
     randomNumbers(0.0, 1.0, 32768),
     randomNumberGenerator(&randomNumbers),
     ssltUniformDirectionGenerator(GetSubRandomDirectionGenerator(0)),
-    stochasticDirectionGenerator(),
-    stochasticRandomGenerator(GetRandomDoubleGenerator(0.0, 1.0)),
+    stochasticRandomGenerator(td->stochasticRandomGenerator),
     cooperate(cf),
     media(mf),
     radiosity(rf),

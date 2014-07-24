@@ -293,7 +293,7 @@ RadiosityRecursionSettings* SceneRadiositySettings::GetRecursionSettings(bool fi
 }
 
 RadiosityFunction::RadiosityFunction(shared_ptr<SceneData> sd, TraceThreadData *td, const SceneRadiositySettings& rs,
-                                     RadiosityCache& rc, Trace::CooperateFunctor& cf, bool ft, const Vector3d& camera) :
+                                     RadiosityCache& rc, Trace::CooperateFunctor& cf, bool ft, const Vector3d& camera, bool rep) :
     threadData(td),
     trace(sd, td, GetRadiosityQualityFlags(rs, QualityFlags(9)), cf, media, *this), // TODO FIXME - we can only use hard-coded Level-9 quality because Radiosity happens to be disabled at lower settings!
     media(td, &trace, &photonGatherer),
@@ -309,7 +309,8 @@ RadiosityFunction::RadiosityFunction(shared_ptr<SceneData> sd, TraceThreadData *
     tileId(0),
     cacheBlockPool(NULL),
     settings(rs),
-    recursionSettings(rs.GetRecursionSettings(ft))
+    recursionSettings(rs.GetRecursionSettings(ft)),
+    reproducibility(rep)
 {
     if (!isFinalTrace)
         errorBound *= rs.lowErrorFactor;
@@ -368,9 +369,19 @@ void RadiosityFunction::BeforeTile(int id, unsigned int pts)
     pretraceStep = pts;
     tileId = id;
 
-    // next tile, so we start the sample direction pattern all over again
+    // make sure the sample direction pattern is properly initialized
     for (unsigned int depth = 0; depth < settings.recursionLimit; depth ++)
-        recursionParameters[depth].directionGenerator.Reset(settings.directionPoolSize);
+    {
+        if (!recursionParameters[depth].directionGenerator)
+        {
+            if (settings.cache)
+                recursionParameters[depth].directionGenerator = new SubRandomSampleDirectionGenerator();
+            else
+                recursionParameters[depth].directionGenerator = new RandomSampleDirectionGenerator(threadData->stochasticRandomGenerator);
+        }
+
+        recursionParameters[depth].directionGenerator->Reset(settings.directionPoolSize);
+    }
 
     assert (cacheBlockPool == NULL);
     cacheBlockPool = radiosityCache.AcquireBlockPool();
@@ -396,11 +407,16 @@ void RadiosityFunction::ComputeAmbient(const Vector3d& ipoint, const Vector3d& r
     threadData->Stats()[param.queryCountStatsId]    ++;
     threadData->Stats()[param.weightStatsId]        += weight;
 
-    // TODO CLARIFY - what exactly is the rationale behind this formula?
-    if(weight < WEIGHT_ERROR_BOUND_OFFSET)
-        temp_error_bound += (WEIGHT_ERROR_BOUND_OFFSET - weight);
+    if (settings.cache)
+    {
+        // TODO CLARIFY - what exactly is the rationale behind this formula?
+        if(weight < WEIGHT_ERROR_BOUND_OFFSET)
+            temp_error_bound += (WEIGHT_ERROR_BOUND_OFFSET - weight);
 
-    reuse = radiosityCache.FindReusableBlock(threadData->Stats(), temp_error_bound * recSettings.errorBoundFactor, ipoint, effectiveNormal, tmpBrilliance, ambient_colour, ticket.radiosityRecursionDepth, pretraceStep, tileId);
+        reuse = radiosityCache.FindReusableBlock(threadData->Stats(), temp_error_bound * recSettings.errorBoundFactor, ipoint, effectiveNormal, tmpBrilliance, ambient_colour, ticket.radiosityRecursionDepth, pretraceStep, tileId);
+    }
+    else
+        reuse = 0.0;
 
     if (ticket.radiosityRecursionDepth == 0)
     {
@@ -567,16 +583,16 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
     unsigned int okCountRaw = 0;
     bool use_raw_normal = similar(raw_normal, layer_normal); // if the normal isn't pertubed, go for the raw normal right away because it makes life easier
     double qualitySum = 0.0;
-    param.directionGenerator.InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal, brilliance);
+    param.directionGenerator->InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal, brilliance);
     for(unsigned int i = 0, hit = 0; i < cur_sample_count; i++)
     {
-        bool ray_ok = param.directionGenerator.GetDirection(direction);
+        bool ray_ok = param.directionGenerator->GetDirection(direction);
         if (!ray_ok && !use_raw_normal)
         {
             // out of good sample directions, but we may still re-try with the raw normal
             use_raw_normal = true;
-            param.directionGenerator.InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal, brilliance);
-            ray_ok = param.directionGenerator.GetDirection(direction);
+            param.directionGenerator->InitSequence(cur_sample_count, raw_normal, layer_normal, use_raw_normal, brilliance);
+            ray_ok = param.directionGenerator->GetDirection(direction);
         }
         if (!ray_ok)
             // out of good sample directions, this time really
@@ -690,7 +706,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
     // limited reuse potential, forget it.
     // [CLi] an exceptionally low distance indicates that we've almost hit two objects at once,
     // so that the sampled rays may be flawed with numeric precision issues
-    if(smallest_dist > (maximum_distance * 0.0001)) // TODO FIXME - Should this be similar to RAD_EPSILON? Otherwise select some other *meaningful* constant! [trf]
+    if(settings.cache && (smallest_dist > (maximum_distance * 0.0001))) // TODO FIXME - Should this be similar to RAD_EPSILON? Otherwise select some other *meaningful* constant! [trf]
     {
         // Theory:  We don't want to calculate a primary method ray loop at every
         // point along the inside edges, so a minimum effectivity is practical.
@@ -767,6 +783,7 @@ double RadiosityFunction::GatherLight(const Vector3d& ipoint, const Vector3d& ra
 ******************************************************************************/
 
 RadiosityFunction::SampleDirectionGenerator::SampleDirectionGenerator() :
+    cycleLength(0),
     rawNormalMode(false),
     rawNormal(0,1,0),
     frameX(1,0,0),
@@ -774,15 +791,11 @@ RadiosityFunction::SampleDirectionGenerator::SampleDirectionGenerator() :
     frameZ(0,0,1)
 {}
 
-void RadiosityFunction::SampleDirectionGenerator::Reset(unsigned int samplePoolCount)
-{
-    if (!sampleDirections)
-        sampleDirections = GetSubRandomCosWeightedDirectionGenerator(0, samplePoolCount);
-}
-
 void RadiosityFunction::SampleDirectionGenerator::InitSequence(unsigned int& sample_count, const Vector3d& raw_normal, const Vector3d& layer_normal, bool use_raw_normal, DBL br)
 {
-    size_t sequenceSize = sampleDirections->CycleLength();
+    size_t sequenceSize = cycleLength;
+    if (sequenceSize == 0)
+        sequenceSize = sample_count * 5;
     sample_count = (unsigned int)min((size_t)sample_count, sequenceSize);
 
     if (use_raw_normal)
@@ -840,7 +853,8 @@ bool RadiosityFunction::SampleDirectionGenerator::GetDirection(Vector3d& directi
     do
     {
         //Increase_Counter(stats[Gather_Performed_Count]);
-        random_vec = (*sampleDirections)();
+
+        GetCosWeightedDirection(random_vec);
 
         // Tweak the direction vector according to the brilliance specified.
         random_vec.y() = fabs(random_vec.y());
@@ -876,6 +890,35 @@ bool RadiosityFunction::SampleDirectionGenerator::GetDirection(Vector3d& directi
     while((ray_ok <= 0.0) && (remainingDirections));
 
     return (ray_ok > 0.0);
+}
+
+RadiosityFunction::SubRandomSampleDirectionGenerator::SubRandomSampleDirectionGenerator() :
+    sampleDirections(GetSubRandomCosWeightedDirectionGenerator(0))
+{
+    cycleLength = sampleDirections->CycleLength();
+}
+
+void RadiosityFunction::SubRandomSampleDirectionGenerator::Reset(unsigned int samplePoolCount)
+{
+    if (!sampleDirections)
+        sampleDirections = GetSubRandomCosWeightedDirectionGenerator(0, samplePoolCount);
+}
+
+void RadiosityFunction::SubRandomSampleDirectionGenerator::GetCosWeightedDirection(Vector3d& direction)
+{
+    direction = (*sampleDirections)();
+}
+
+RadiosityFunction::RandomSampleDirectionGenerator::RandomSampleDirectionGenerator(SequentialDoubleGeneratorPtr source) :
+    randomSource(source)
+{}
+
+void RadiosityFunction::RandomSampleDirectionGenerator::Reset(unsigned int samplePoolCount)
+{}
+
+void RadiosityFunction::RandomSampleDirectionGenerator::GetCosWeightedDirection(Vector3d& direction)
+{
+    direction = CosWeighted3dOnHemisphere(randomSource);
 }
 
 

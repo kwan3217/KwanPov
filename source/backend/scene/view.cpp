@@ -1019,7 +1019,7 @@ void View::StartRender(POVMS_Object& renderOptions)
     }
 
     // do radiosity pretrace
-    if(viewData.GetSceneData()->radiositySettings.radiosityEnabled)
+    if(viewData.GetSceneData()->radiositySettings.radiosityEnabled && viewData.GetSceneData()->radiositySettings.cache)
     {
         // TODO load radiosity data (if applicable)?
 
@@ -1056,7 +1056,7 @@ void View::StartRender(POVMS_Object& renderOptions)
 
                 // do render one pretrace step with current pretrace size
                 for(int i = 0; i < actualThreads; i++)
-                    viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new RadiosityTask(&viewData, actualSize, actualSize, step, 1, nominalThreads))));
+                    viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new RadiosityTask(&viewData, actualSize, actualSize, step, 1, nominalThreads, highReproducibility))));
 
                 // wait for previous pretrace step to finish
                 renderTasks.AppendSync();
@@ -1075,7 +1075,7 @@ void View::StartRender(POVMS_Object& renderOptions)
         {
             // do render all pretrace steps
             for(int i = 0; i < maxRenderThreads; i++)
-                viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new RadiosityTask(&viewData, startSize, endSize, RadiosityFunction::PRETRACE_FIRST, steps, 0))));
+                viewThreadData.push_back(dynamic_cast<ViewThreadData *>(renderTasks.AppendTask(new RadiosityTask(&viewData, startSize, endSize, RadiosityFunction::PRETRACE_FIRST, steps, 0, highReproducibility))));
 
             // wait for pretrace to finish
             renderTasks.AppendSync();

@@ -82,6 +82,11 @@ Testing for UberPOV:
         The "#persistent" statement can be used to pass data to subsequent
         frames of an animation.
 
+      - upov-radiosity-no_cache (0.10):
+
+        The "no_cache" keyword can be specified inside the global radiosity
+        block to enable unbiased computation of diffuse illumination.
+
       - upov-read-text (1.00):
 
         The "text" keyword can be specified in the "#read" directive, enabling
@@ -205,6 +210,29 @@ Reflection Blur:
     This syntax extension can be tested for using the #patch directive or
     patch() function with the patch name "upov-reflection-roughness"; the
     current implementation is version 0.9.
+
+Unbiased Diffuse Illumination:
+------------------------------
+
+  - UberPOV allows to disable the caching of radiosity samples, by using the
+    following syntax in the global radiosity block:
+
+        no_cache [BOOL]
+
+    It also changes the way the secondary ray directions are chosen, and
+    effectively turns the radiosity algorithm into a purely stochastic unbiased
+    algorithm to compute diffuse illumination.
+
+    Most radiosity settings are without effect in this mode.
+
+    The current implementation does not translate classic radiosity settings
+    into useful parameters for this mode of operation; it is therefore highly
+    recommended to use a much lower setting for the "count" parameter than
+    typical with standard radiosity.
+
+    This syntax extension can be tested for using the #patch directive or
+    patch() function with the patch name "upov-radiosity-no_cache"; the current
+    implementation is version 0.1.
 
 Blink Keyword:
 --------------
