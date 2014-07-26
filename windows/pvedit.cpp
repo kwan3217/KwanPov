@@ -1,43 +1,47 @@
-/*******************************************************************************
- * pvedit.cpp
- *
- * This file contains editor support code.
- *
- * Author: Christopher J. Cason.
- *
- * ---------------------------------------------------------------------------
- * UberPOV Raytracer version 1.37.
- * Portions Copyright 2013 Christoph Lipka.
- *
- * UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
- * subject to the same licensing terms and conditions.
- * ---------------------------------------------------------------------------
- * Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
- * Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
- *
- * POV-Ray is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * POV-Ray is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * ---------------------------------------------------------------------------
- * POV-Ray is based on the popular DKB raytracer version 2.12.
- * DKBTrace was originally written by David K. Buck.
- * DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
- * ---------------------------------------------------------------------------
- * $File: //depot/clipka/upov/windows/pvedit.cpp $
- * $Revision: #5 $
- * $Change: 6087 $
- * $DateTime: 2013/11/11 03:53:39 $
- * $Author: clipka $
- *******************************************************************************/
+//******************************************************************************
+///
+/// @file windows/pvedit.cpp
+///
+/// This file contains editor support code.
+///
+/// @author Christopher J. Cason.
+///
+/// @copyright
+/// @parblock
+///
+/// UberPOV Raytracer version 1.37.
+/// Portions Copyright 2013-2014 Christoph Lipka.
+///
+/// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+/// subject to the same licensing terms and conditions.
+///
+/// ----------------------------------------------------------------------------
+///
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+///
+/// POV-Ray is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU Affero General Public License as
+/// published by the Free Software Foundation, either version 3 of the
+/// License, or (at your option) any later version.
+///
+/// POV-Ray is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU Affero General Public License for more details.
+///
+/// You should have received a copy of the GNU Affero General Public License
+/// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+///
+/// ----------------------------------------------------------------------------
+///
+/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// DKBTrace was originally written by David K. Buck.
+/// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
+///
+/// @endparblock
+///
+//*******************************************************************************
 
 #define POVWIN_FILE
 #define _WIN32_IE COMMONCTRL_VERSION
@@ -62,7 +66,7 @@ namespace povwin
 {
 
 using namespace pov;
-  
+
 HINSTANCE               hLibPovEdit ;
 
 extern bool             debugging ;
@@ -202,6 +206,15 @@ bool LoadEditorDLL (char *path, bool errorOK)
                      "instructions on how to correct this or turn editor loading off.", "Important!") ;
 #else
       if (MessageBox (main_window,
+#if STANDALONE_BUILD == 1
+                      BRANCH_NAME " could not load the internal editor. This is to be expected, "
+                      "as the editor DLL is not part of UberPOV, and needs to be obtained from "
+                      "official POV-Ray. If you do not wish to use the editor you can turn "
+                      "it off (and stop this message appearing) by unchecking 'Use Editor' "
+                      "under the 'Other Settings' sub-menu of the Options menu.\n\n"
+                      "If you wish to enable the editor, clicking 'Yes' below will take "
+                      "you to its download page.",
+#else
                       BRANCH_NAME " could not load POV-Ray's internal editor. This is to be expected "
                       "if you installed the AGPL-licenced distribution of POV-Ray, as the editor DLL "
                       "is not included. If you do not wish to use the editor you can turn "
@@ -209,6 +222,7 @@ bool LoadEditorDLL (char *path, bool errorOK)
                       "under the 'Other Settings' sub-menu of the Options menu.\n\n"
                       "If you wish to enable the editor, clicking 'Yes' below will take "
                       "you to its download page.",
+#endif
                       "Could not load internal editor - download it?",
                       MB_ICONQUESTION | MB_YESNO) == IDYES)
                         ShellExecute (NULL, NULL, "http://www.povray.org/download/wineditdll/" POV_RAY_VERSION COMPILER_VER "." PVENGINE_VER, NULL, NULL, SW_SHOWNORMAL) ;
