@@ -1,0 +1,3 @@
+NOTE - the files in this directory and all sub-directories have been taken
+directly from POV-Ray 3.7.0 as-is, and are NOT officially part of the
+UberPOV distribution.

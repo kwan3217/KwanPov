@@ -1,7 +1,7 @@
 ###################################################################################################
 # setup.nsi
 #
-# This file contains the NSIS setup script for the Windows version of POV-Ray.
+# This file contains the NSIS setup script for the Windows version of UberPOV.
 #
 # Compiling this file requires the Nullsoft Scriptable Install System. It has only been tested with
 # NSIS v2.46.
@@ -9,6 +9,14 @@
 # Before compiling please read "Customization Notes" below. Once you have set up your distribution
 # tree and updated the variable definitions in this file, you may execute "makensis setup.nsi" to
 # build the output file.
+#
+###################################################################################################
+#
+# UberPOV Raytracer version 1.37.
+# Portions Copyright 2013-2014 Christoph Lipka.
+#
+# UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+# subject to the same licensing terms and conditions.
 #
 ###################################################################################################
 #
@@ -30,21 +38,14 @@
 #
 ###################################################################################################
 #
-# $File: //depot/public/povray/3.x/windows/setup.nsi $
-# $Revision: #1 $
-# $Change: 6069 $
-# $DateTime: 2013/11/06 11:59:40 $
-# $Author: chrisc $
-#
-###################################################################################################
-#
 # Customization Notes:
 #
 # Please read these instructions in order to customize this install script for your use. Doing so
 # involves two main steps: firstly, setting up a install tree containing the files in a particular
 # layout, and secondly changing various variables, such as adding your name to the 'Company' field,
-# choosing the default destination (please do not use the same default as official POV-Ray), and so
-# on. Once you have done all of this you should comment-out the '!error' directive below.
+# choosing the default destination (please do not use the same default as official POV-Ray or
+# UberPOV), and so on. Once you have done all of this you should comment-out the '!error' directive
+# below.
 #
 # You must set INSTROOT to point at a tree containing a set of files in the layout expected by this 
 # script. Basically the tree as presented here is almost identical to what will end up on the target
@@ -66,9 +67,9 @@
 #     ./user/scenes
 #
 # Note in particular that within the ./core/bin directory you must re-name any files that contain
-# 'POV-Ray' to contain ${MYABBREV} as defined below; e.g. using the example 'Laser-Ray' abbreviation
+# 'UberPOV' or 'POV-Ray' to contain ${MYABBREV} as defined below; e.g. using the example 'Laser-Ray' abbreviation
 # "POV-Ray.Scene.ico" would become "Laser-Ray.Scene.ico". Additionally any files prefixed with
-# "pvengine" (e.g. all default EXE's) must have that prefix replaced with ${MYEXEPREFIX}.
+# "uberpov" (e.g. all default EXE's) must have that prefix replaced with ${MYEXEPREFIX}.
 #
 # Additionally some files not part of the build are added to ./core/bin allow for supporting dumps;
 # these are dbghelp.dll and submitminidump.exe. The former is available from Microsoft and may be
@@ -80,7 +81,7 @@
 # shortcuts; you may copy these from distribution/platform-specific/windows/icons/ (but be sure to
 # re-name them as discussed above).
 #
-# NB: The path 'distribution/' refers to the directory of that name in the standard POV-Ray source
+# NB: The path 'distribution/' refers to the directory of that name in the standard UberPOV source
 # tree (on the same level as 'libraries', 'source', 'vfe', 'unix', etc). 
 #
 #   ./agpl-3.0.txt       copied from distribution/
@@ -142,7 +143,7 @@ Name "${MYPRODUCT}"
 !define DOCDEST "$DOCUMENTS\${MYCOMPANY}\${MYPRODUCT}\${VERSIONSTR}"
 !define REGKEY "SOFTWARE\${MYCOMPANY}\${MYPRODUCT}\${VERSIONSTR}"
 !define UNINSTALL_REG_SUFFIX "${VERSIONSTR}"
-!define URL ${MYURL}
+!define URL "${MYURL}"
 
 # MUI Symbol Definitions
 !define MUI_ICON "${INSTROOT}\Core\Bin\${MYABBREV}.ico"
@@ -175,7 +176,7 @@ var Dialog
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE ${INSTROOT}\agpl-3.0.txt
+!insertmacro MUI_PAGE_LICENSE "${INSTROOT}\agpl-3.0.txt"
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE BinDirectoryLeave
 !define MUI_DIRECTORYPAGE_VARIABLE $BinDir
 !define MUI_DIRECTORYPAGE_TEXT_TOP "Setup will install the core $(^NameDA) files in the following location. Click Browse to select a different folder."
@@ -200,7 +201,7 @@ InstallDir $BinDir
 CRCCheck on
 XPStyle on
 ShowInstDetails show
-VIProductVersion ${MYVER}.${MYSUBVER}
+VIProductVersion "${MYVER}.${MYSUBVER}"
 VIAddVersionKey ProductName "${MYPRODUCT}"
 VIAddVersionKey ProductVersion "${MYVER}"
 VIAddVersionKey CompanyName "${MYCOMPANY}"
@@ -220,20 +221,20 @@ Section -Main SEC0000
 
     SetOutPath "$BinDir"
     SetOverwrite on
-    File ${INSTROOT}\agpl-3.0.txt
-    File ${INSTROOT}\revision.txt
-    File ${INSTROOT}\changes.txt
-    File /r ${INSTROOT}\Core\*
+    File "${INSTROOT}\agpl-3.0.txt"
+    File "${INSTROOT}\revision.txt"
+    File "${INSTROOT}\changes.txt"
+    File /r "${INSTROOT}\Core\*"
     WriteRegStr HKCU "${REGKEY}\Components" Main 1
 SectionEnd
 
 Section "User Files" SEC0001
     SetOutPath "$DocDir"
     SetOverwrite on
-    File ${INSTROOT}\agpl-3.0.txt
-    File ${INSTROOT}\revision.txt
-    File ${INSTROOT}\changes.txt
-    File /r ${INSTROOT}\User\*
+    File "${INSTROOT}\agpl-3.0.txt"
+    File "${INSTROOT}\revision.txt"
+    File "${INSTROOT}\changes.txt"
+    File /r "${INSTROOT}\User\*"
     WriteRegStr HKCU "${REGKEY}\Components" "User Files" 1
 SectionEnd
 
@@ -242,7 +243,7 @@ Section -post SEC0002
     WriteRegStr HKCU "${REGKEY}\Windows" DocPath "$DocDir"
     WriteRegDWORD HKCU "${REGKEY}\Windows" FreshInstall 1
     SetOutPath "$BinDir"
-    WriteUninstaller $BinDir\${MYEXEPREFIX}-${MYVER}-uninstall.exe
+    WriteUninstaller "$BinDir\${MYEXEPREFIX}-${MYVER}-uninstall.exe"
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     SetOutPath "$SMPROGRAMS\$StartMenuGroup"
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${MYPRODUCT}.lnk" "$BinDir\bin\$TargetEXE"
@@ -488,7 +489,7 @@ Section -un.post UNSEC0002
     Delete "$SMPROGRAMS\$StartMenuGroup\Scene Previews.lnk"
     Delete "$Desktop\${MYABBREV} ${VERSIONSTR}.lnk"
     Delete "$Desktop\${MYABBREV} ${VERSIONSTR} Examples.lnk"
-    Delete $INSTDIR\${MYEXEPREFIX}-${MYVER}-uninstall.exe
+    Delete "$INSTDIR\${MYEXEPREFIX}-${MYVER}-uninstall.exe"
     RmDir $SMPROGRAMS\$StartMenuGroup
     RmDir $INSTDIR
 SectionEnd

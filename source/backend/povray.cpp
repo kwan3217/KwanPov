@@ -298,7 +298,7 @@ void BuildInitInfo(POVMSObjectPtr msg)
 		err = POVMSUtil_SetString(msg, kPOVAttrib_PlatformName, POVRAY_PLATFORM_NAME);
 	if(err == kNoErr)
 		err = POVMSUtil_SetFormatString(msg, kPOVAttrib_CoreVersion,
-		                                BRANCH_FULL_NAME " Version %s%s", BRANCH_VERSION, COMPILER_VER);
+		                                BRANCH_FULL_NAME " Version %s", BRANCH_VERSION STANDALONE_VER COMPILER_VER SSE2_INCLUDED);
 	if(err == kNoErr)
 		err = POVMSUtil_SetString(msg, kPOVAttrib_EnglishText,
 		                          DISTRIBUTION_MESSAGE_1 "\n" DISTRIBUTION_MESSAGE_2 "\n" DISTRIBUTION_MESSAGE_3
