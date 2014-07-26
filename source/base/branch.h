@@ -2,7 +2,7 @@
 ///
 /// @file base/branch.h
 ///
-/// @todo   What's in here?
+/// This file contains preprocessor defines specifying details of this branch.
 ///
 /// @copyright
 /// @parblock
@@ -42,33 +42,35 @@
 #ifndef POVRAY_BRANCH_H
 #define POVRAY_BRANCH_H
 
+#include "base/build.h"
+
 #define BRANCH_NAME             "UberPOV"
 #define BRANCH_FULL_NAME        "UberPOV Raytracer"
 #define BRANCH_MAINTAINER       "Christoph Lipka"
 #define BRANCH_CONTACT          "http://www.lipka-koeln.de"
-#define BRANCH_VERSION          "1.37.0.0-beta.6"
+#define BRANCH_VERSION          "1.37-dev"
 #define BRANCH_COPYRIGHT        "Copyright 2013-2014 Christoph Lipka."
 
-///
 /// Primary developers of this branch, in alphabetical order.
-/// Comma-separated list of strings, e.g. @code
+/// Comma-separated list of strings, e.g.
+///
 ///     #define BRANCH_DEVELOPERS "John Doe", "Frank N. Furter", "R. Daneel Olivaw"
-/// @endcode.
 ///
 #define BRANCH_DEVELOPERS       "Christoph Lipka"
 
-///
 /// Additional contributors to this branch, in alphabetical order.
-/// Comma-separated list of strings, e.g. @code
+/// Comma-separated list of strings, e.g.
+///
 ///     #define BRANCH_CONTRIBUTORS "John Doe", "Frank N. Furter", "R. Daneel Olivaw"
-/// @endcode.
+///
 /// Leave undefined if there are no additional contributors.
 ///
 #define BRANCH_CONTRIBUTORS     "Christian Froeschlin"
 
 
-#ifdef STANDALONE_BUILD
-    // This is a build for standalone operation without (or independent of) an official POV-Ray installation.
+#if STANDALONE_BUILD == 1
+    // This is a build for standalone operation without (or independent of) an official POV-Ray installation,
+    // so we're using our own registry key, directory and ini file names.
 
     #define BRANCH_INI  "uberpov.ini"
 
@@ -79,7 +81,8 @@
     #define PATHVERKEY  "v1.37"
 
 #else
-    // This is a build for piggyback operation alongside an official POV-Ray installation.
+    // This is a build for piggyback operation alongside an official POV-Ray installation,
+    // so we're using the same registry key, directory and ini file names as official POV-Ray.
 
     #define BRANCH_INI  "povray.ini"
 
@@ -92,7 +95,6 @@
 #endif
 
 
-///
 /// *************************************************************************************************************
 ///
 /// @name Patches With Notable Limitations
@@ -102,7 +104,6 @@
 /// @{
 ///
 
-///
 /// Experimental patch providing a mechanism to persist data between frames in an animation.
 /// Kudos to Christian Froeschlin, who published the basis for this patch on the povray.unofficial.patches newsgroup.
 ///
@@ -118,10 +119,5 @@
 /// @}
 ///
 /// *************************************************************************************************************
-///
-
-#ifndef BRANCH_BUILD_IS_OFFICIAL
-#define BRANCH_BUILD_IS_OFFICIAL 0
-#endif
 
 #endif // POVRAY_BRANCH_H
