@@ -104,7 +104,7 @@ bool povray_terminated();
 
 #define POV_RAY_IS_BRANCH   1
 
-#ifdef STANDALONE_BUILD
+#if STANDALONE_BUILD == 1
     #define STANDALONE_VER ".stalone"
     #define REGCURRENT_VERSION BRANCH_VERSION
 #else
