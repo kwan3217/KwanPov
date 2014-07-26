@@ -62,8 +62,8 @@ namespace pov
 
 using namespace pov_base;
 
-RadiosityTask::RadiosityTask(ViewData *vd, DBL ptsz, DBL ptesz, unsigned int pts, unsigned int ptsc, unsigned int nt, bool hr) :
-    RenderTask(vd),
+RadiosityTask::RadiosityTask(ViewData *vd, DBL ptsz, DBL ptesz, unsigned int pts, unsigned int ptsc, unsigned int nt, bool hr, size_t seed) :
+    RenderTask(vd, seed),
     trace(vd, GetViewDataPtr(), vd->GetSceneData()->parsedMaxTraceLevel, vd->GetSceneData()->parsedAdcBailout,
           vd->GetQualityFeatureFlags(), cooperate, media, radiosity, !vd->GetSceneData()->radiositySettings.vainPretrace),
     cooperate(*this),

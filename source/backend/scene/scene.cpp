@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013 Christoph Lipka.
+/// Portions Copyright 2013-2014 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -449,6 +449,8 @@ Scene::~Scene()
 
 void Scene::StartParser(POVMS_Object& parseOptions)
 {
+    size_t seed = 0; // TODO
+
     // A scene can only be parsed once
     if(parserControlThread == NULL)
 #ifndef USE_OFFICIAL_BOOST
@@ -527,14 +529,14 @@ void Scene::StartParser(POVMS_Object& parseOptions)
     }
 
     // do parsing
-    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new Parser(sceneData, bool(parseOptions.Exist(kPOVAttrib_Clock)), parseOptions.TryGetFloat(kPOVAttrib_Clock, 0.0)))));
+    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new Parser(sceneData, bool(parseOptions.Exist(kPOVAttrib_Clock)), parseOptions.TryGetFloat(kPOVAttrib_Clock, 0.0), seed))));
 
     // wait for parsing
     parserTasks.AppendSync();
 
     // do bounding - we always call this even if the bounding is turned off
     // because it also generates object statistics
-    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new BoundingTask(sceneData, parseOptions.TryGetInt(kPOVAttrib_BoundingThreshold, 1)))));
+    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new BoundingTask(sceneData, parseOptions.TryGetInt(kPOVAttrib_BoundingThreshold, 1), seed))));
 
     // wait for bounding
     parserTasks.AppendSync();

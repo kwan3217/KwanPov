@@ -7,6 +7,14 @@
 /// @copyright
 /// @parblock
 ///
+/// UberPOV Raytracer version 1.37.
+/// Portions Copyright 2013-2014 Christoph Lipka.
+///
+/// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+/// subject to the same licensing terms and conditions.
+///
+/// ----------------------------------------------------------------------------
+///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
 /// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
 ///
@@ -134,8 +142,8 @@ class BSPProgress : public BSPTree::Progress
         BSPProgress();
 };
 
-BoundingTask::BoundingTask(shared_ptr<SceneData> sd, unsigned int bt) :
-    Task(new SceneThreadData(sd), boost::bind(&BoundingTask::SendFatalError, this, _1)),
+BoundingTask::BoundingTask(shared_ptr<SceneData> sd, unsigned int bt, size_t seed) :
+    Task(new SceneThreadData(sd, seed), boost::bind(&BoundingTask::SendFatalError, this, _1)),
     sceneData(sd),
     boundingThreshold(bt)
 {

@@ -7,6 +7,14 @@
 /// @copyright
 /// @parblock
 ///
+/// UberPOV Raytracer version 1.37.
+/// Portions Copyright 2013-2014 Christoph Lipka.
+///
+/// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+/// subject to the same licensing terms and conditions.
+///
+/// ----------------------------------------------------------------------------
+///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
 /// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
 ///
@@ -60,8 +68,8 @@
 namespace pov
 {
 
-PhotonShootingTask::PhotonShootingTask(ViewData *vd, PhotonShootingStrategy* strategy) :
-    RenderTask(vd),
+PhotonShootingTask::PhotonShootingTask(ViewData *vd, PhotonShootingStrategy* strategy, size_t seed) :
+    RenderTask(vd, seed),
     trace(vd->GetSceneData(), GetViewDataPtr(), vd->GetSceneData()->photonSettings.Max_Trace_Level,
           vd->GetSceneData()->photonSettings.adcBailout, vd->GetQualityFeatureFlags(), cooperate),
     messageFactory(10, 370, "Photon", vd->GetSceneData()->backendAddress, vd->GetSceneData()->frontendAddress, vd->GetSceneData()->sceneId, 0), // TODO FIXME - Values need to come from the correct place!

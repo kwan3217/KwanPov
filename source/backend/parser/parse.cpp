@@ -137,8 +137,8 @@ Parser::SYM_TABLE* Parser::persistent_symbols = NULL;
 *
 ******************************************************************************/
 
-Parser::Parser(shared_ptr<SceneData> sd, bool useclk, DBL clk) :
-    Task(new SceneThreadData(sd), boost::bind(&Parser::SendFatalError, this, _1)),
+Parser::Parser(shared_ptr<SceneData> sd, bool useclk, DBL clk, size_t seed) :
+    Task(new SceneThreadData(sd, seed), boost::bind(&Parser::SendFatalError, this, _1)),
     sceneData(sd),
     clockValue(clk),
     useClock(useclk),

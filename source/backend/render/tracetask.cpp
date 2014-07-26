@@ -223,8 +223,8 @@ void TraceTask::SubdivisionBuffer::Clear()
         *i = false;
 }
 
-TraceTask::TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr) :
-    RenderTask(vd),
+TraceTask::TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr, size_t seed) :
+    RenderTask(vd, seed),
     trace(vd, GetViewDataPtr(), vd->GetSceneData()->parsedMaxTraceLevel, vd->GetSceneData()->parsedAdcBailout,
           vd->GetQualityFeatureFlags(), cooperate, media, radiosity),
     cooperate(*this),

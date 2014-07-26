@@ -304,7 +304,7 @@ class Parser : public Task
         };
 
         // constructor
-        Parser(shared_ptr<SceneData> sd, bool useclock, DBL clock);
+        Parser(shared_ptr<SceneData> sd, bool useclock, DBL clock, size_t seed);
 
         void Run();
         void Stopped();

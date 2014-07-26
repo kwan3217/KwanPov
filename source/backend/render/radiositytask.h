@@ -57,7 +57,7 @@ namespace pov
 class RadiosityTask : public RenderTask
 {
     public:
-        RadiosityTask(ViewData *vd, DBL ptsz, DBL ptesz, unsigned int pts, unsigned int ptsc, unsigned int nt, bool hr);
+        RadiosityTask(ViewData *vd, DBL ptsz, DBL ptesz, unsigned int pts, unsigned int ptsc, unsigned int nt, bool hr, size_t seed);
         virtual ~RadiosityTask();
 
         virtual void Run();
