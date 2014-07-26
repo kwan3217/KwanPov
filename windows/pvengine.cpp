@@ -789,7 +789,7 @@ void PrintRenderTimes (int Finished, int NormalCompletion)
             GenerateDumpMeta(true);
             fwrite(DumpMeta, strlen(DumpMeta), 1, f);
             fprintf(f, "povversion=%s\n", POV_RAY_VERSION) ;
-            fprintf(f, "compilerversion=%s\n", COMPILER_VER) ;
+            fprintf(f, "compilerversion=%s\n", COMPILER_VER SSE2_INCLUDED) ;
             fprintf(f, "platformversion=%s\n", PVENGINE_VER) ;
             fclose(f);
           }
@@ -1283,8 +1283,8 @@ bool checkRegKey (void)
   if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\" REGKEY "\\CurrentVersion\\Windows", 0, KEY_READ | KEY_WRITE, &key) == ERROR_SUCCESS)
   {
     len = sizeof (str) ;
-    if (RegQueryValueEx (key, VERSIONVAL, 0, NULL, (BYTE *) str, &len) != 0 || strcmp (str, BRANCH_VERSION) != 0)
-        RegSetValueEx (key, VERSIONVAL, 0, REG_SZ, (BYTE *) BRANCH_VERSION, (int) strlen (BRANCH_VERSION) + 1) ;
+    if (RegQueryValueEx (key, VERSIONVAL, 0, NULL, (BYTE *) str, &len) != 0 || strcmp (str, REGCURRENT_VERSION) != 0)
+        RegSetValueEx (key, VERSIONVAL, 0, REG_SZ, (BYTE *) REGCURRENT_VERSION, (int) strlen (REGCURRENT_VERSION) + 1) ;
     RegCloseKey (key) ;
   }
 
@@ -2101,7 +2101,7 @@ bool start_rendering (bool ignore_source_file)
           wrapped_printf ("Preset source file is '%s'.", source_file_name) ;
           splitpath (source_file_name, dir, NULL) ;
           SetCurrentDirectory (dir) ;
-          sprintf (str, "%s\\povray.ini", dir) ;
+          sprintf (str, "%s\\" BRANCH_INI, dir) ;
           if (fileExists (str))
           {
             wrapped_printf ("File '%s' exists - merging it.", str) ;
@@ -4888,7 +4888,7 @@ void ShowAboutBox (void)
   int         oldMode ;
   MSG         msg ;
   HDC         hdcMemory ;
-  char        *s = BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ;
+  char        *s = BRANCH_VERSION STANDALONE_VER COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ;
   SIZE        size ;
   HFONT       oldFont ;
   BITMAP      bm ;
@@ -5190,10 +5190,10 @@ bool WriteDumpMeta(struct _EXCEPTION_POINTERS *ExceptionInfo, const char *filena
 #endif
 #if POV_RAY_IS_BRANCH == 1
   fprintf(f, "branchname=%s\n", BRANCH_NAME) ;
-  fprintf(f, "branchversion=%s\n", BRANCH_VERSION) ;
+  fprintf(f, "branchversion=%s\n", BRANCH_VERSION STANDALONE_VER) ;
 #endif
   fprintf(f, "povversion=%s\n", POV_RAY_VERSION) ;
-  fprintf(f, "compilerversion=%s\n", COMPILER_VER) ;
+  fprintf(f, "compilerversion=%s\n", COMPILER_VER SSE2_INCLUDED) ;
   fprintf(f, "platformversion=%s\n", PVENGINE_VER) ;
   fprintf(f, "remotesession=%u\n", GetSystemMetrics(SM_REMOTESESSION)) ;
   fclose(f);
@@ -5236,9 +5236,9 @@ char *WriteDump(struct _EXCEPTION_POINTERS *pExceptionInfo, bool full, long time
       static char szDumpPath[_MAX_PATH];
 
       if (full)
-        sprintf(szScratch, BRANCH_NAME "-" BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.dmp", timestamp);
+        sprintf(szScratch, BRANCH_NAME "-" BRANCH_VERSION STANDALONE_VER COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.dmp", timestamp);
       else
-        sprintf(szScratch, BRANCH_NAME "-" BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.minidump", timestamp);
+        sprintf(szScratch, BRANCH_NAME "-" BRANCH_VERSION STANDALONE_VER COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER "-%08X.minidump", timestamp);
 
       // work out a good place for the dump file
       if (!GetTempPath( _MAX_PATH - 64, szDumpPath))
@@ -5518,7 +5518,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   }
 
   sprintf(ToolIniFileName, "%sini\\pvtools.ini", DocumentsPath);
-  sprintf (DefaultRenderIniFileName, "%sini\\povray.ini", DocumentsPath) ;
+  sprintf (DefaultRenderIniFileName, "%sini\\" BRANCH_INI, DocumentsPath) ;
   GetModuleFileName (hInst, str, sizeof (str) - 1) ;
   splitpath (str, modulePath, NULL) ;
   validatePath (modulePath) ;
@@ -5791,7 +5791,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 
   GetHKCU("General", VERSIONVAL, "[unknown]", str, (DWORD) strlen (str)) ;
   if (debugging)
-    debug_output("Registry records version %s, and we are %s\n", str, BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER) ;
+    debug_output("Registry records version %s, and we are %s\n", str, BRANCH_VERSION COMPILER_VER "." PVENGINE_VER) ;
 
   if (strcmp (str, BRANCH_VERSION COMPILER_VER "." PVENGINE_VER) != 0)
   {
@@ -6110,7 +6110,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 #else
   buffer_message (mIDE, BRANCH_NAME " for Windows is part of the POV-Ray(tm) suite of programs.\n") ;
 #endif
-  buffer_message (mIDE, "  This is version " BRANCH_VERSION COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ".\n") ;
+  buffer_message (mIDE, "  This is version " BRANCH_VERSION STANDALONE_VER COMPILER_VER SSE2_INCLUDED "." PVENGINE_VER ".\n") ;
 #if POV_RAY_IS_BRANCH == 1
   buffer_message (mIDE, BRANCH_COPYRIGHT ".\n") ;
   buffer_message (mIDE, "Portions Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.\n") ;

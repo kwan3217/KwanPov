@@ -7,7 +7,7 @@ and all others who contributed to that fantastic piece of software!
 This document is a WIP
 --------------------------------------
 
-Last edit: 2013-11-17
+Last edit: 2014-05-29
 
 License
 --------------------------------------
@@ -30,4 +30,4 @@ POV-Ray. If so, report bugs via the official POV-Ray bug reporting channels.
 Official Binaries
 --------------------------------------
 
-At this point in time, no pre-built binaries are available.
+Pre-built binaries are made available from time to time for 32- and 64-bit Windows.
