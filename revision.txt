@@ -1,188 +1,924 @@
---------------------------------------------------
-Changes between POV-Ray 3.7.0 and UberPOV 1.37.0.0
---------------------------------------------------
+------------------------------------------------------------------------------
+UberPOV "develop" Branch Revision History - 2014-07-26
+------------------------------------------------------------------------------
+Note: the following list is sorted purely chronologically; changes listed
+below a certain version tag were developed before that version's release, but
+may or may not have been included in it. All changes listed are, however,
+included in this particular version.
+------------------------------------------------------------------------------
 
-Change 5956 on 2013/07/26 by clipka@cli-private
+Commit 8da4939 on 2014-07-26 by Christoph Lipka
 
-    updated change.txt
+    Implemented custom seeding of the stochastic pseudo-random number generator.
 
-Change 5955 on 2013/07/26 by clipka@cli-private
+Commit c7cf81f on 2014-07-26 by Christoph Lipka
 
-    overhauled install guides and licensing stuff, and renamed some
-    distribution files that still carried "povray" in their name
+    Fixed a message box that wasn't quite fitting for a stand-alone build.
 
-Change 5954 on 2013/07/23 by clipka@cli-private
+Commit 7f01776 on 2014-07-26 by Christoph Lipka
 
-    added two more sample scenes
+    Merge branch 'master' into develop
 
-Change 5953 on 2013/07/23 by clipka@cli-private
+Commit b3f6946 on 2014-07-26 by Christoph Lipka
 
-    implemented blurred reflections, and changed interaction of multiple
-    oversampling features along a ray's path so that the second (and any
-    subsequent) oversampling feature will now dynamically adjust the number
-    of rays shot rather than shooting just a single ray; also applied a
-    few minor code changes.
+    Merge branch 'release/v1.37.0.0-beta.7' into develop
 
-    Blurred reflections are enabled by adding a "roughness NUMBER" parameter
-    to the reflection block, with values corresponding to the highlights
-    roughness parameter. The number of oversampling rays is determined
-    automatically depending on the roughness. This language extension is
-    named "upov-reflection-roughness", and its current implementation is
-    version 0.9.
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.7
+------------------------------------------------------------------------------
 
-Change 5952 on 2013/07/23 by clipka@cli-private
+Commit c4406d9 on 2014-07-26 by Christoph Lipka
 
-    fixed a bug in radiosity.cpp concerning interaction between radiosity
-    and other oversampling features
+    Merge branch 'release/v1.37.0.0-beta.7'
 
-Change 5951 on 2013/07/23 by clipka@cli-private
+Commit 83d4165 on 2014-07-26 by Christoph Lipka
 
-    Modified area lights and subsurface light transport to use less samples
-    if another oversampling element is already involved in the ray's path
-    (currently this applies to anti-aliasing mode 3, focal blur, SSLT,
-    and radiosity sample rays). Area lights will now always use jitter in
-    such cases.
+    preparing v1.37.0.0-beta.7
 
-Change 5949 on 2013/07/22 by clipka@cli-private
+Commit 495cf08 on 2014-07-26 by Christoph Lipka
 
-    added license notice to glare desaturation sample scene
+    Merge branch 'stalone' into develop
 
-Change 5948 on 2013/07/22 by clipka@cli-private
+Commit 61c0990 on 2014-07-26 by Christoph Lipka
 
-    Added anti-aliasing mode 3, which uses a stochastic metric of each
-    pixel and its immediate neighborhood to determine how many samples
-    to take; samples are distributed evenly within each pixel using
-    a sub-random sequence. An absolute maximum number of samples is
-    specified by the +Rn (Antialias_Depth=n) parameter, using the formula
-    N=2^(n*2). Antialias_Threshold=n.n (+An.n) specifies a stochastic
-    parameter called variance (essentially how much error in the color of each
-    pixel you are willing to accept), while the new Antialias_Confidence=n.n
-    (+ACn.n) parameter specifies another stochastic parameter called
-    confidence (essentially how sure you want to be that the computed color
-    of any given pixel is within the error margin specified by the variance).
-    When anti-aliasing mode 3 is selected, focal blur oversampling
-    parameters (blur_samples, confidence and variance) will be entirely
-    ignored; the focal blur algorithm will instead perform only jittering
-    of individual rays, while leaving the oversampling process entirely to
-    the anti-aliasing algorithm.
+    Modified macro system to specify version, copyright and build information.
 
-Change 5947 on 2013/07/22 by clipka@cli-private
+    Changed distribution of macros among the files backend/povray.h and base/branch.h; added
+    another file base/build.h specifically for stuff pertaining to an individual build, e.g.
+    whether it's official, who compiled it, etc.
 
-    integrate from POV-Ray 3.7 rev. #5946
+Commit 91a2ad7 on 2014-07-25 by Christoph Lipka
 
-Change 5945 on 2013/07/22 by clipka@cli-private
+    Added a sample scene for the "blink" feature.
 
-    integrate from POV-Ray 3.7 rev. #5940
+Commit 6003aa7 on 2014-07-25 by Christoph Lipka
 
-Change 5944 on 2013/07/22 by clipka@cli-private
+    Initial preparations for a stand-alone build of UberPOV.
 
-    updated a bunch of file headers
+    The stand-alone build is supposed to come with its own installer, and run without, or
+    independent of, any existing official POV-Ray installation. This commit includes the following
+    changes in preparation to this end:
 
-Change 5942 on 2013/07/22 by clipka@cli-private
+      - Reviewed the `distribution` directory tree, removing a few files and updating others; most
+        of this tree is now considered official part of UberPOV, with the exception of the help
+        file and the icons.
+      - Reviewed and updated `windows/setup.nsi`, which is now considered official part of UberPOV
+        as well.
+      - Updated Windows-specific code to use an alternate registry key and directory names to live
+        nicely alongside with POV-Ray without mutual interference. This code can be activated via
+        the `STANDALONE_BUILD` precompiler define.
+      - The stand-alone variant will identify itself via a ".stalone" suffix after the version
+        number.
+      - Slightly modified original "piggyback" variant to more clearly identify itself in the
+        `POV-Ray/CurrentVersion/Windows/VersionNo64` registry key.
 
-    added changes.txt and revision.txt
+Commit 784444e on 2014-07-24 by Christoph Lipka
 
-Change 5941 on 2013/07/22 by clipka@cli-private
+    Merge branch 'release/v1.37.0.0-beta.6' into develop
 
-    fixed DISTRIBUTION_MESSAGE_2 sometimes being redefined; also fixed
-    perforce filetype of branch.h
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.6
+------------------------------------------------------------------------------
 
-Change 5939 on 2013/07/20 by clipka@cli-private-ux
+Commit 2c1b429 on 2014-07-24 by Christoph Lipka
 
-    fixed broken unix build
+    Merge branch 'release/v1.37.0.0-beta.6'
 
-Change 5938 on 2013/07/20 by clipka@cli-private-ux
+Commit fede6a2 on 2014-07-24 by Christoph Lipka
 
-    Add ~/unix/NEWS and ~/unix/ChangeLog back in again, as I found that
-    automake demands their presence; also fixed a bug in prebuild.sh
+    preparing v1.37.0.0-beta.6
 
-Change 5935 on 2013/07/20 by clipka@cli-private
+Commit 21cc3c6 on 2014-07-24 by Christoph Lipka
 
-    added sample scene for glare desaturation feature
+    Add support for stochastic diffuse computations.
 
-Change 5934 on 2013/07/20 by clipka@cli-private
+    Specifying `no_cache` in the global radiosity block will disable caching of radiosity samples,
+    and use a more random algorithm to generate secondary ray directions, effectively using the
+    radiosity code for straightforward stochastic computation of diffuse illumination.
 
-    updating unix files to reflect branching
-    (still needs testing)
+Commit d197937 on 2014-07-23 by Christoph Lipka
 
-Change 5933 on 2013/07/20 by clipka@cli-private
+    Merge branch 'povray/master' into develop
 
-    Merging from POV-Ray 3.7 rev. 5922 using clipka-upov (pulling in some
-    distribution files from main branch) - some files had refused the
-    previous attempt
+Commit 54b283a on 2014-07-23 by Christoph Lipka
 
-Change 5931 on 2013/07/19 by clipka@cli-private
+    Improved finish features for more realism:
 
-    Merging from POV-Ray 3.7 rev. 5922 using clipka-upov (pulling in some
-    distribution files from main branch)
+      - Radiosity support for brilliance is now available; to activate it, specify `brilliance on`
+        in the global radiosity settings.
+      - The brilliance effect can now be applied not only to incoming light, but also to outgoing
+        light; to activate this, specify a second FLOAT value after the `brilliance` keyword. For
+        maximum realism, both parameters should be set to the same value.
+      - Fresnel angle-dependent attenuation can now also be enabled for highlights and the diffuse
+        component, by specifying `fresnel on` directly in the finish block.
+        (Note that you will still need to enable fresnel attenuation for reflections separately;
+        also note that where reflection and highlights increase at shallow angles, the diffuse
+        component decreases accordingly.) For a perfect match between reflection and highlights use
+        the `albedo` keyword for the highlight with the same value as the reflection maximum; the
+        reflection minimum should be set to zero.
 
-Change 5927 on 2013/07/19 by clipka@cli-private
+Commit 9b10411 on 2014-07-21 by Christoph Lipka
 
-    Stripped codemax project from the VS 2010 solution
+    fix for GitHub issue #32
 
-Change 5926 on 2013/07/19 by clipka@cli-private
+Commit 08c53d8 on 2014-07-21 by Christoph Lipka
 
-    added a generic syntax to check for supported language extensions
-    (and the implemented versions thereof) across arbitrary branches:
-    The "#patch STRING FLOAT;" directive forces a parse error if the
-    specified patch is not supported at the given version number, and a
-    parse warning if the major versions do not match; the "patch(STRING)"
-    function returns the implemented version of the specified patch as a
-    FLOAT. If the STRING is omitted, both language constructs apply to the
-    version of this feature itself (0.99 at present).
-    I suggest that branches of POV-Ray adopting this feature should accept
-    the version statement syntax "#version unofficial patch FLOAT;", where
-    FLOAT is the official POV-Ray version the branch is based on, rather
-    than the version of the branch itself, and that the "version" variable
-    should also return the official POV-Ray version the branch is based on.
+    more fix for GitHub issue #31
 
-Change 5925 on 2013/07/19 by clipka@cli-private
+Commit 159e23b on 2014-07-21 by Christoph Lipka
 
-    change console executable names
+    fix for GitHub issue #31
 
-Change 5924 on 2013/07/18 by clipka@cli-private
+Commit f1699ea on 2014-07-07 by Christoph Lipka
 
-    fix codemax.h, which for mysterious reasons got broken
+    fix for GitHub issue #30
 
-Change 5923 on 2013/07/18 by clipka@cli-private
+Commit af80da4 on 2014-07-02 by Christoph Lipka
 
-    integrate from POV-Ray 3.7 rev. #5922
+    This should wrap it up for GitHub issue #29.
 
-Change 5921 on 2013/07/18 by clipka@cli-private
+Commit ca65fc5 on 2014-07-01 by Christoph Lipka
 
-    implement glare desaturation feature:
-    If the output file does not support high dynamic range and there are
-    colors in the image with some - but not all - components overexposed,
-    such colors can now be desaturated in favor of preserving the brightness;
-    the +GLDn or Glare_Desaturation=n parameter controls the strength of
-    this effect: 0.0 = off (default), 1.0 = brightness is preserved at all
-    cost. If the output file does support high dynamic range, the effect
-    is still applied to the preview window.
+    Hopefully the final fixes for GitHub issue #29.
 
-Change 5920 on 2013/07/18 by clipka@cli-private
+Commit 38a31fb on 2014-07-01 by Christoph Lipka
 
-    updated manifest
+    Even more fixes for GitHub issue #29.
 
-Change 5919 on 2013/07/18 by clipka@cli-private
+Commit 583d4c8 on 2014-06-30 by Christoph Lipka
 
-    replaced the name "POV-Ray" in plenty of places within the code,
-    introducing a framework that should help developers of other branches
-    as well
+    Yet more fixes for GitHub issue #29.
 
-Change 5918 on 2013/07/18 by clipka@cli-private
+Commit f42a95b on 2014-06-30 by Christoph Lipka
 
-    replaced some resources and changed the executable name
+    More fixes for GitHub issue #29.
 
-Change 5917 on 2013/07/18 by clipka@cli-private
+    As the inclusion of <math.h> instead of <cmath> appears to be the source of one of the compile
+    errors, I've also replaced other C standard header file includes with the respective C++
+    counterparts along the way throughout the project (except the Windows specific code for now).
 
-    trimming down the build stuff; for now, this branch will not have an
-    installer, nor will it submit crash dumps anywhere, and the only build
-    environment supported will be Visual Studio 2010
+Commit f68065b on 2014-06-29 by Christoph Lipka
 
-Change 5916 on 2013/07/17 by clipka@cli-private
+    Fixes for GitHub issue #29
 
-    Branching from POV-Ray 3.7 rev. #5915 using clipka-upov
+Commit bdd7ccc on 2014-06-27 by Christoph Lipka
 
------------
-End of File
------------
+    Merge branch 'styleguide'
+
+Commit 365fc8f on 2014-06-27 by Christoph Lipka
+
+    5th iteration of the styleguide draft; Minor changes:
+
+      - Source comments can now use the "Dot" tool.
+      - Certain method names can now use `camelCase`.
+
+Commit 652bf21 on 2014-06-27 by Christoph Lipka
+
+    Merge branch 'refactor'
+
+Commit 92899df on 2014-06-25 by Christoph Lipka
+
+    Merge branch 'hotfix/photons_eca922a2' into refactor
+
+Commit 9fafc3c on 2014-06-25 by Christoph Lipka
+
+    fix photons bug introduced with commit 'eca922a2819fabbadd82c31e4bfadaa0c425b5b5'
+
+Commit eee8ece on 2014-06-25 by Christoph Lipka
+
+    More colour related refactoring.
+
+    Render engine is now almost entirely unaware of the colour model used (currently still RGB, but
+    a spectral model might be a future option). Also "unbundled" colour and filter/transmit
+    information in many places, in preparation for full-colour transparency computations.
+
+Commit caee861 on 2014-06-24 by Christoph Lipka
+
+    Merge branch 'povray/refactor' into develop
+
+Commit 58e27fe on 2014-06-23 by Christoph Lipka
+
+    Minor refactoring (quality level, experimental feature warnings) to eliminate povrayold.h.
+
+Commit 0ea2da4 on 2014-06-23 by Christoph Lipka
+
+    More colour data type refactoring.
+
+    Now using different dedicated colour data types for:
+      - parsing (legacy RGBFT format)
+      - front-end result image processing (RGBT format; the front-end never actually used the filter
+        channel)
+      - render engine colour math (currently RGBFT format; intended to be later replaced with RGB
+        colour + RGB transmit)
+
+Commit eca922a on 2014-06-19 by Christoph Lipka
+
+    Replaced `SMALL_COLOUR` legacy type with new type `PhotonColour` based on new class template
+    `GenericRGBEColour`; also employing this new type in Radiance HDR image file reading & writing.
+
+Commit c9dc791 on 2014-06-19 by Christoph Lipka
+
+    Merge branch 'master' into refactor
+
+Commit 914fff1 on 2014-06-19 by Christoph Lipka
+
+    Reduced warning level in Visual Studio 2010 external library projects
+
+Commit e5bd529 on 2014-06-19 by Christoph Lipka
+
+    Further refactoring of blend map handling. Also got rid of legacy data types COLOUR, RGB and
+    UV_VECT for good.
+
+Commit d7504bf on 2014-06-18 by Christoph Lipka
+
+    Merge branch 'master' into refactor
+
+Commit cf1c3fb on 2014-06-18 by Christoph Lipka
+
+    Refactored blend map handling
+    Removed the hard-coded limit of 256 blend map entries along the way.
+    More work to follow.
+
+Commit ac564f7 on 2014-06-18 by Christoph Lipka
+
+    Fixing waves pattern in normals
+
+Commit 9a278c7 on 2014-06-16 by Christoph Lipka
+
+    Merge branch 'hotfix/image_pattern'
+
+Commit 7502593 on 2014-06-16 by Christoph Lipka
+
+    Merge branch 'hotfix/image_pattern' into refactor
+
+Commit cc24c62 on 2014-06-16 by Christoph Lipka
+
+    fixing broken image_pattern
+
+Commit 2a2d1a8 on 2014-06-15 by Christoph Lipka
+
+    Gotten rid of legacy VECTOR type for good.
+
+Commit 2a41f04 on 2014-06-14 by Christoph Lipka
+
+    Eliminated some circular include file dependencies. Also thrown out a bit of dead code.
+
+Commit 2c4e9f2 on 2014-06-13 by Christoph Lipka
+
+    Merge branch 'refactor'
+
+Commit 35a20c2 on 2014-06-13 by Christoph Lipka
+
+    More refactoring work on the Pattern classes, as well as some documentation work; also
+    introducing new file header comments
+
+Commit a190a10 on 2014-06-12 by Christoph Lipka
+
+    4th iteration of the styleguide draft.
+    Most notable changes: Most of the "Miscellaneous Coding Rules" now reside on a separate page.
+    Naming conventions have been established.
+
+Commit d9b5eb0 on 2014-06-11 by Christoph Lipka
+
+    Third iteration of the styleguide draft: Fleshed out a few more rules; changed file encoding
+    rules to permit plain-ASCII only; minor other changes.
+
+Commit ca930a9 on 2014-06-10 by Christoph Lipka
+
+    Adding a bit of documentation on the POVMS interface
+
+Commit 30aaf02 on 2014-06-08 by Christoph Lipka
+
+    Second iteration of the styleguide draft.
+
+Commit 910610f on 2014-06-08 by Christoph Lipka
+
+    First draft for a coding styleguide, up for discussion among the dev team.
+
+Commit 19c420e on 2014-06-04 by Christoph Lipka
+
+    minor fixes in dithering code
+
+Commit 2423c2f on 2014-05-29 by Christoph Lipka
+
+    Merge branch 'master' into refactor
+
+Commit 31010d1 on 2014-05-29 by Christoph Lipka
+
+    Merge branch 'hotfix'
+
+Commit 16f24ce on 2014-05-29 by Christoph Lipka
+
+    Merge branch 'master' into refactor
+
+Commit 789f791 on 2014-05-29 by Christoph Lipka
+
+    Update README.md
+
+Commit 900128d on 2014-05-29 by Christoph Lipka
+
+    Update README.md
+
+Commit 6ee7d8c on 2014-05-29 by Christoph Lipka
+
+    Merge branch 'master' into develop
+
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.5
+------------------------------------------------------------------------------
+
+Commit de7077e on 2014-05-28 by Christoph Lipka
+
+    Merge branch 'release/v1.37.0.0-beta.5'
+
+Commit aa6f1ea on 2014-05-28 by Christoph Lipka
+
+    preparing v1.37.0.0-beta.5
+
+Commit e7b7ed3 on 2014-05-28 by Christoph Lipka
+
+    Improved render performance in scenes with many distance-based fading lights, by cutting off
+    fading lights entirely at a certain distance.
+    The cutoff distance is computed automatically from light source parameters and global
+    adc_bailout, but can be overridden individually by the new max_distance parameter in the
+    light_source block.
+
+Commit 70c7054 on 2014-05-27 by Christoph Lipka
+
+    Implemented persistent variables, to pass data between animation frames.
+
+Commit 34d0c6c on 2014-05-24 by Christoph Lipka
+
+    Merge pull request #25 from nicolas17/comment-typos
+
+    Fix some comment typos.
+
+Commit 1bdfcac on 2014-03-07 by Nicolás Alvarez
+
+    Fix some comment typos.
+
+Commit 8c2a8ad on 2014-01-24 by Christoph Lipka
+
+    minor comment fix
+
+Commit 20c837e on 2014-01-24 by Christoph Lipka
+
+    attempt to fix unix build errors introduced with previous change
+
+Commit a4b2e32 on 2014-01-23 by Christoph Lipka
+
+    work around a problem leading to pitch black pixels near the horizon
+
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.4
+------------------------------------------------------------------------------
+
+Commit 63c0f48 on 2014-01-18 by Christoph Lipka
+
+    Merge branch 'release/v1.37.0.0-beta.4'
+
+Commit f001ea0 on 2014-01-18 by Christoph Lipka
+
+    preparing v1.37.0.0-beta.4
+
+Commit 796adb6 on 2014-01-18 by Christoph Lipka
+
+    Merge branch 'povray/master' into develop
+
+Commit e6df712 on 2014-01-18 by Christoph Lipka
+
+    fix bug in Vector3d::orthogonal(), which caused blurred reflections to break for some surface
+    orientations
+
+Commit 0b40390 on 2014-01-06 by Christoph Lipka
+
+    fix typo in configure.ac
+
+Commit 98a3cdf on 2014-01-06 by Christoph Lipka
+
+    Merge branch 'master' into hotfix/boost1.49-boost_system
+
+Commit d76159a on 2014-01-06 by Christoph Lipka
+
+    Reverted last change 4e6ca9e257030a4d949735665348e3d02937b5f2 due to unacceptable side effects,
+    and implemented a different approach to try and fix issue #18
+
+Commit b039cf3 on 2014-01-04 by Christoph Lipka
+
+    Merge branch 'master' into hotfix/boost1.49-boost_system
+
+Commit 16ea3b4 on 2014-01-04 by Christoph Lipka
+
+    Fix for configure attempting to link boost_system even with boost 1.49 or earlier.
+
+Commit 4e6ca9e on 2014-01-01 by Christoph Lipka
+
+    Merge pull request #18 from jlec/master
+
+    Only test mkl library with --with-libmkl
+
+Commit 20de88e on 2013-12-26 by Justin Lecher
+
+    Update logic for mkl location testing
+
+    Signed-off-by: Justin Lecher <jlec@gentoo.org>
+
+Commit 781b2f3 on 2013-12-25 by Justin Lecher
+
+    Only test mkl library with --with-libmkl
+
+    If we do not make the test conditionally and use --without-libmkl during configure,
+    we end up with -Lno in LDFLAGS.
+
+    Signed-off-by: Justin Lecher <jlec@gentoo.org>
+
+Commit 5673a34 on 2013-12-25 by Christoph Lipka
+
+    Whitespace cleanup
+
+Commit 171a5b6 on 2013-12-25 by Christoph Lipka
+
+    Add `Create_Continue_Trace_Log` ini setting and `-CC` command line option.
+
+    Specifying `Create_Continue_Trace_Log=no` or `-CC` will suppress the creation of the
+    `.pov-state` file. Note that while this may save space and even speed up simple renders, if you
+    abort the render you will be unable to continue it later using the `Continue_Trace=yes` or `+C`
+    options.
+
+Commit 4745018 on 2013-12-20 by Christoph Lipka
+
+    Merge pull request #17 from LeForgeron/master
+
+    Proposal to fix fs#314 (perforce #6159)
+
+Commit a21c6e8 on 2013-12-20 by Jérôme Grimbert
+
+    Proposal to fix fs#314 (perforce #6159)
+
+Commit 5a081e9 on 2013-12-20 by Christoph Lipka
+
+    fix <http://bugs.povray.org/task/318> and other media sampling method 3 bogosities
+
+Commit 75733fe on 2013-12-17 by Christoph Lipka
+
+    Merge povray/master
+
+Commit 50d8f95 on 2013-12-17 by Christoph Lipka
+
+    Merge branch 'master' into refactor
+
+Commit 8c26649 on 2013-12-17 by Christoph Lipka
+
+    update various file headers to reflect that they no longer match the Perforce depot
+
+Commit 02eb3ae on 2013-12-17 by Christoph Lipka
+
+    Merge branch 'master' into refactor
+
+Commit 2fd1779 on 2013-12-16 by Christoph Lipka
+
+    Merge pull request #16 from LeForgeron/master
+
+    Fixing fs#317
+
+Commit 137ccc2 on 2013-12-16 by Christoph Lipka
+
+    Merge branch 'hotfix' into refactor
+
+Commit 9fc31fa on 2013-12-16 by Christoph Lipka
+
+    forgot to commit source/base/colour.h
+
+Commit f24393f on 2013-12-16 by Christoph Lipka
+
+    overhauled the implementation of the "inverse" keyword; also fixed three bugs discovered along
+    the way (FS#315, FS#316, and another one previously masked by FS#316).
+
+    corresponds to Perforce change 6164.
+
+Commit 4f39fd0 on 2013-12-16 by Christoph Lipka
+
+    header file cleanup: Weeded out frame.h, removing obsolete stuff and moving some definitions
+    out to other headers; also weeded out a few other header files, moving some stuff to the
+    corresponding .cpp files or to different header files.
+
+    corresponds to Perforce change 6163.
+
+Commit 58ff3f5 on 2013-12-16 by Christoph Lipka
+
+    introduced new class BasicRay as lightweight alternative to (and base class for) class Ray, to
+    be used in cases where only geometric properties (origin and direction) matter; TraceTicket is
+    now referenced via the Ray class, rather than passed around separately.
+
+    corresponds to Perforce changes 6161, 6162.
+
+Commit 87dd6ee on 2013-12-16 by Christoph Lipka
+
+    disentangling the legacy PATTERN, PIGMENT, TEXTURE and TNORMAL types
+
+    corresponds to Perforce changes 6156, 6158.
+
+Commit a03dd73 on 2013-12-16 by Christoph Lipka
+
+    Merge branch 'master' into refactor
+
+Commit 4add3ce on 2013-12-16 by Christoph Lipka
+
+    disabled the arbitrary limit on the number of blob components
+
+    corresponds to Perforce change 6155.
+
+Commit b75c069 on 2013-12-16 by Christoph Lipka
+
+    turned pattern handling code into a legion of polymorphic classes; some work on special cases
+    still pending.
+
+    corresponds to Perforce change 6154.
+
+Commit 21fddef on 2013-12-16 by Christoph Lipka
+
+    updated platform config for OS X based on a patch by GitHub user Nyoho (see
+    https://github.com/Nyoho/povray/commit/a646d36abbd1e76fb04ce9b0789936d5505b075c)
+
+    corresponds to Perforce change 6148.
+
+Commit d35825d on 2013-12-16 by Christoph Lipka
+
+    replaced legacy VECTOR and UV_VECT types with Vector3d and Vector2d, respectively, throughout
+    almost all of the POV-Ray code.
+
+    corresponds to Perforce changes 6146, 6147, 6150.
+
+Commit 0221338 on 2013-12-16 by Christoph Lipka
+
+    attempt to fix GitHub issue #7
+
+    corresponds to Perforce change 6137.
+
+Commit d8921a4 on 2013-12-16 by Christoph Lipka
+
+    fix GitHub issues #5 and #6.
+
+    corresponds to Perforce changes 6135, 6136.
+
+Commit c69dd33 on 2013-12-16 by Christoph Lipka
+
+    now using std::tr1 smart pointers if available, or boost's implementation otherwise; we're
+    using <boost/tr1/memory.hpp> to pull in either. Should fix GitHub issue #8.
+
+    corresponds to Perforce change 6132.
+
+Commit a417f97 on 2013-12-16 by Christoph Lipka
+
+    eliminate uint type from platform-independent code; fixes GitHub issue #10
+
+    corresponds to Perforce change 6130.
+
+Commit 7807b53 on 2013-12-16 by Christoph Lipka
+
+    added header files to hold Unix flavor-specific config settings; also thrown out the unused
+    fseek64 macro from both Unix and Windows syspovconfig.h; should fix GitHub issue #9.
+
+    corresponds to Perforce changes 6129, 6131, 6133.
+
+Commit 7c4abbf on 2013-12-16 by Christoph Lipka
+
+    Merge branch 'hotfix' into refactor
+
+Commit b260c34 on 2013-12-16 by Christoph Lipka
+
+    Merge branch 'hotfix'
+
+Commit f69d768 on 2013-12-16 by Christoph Lipka
+
+    fix for build error introduced with latest change (forgot to commit types.h)
+
+Commit 5cee76e on 2013-12-16 by Christoph Lipka
+
+    replaced legacy VECTOR, SNGL_VECT and UV_VECT types with Vector3d, SnglVector3d and Vector2d,
+    respectively, in shapes code, plus other refactoring work in fractal code.
+
+    corresponds to Perforce changes 6123, 6124, 6138, 6139, 6140, 6142, 6143, 6144, 6145, 6149.
+
+Commit 838ce9d on 2013-12-16 by Christoph Lipka
+
+    replaced legacy VECTOR and UV_VECT types with Vector3d and Vector2d, respectively, in
+    ObjectBase interface, objects.h functions, and throughout virtually all of the parser code.
+    Also fixed a few bugs introduced with previous change.
+
+    corresponds to Perforce changes 6121, 6122, 6134, 6151, 6153.
+
+Commit 40d9c39 on 2013-12-16 by Christoph Lipka
+
+    replaced legacy VECTOR, SNGL_VECT and BBOX_VECT types with Vector3d, new SnglVector3d and new
+    BBoxVector3d types, respectively, in Intersection and Ray classes, in bounding code and a small
+    portion of photons code; also replaced these types in the Blob class except where dictated by
+    the ObjectBase interface;
+    gave old BBOX data type a facelift along the way, throwing out the union and separating it into
+    two separate new types (BoundingBox and MinMaxBoundingBox).
+
+    corresponds to Perforce changes 6118, 6119, 6120.
+
+Commit c768ecd on 2013-12-16 by Christoph Lipka
+
+    eliminating some redundant computations in SSLT code
+
+    corresponds to Perforce changes 6109, 6110.
+
+Commit e703a8b on 2013-12-16 by Christoph Lipka
+
+    various changes related to color computations.
+
+    corresponds to Perforce changes 6089, 6090, 6095, 6096, 6097, 6113.
+
+Commit 278eb39 on 2013-12-16 by Christoph Lipka
+
+    preliminary workaround for FS#313 (radiosity.cpp pov::RadiosityFunction::BeforeTile assertion
+    failed)
+
+    corresponds to Perforce change 6092.
+
+Commit 956d8ab on 2013-12-16 by Christoph Lipka
+
+    VS2010 kept reporting GUI project to be out of date even if it wasn't; fixed.
+
+    corresponds to Perforce change 6088.
+
+Commit 2d12f46 on 2013-12-16 by Christoph Lipka
+
+    hotfix for residual issues with FS#270; the artifacts still observed with radiosity
+    abort-continue will now only show in the preview, but not in the generated image file.
+
+    corresponds to Perforce change 6086.
+
+Commit ba9fd68 on 2013-12-16 by Christoph Lipka
+
+    eliminated a host of C-style pointer casts, mostly by replacing with C++-style casts
+
+    corresponds to Perforce changes 6083, 6084, 6085.
+
+Commit ce3f659 on 2013-12-16 by Christoph Lipka
+
+    atmospheric fog, rainbows and sky spheres now use C++ style memory allocation instead of
+    POV_MALLOC
+
+    corresponds to Perforce change 6082.
+
+Commit 3c71689 on 2013-12-16 by Christoph Lipka
+
+    minor robustness improvement in IFF image reading code
+
+    corresponds to Perforce change 6081.
+
+Commit c1d54d3 on 2013-12-16 by Christoph Lipka
+
+    minor change in how zlib is included in povmscpp.cpp
+
+    corresponds to Perforce change 6080.
+
+Commit a53e090 on 2013-12-16 by Christoph Lipka
+
+    more sophisticated way of pulling in the libtiff headers in povray.cpp without breaking the
+    Windows build
+
+    corresponds to Perforce change 6079.
+
+Commit af319dd on 2013-12-16 by Christoph Lipka
+
+    minor improvements in SSLT relating to the storage of precomputed values
+
+    corresponds to Perforce change 6078.
+
+Commit 1430e54 on 2013-12-16 by Christoph Lipka
+
+    require boost >= 1.38
+
+    corresponds to Perforce change 6077.
+
+Commit 51947bd on 2013-12-16 by Christoph Lipka
+
+    fixed two yet unreported bugs:
+    - Iridescence did not properly honor full area diffuse lighting.
+    - Subsurface scattering did not play nice with non-default brilliance values.
+
+    corresponds to Perforce change 6076.
+
+Commit c86bd0a on 2013-12-16 by Christoph Lipka
+
+    minor beautifications
+
+    corresponds to Perforce change 6075.
+
+Commit 7ae56bc on 2013-12-15 by Jérôme Grimbert
+
+    Fixing fs#317
+
+Commit d60416f on 2013-12-06 by Christoph Lipka
+
+    Merge pull request #14 from yoe/master
+
+    Files shipping with automake are now automatically taken from there, using the --add-missing
+    parameter.
+    Fixes issue #6. Thanks to Wouter "yoe" Verhelst.
+
+Commit 9e7e624 on 2013-12-06 by Wouter Verhelst
+
+    Make sure Makefile.in gets generated properly
+
+    config.guess, config.sub, depcomp, etc, are all scripts that ship with
+    automake, and which will be updated with a new automake version; it's
+    generally a bad idea to use one of these scripts from a different
+    automake version.
+
+    Moreover, recent versions of automake also contain and require a
+    "compile" script, which isn't in this directory.
+
+    Instead, pass the "--add-missing" parameter to automake, which will copy
+    the required files to the expected location. This will make automake
+    work, regardless of the version, and will avoid any issues due to the
+    used scripts not matching the used automake version.
+
+Commit 318e32d on 2013-12-06 by Christoph Lipka
+
+    Merge branch 'master' of https://github.com/POV-Ray/povray into develop
+
+    # By Christoph Lipka (2) and Wouter Verhelst (1)
+    # Via Wouter Verhelst (1) and others
+    * 'master' of https://github.com/POV-Ray/povray:
+      Account for changes in boost dependencies
+      minor whitespace cleanup
+      eliminate duplicate inclusion of hcmplx.h in backend/math/hcmplx.cpp
+
+Commit 227c801 on 2013-12-05 by Christoph Lipka
+
+    Merge pull request #13 from yoe/master
+
+    Unix build process now automatically detects whether -lboost_thread requires -lboost_system to
+    work. (Thanks to Wouter "yoe" Verhelst for the fix.)
+
+Commit cba5bc5 on 2013-12-06 by Wouter Verhelst
+
+    Account for changes in boost dependencies
+
+    Since <boost/thread/thread.hpp> includes some headers which will already
+    call a boost_system function, recent versions of boost require
+    -lboost_system before -lboost_thread will work, resulting in a failure
+    of this test if not accounted for.
+
+    Make it try without -lboost_system first, but try again with it added to
+    $LIBS if that fails.
+
+Commit 8986ec3 on 2013-12-05 by Christoph Lipka
+
+    minor whitespace cleanup
+
+Commit 63cb736 on 2013-12-04 by chris20
+
+    Merge pull request #11 from c-lipka/master
+
+    eliminate duplicate inclusion of hcmplx.h in backend/math/hcmplx.cpp
+
+Commit b557f95 on 2013-12-05 by Christoph Lipka
+
+    eliminate duplicate inclusion of hcmplx.h in backend/math/hcmplx.cpp
+
+Commit f80b19c on 2013-11-26 by Christoph Lipka
+
+    fixed a bug in the AA mode 3 code that caused memory consumption to soar when using excessively
+    high quality settings, and could also cause a "Cannot access data in file." render abort.
+
+Commit 5ccf4a7 on 2013-11-24 by Christoph Lipka
+
+    fixed trace() SDL function, which got broken by the addition of multiple exposure support
+    (change #6116).
+
+Commit 2e57c42 on 2013-11-24 by Christoph Lipka
+
+    fixed SSLT, which got broken by the addition of multiple exposure support (change #6116); the
+    two should now go along perfectly fine.
+
+Commit 102fea5 on 2013-11-22 by Christoph Lipka
+
+    add basic support for motion blur and multiple exposure effects
+
+Commit ce3bb42 on 2013-11-21 by Christoph Lipka
+
+    fixed some version info for unix version
+
+Commit f06facf on 2013-11-21 by Christoph Lipka
+
+    resolve unix build error due to file name conflict between old /backend/colour/colour.cpp and
+    new /base/colour.cpp
+
+Commit c022326 on 2013-11-20 by Christoph Lipka
+
+    integrate latest changes from Perforce repository (revision #6112)
+
+Commit 9219661 on 2013-11-20 by Christoph Lipka
+
+    another bugfix for anti-aliasing mode 3
+
+Commit 8bf9434 on 2013-11-20 by Christoph Lipka
+
+    changed version string to reflect that this is not a final release
+
+Commit 9a5ff99 on 2013-11-20 by Christoph Lipka
+
+    fix for blockish speckle artifacts in anti-aliasing mode 3
+
+Commit 027c9d3 on 2013-11-20 by Christoph Lipka
+
+    add latest changes from Perforce repository
+
+Commit 18362b2 on 2013-11-19 by Christoph Lipka
+
+    properly initialize blurred reflection parameters
+
+Commit 9dcd5e9 on 2013-11-18 by Christoph Lipka
+
+    Update README.md
+
+Commit a4585dd on 2013-11-18 by Christoph Lipka
+
+    some files had been missing from revision #6094.
+
+Commit dc11cda on 2013-11-18 by Christoph Lipka
+
+    Merge branch 'master' of https://github.com/UberPOV/UberPOV.git
+
+Commit 9a8c468 on 2013-11-18 by Christoph Lipka
+
+    should fix compile error in vfedisplay.cpp (forgot to submit these files last time)
+
+Commit 7cf1064 on 2013-11-18 by Christoph Lipka
+
+    should fix compile errors in photons.cpp and vfedisplay.cpp.
+    Hopefully also fixes compile error in boost/bind/bind.hpp.
+
+Commit da915c8 on 2013-11-17 by Christoph Lipka
+
+    UberPOV revision #6094
+
+Commit 6d3d43e on 2013-11-17 by chris20
+
+    Merge pull request #4 from ideasman42/master
+
+    quiet compiler warnings building with gcc and clang.
+
+Commit b3846f5 on 2013-11-17 by Campbell Barton
+
+    quiet compiler warnings building with gcc and clang.
+    - define variables and functions as static when not declared by headers.
+    - remove some unused defines.
+    - other minor changes to quiet warnings.
+
+Commit fbc04c9 on 2013-11-16 by chris20
+
+    Merge pull request #2 from POV-Ray/3.7-stable
+
+    3.7 stable
+
+Commit cfbd0c1 on 2013-11-16 by chris20
+
+    Update README.md
+
+Commit b775d60 on 2013-11-16 by chris20
+
+    Update README.md
+
+Commit 0bbe2b7 on 2013-11-16 by chris20
+
+    Create README.md
+
+Commit 16c80a3 on 2013-11-16 by chris20
+
+    Update README.md
+
+Commit 373631e on 2013-11-16 by chris20
+
+    Add docs
+
+------------------------------------------------------------------------------
+POV-Ray v3.7.0.0
+------------------------------------------------------------------------------
+
+Commit 392510a on 2013-11-06 by chris20
+
+    Fix typo
+
+Commit b0fd27d on 2013-11-06 by chris20
+
+    Add .gitignore
+
+Commit c7442df on 2013-11-06 by chris20
+
+    Update README.md
+
+Commit 5378182 on 2013-11-06 by chris20
+
+    Add README.md
+
+Commit 86f4639 on 2013-11-06 by chris20
+
+    Initial import
+
