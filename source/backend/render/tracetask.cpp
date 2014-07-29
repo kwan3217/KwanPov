@@ -760,7 +760,7 @@ void TraceTask::StochasticSupersamplingM3()
                         trace(x + jitter.x(), y + jitter.y(), GetViewData()->GetWidth(), GetViewData()->GetHeight(), colTemp, max(samples, minSamples));
 
                         col = PreciseRGBTColour(GammaCurve::Encode(aaGamma, colTemp));
-                        colSqr = col*col;
+                        colSqr = Sqr(col);
 
                         if (index >= pixelsSamples.size())
                         {

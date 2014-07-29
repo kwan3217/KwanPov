@@ -734,6 +734,7 @@ AX_TEST_COMPILER_FLAGS([-Wno-multichar])
 AX_TEST_COMPILER_FLAGS([-Wno-write-strings])
 if test x"$pov_compiler_vendor" = x"gnu"; then
   AX_TEST_COMPILER_FLAGS([-fno-enforce-eh-specs])
+  AX_TEST_COMPILER_FLAGS([-Wno-non-template-friend])
 fi
 
 
