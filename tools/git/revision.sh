@@ -4,19 +4,34 @@
 
 branch=`git branch | sed -n 's:\* ::p'`
 
+# first, generate a list of version tags (including old "beta" branch)
+betaBranch="v1.37.0.0-beta.3"
+releases=`git log --decorate --date=short --pretty=format:"%d" master $betaBranch | sed -n 's/^.*tag: \(v1[.]3[^,)]*\).*$/\1/p'`
+
 # generate list of relevant commits
-git log --decorate --date=short --pretty=format:"%d%n%nCommit %h on %cd by %cn %n%n%n%w(0,4,4)%B%n" > revision.txt
+echo -n "Fetching revision data from Git repo"
+current="HEAD"
+rm revision.txt
+for prev in $releases
+do
+  echo -n "."
+  git log --decorate --date=short --pretty=format:"%d%n%nCommit %h on %cd by %cn %n%n%n%w(0,4,4)%B%n" "$current" "^$prev" >> revision.txt
+  current="$prev"
+done
+git log --decorate --date=short --pretty=format:"%d%n%nCommit %h on %cd by %cn %n%n%n%w(0,4,4)%B%n" "$current" >> revision.txt
+echo "Done."
 
 date=`sed -n 's/Commit [0-9a-zA-Z]* on \([-0-9]*\) .*/\1/p' revision.txt | head -n1`
 
 # split up ref name lists into single lines
+echo -n "Isolating ref names"
 while grep -e '^ ([^,)]*,' revision.txt >/dev/null
 do
   echo -n "."
   sed 's/^ (\([^,)]*\),\s/ (\1)\n (/g' revision.txt > revision.txt~
   mv -f revision.txt~ revision.txt
 done
-echo
+echo "Done."
 
 # prettify the tag ref names
 divider='------------------------------------------------------------------------------'
@@ -31,20 +46,6 @@ mv -f revision.txt~ revision.txt
 sed 's/^ ([^)]*)$//g' revision.txt > revision.txt~
 mv -f revision.txt~ revision.txt
 
-# add header
-(
-  echo $divider
-  echo "UberPOV \"$branch\" Branch Revision History - $date"
-  echo $divider
-  echo "Note: the following list is sorted purely chronologically; changes listed"
-  echo "below a certain version tag were developed before that version's release, but"
-  echo "may or may not have been included in it. All changes listed are, however,"
-  echo "included in this particular version."
-  echo $divider
-  cat revision.txt
-) > revision.txt~
-mv -f revision.txt~ revision.txt
-
 # collapse consecutive empty lines
 sed -r ':a; /^\s*$/ {N;ba}; s/( *\n){2,}/\n/' revision.txt > revision.txt~
 mv -f revision.txt~ revision.txt
@@ -53,4 +54,40 @@ mv -f revision.txt~ revision.txt
 sed 's/\s*$//g' revision.txt > revision.txt~
 mv -f revision.txt~ revision.txt
 
-echo Done.
+# identifying known authors
+sed 's/by chris20$/by Chris Cason (chris20)/g' revision.txt > revision.txt~
+mv -f revision.txt~ revision.txt
+sed 's/by c-lipka$/by Christoph Lipka (c-lipka)/g' revision.txt > revision.txt~
+mv -f revision.txt~ revision.txt
+
+# word wrap after 100 characters
+echo -n "Performing word wrapping"
+maxText="...................................................................................................."
+sed '/^    / s/^\('"$maxText"'\)/\1:|:/g' revision.txt > revision.txt~
+mv -f revision.txt~ revision.txt
+while grep -e ":|:" revision.txt >/dev/null
+do
+  echo -n "."
+  sed 's/^[ ~]\([ -]*[^ ]*\):|:/ \1/g' revision.txt > revision.txt~
+  mv -f revision.txt~ revision.txt
+  sed '/^[ ~]   [^ -]/ s/ \([^ ]*\):|:/\n~   \1/g' revision.txt > revision.txt~
+  mv -f revision.txt~ revision.txt
+  sed '/^[ ~]   - [^ ]/ s/ \([^ ]*\):|:/\n~     \1/g' revision.txt > revision.txt~
+  mv -f revision.txt~ revision.txt
+  sed '/^[ ~]     [- ] [^ ]/ s/ \([^ ]*\):|:/\n~       \1/g' revision.txt > revision.txt~
+  mv -f revision.txt~ revision.txt
+  sed '/^~/ s/^\('"$maxText"'\)/\1:|:/g' revision.txt > revision.txt~
+  mv -f revision.txt~ revision.txt
+  sed 's/^~/ /g' revision.txt > revision.txt~
+  mv -f revision.txt~ revision.txt
+done
+echo "Done."
+
+# add header
+(
+  echo $divider
+  echo "UberPOV Revision History"
+  echo $divider
+  cat revision.txt
+) > revision.txt~
+mv -f revision.txt~ revision.txt

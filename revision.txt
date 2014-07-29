@@ -1,11 +1,22 @@
 ------------------------------------------------------------------------------
-UberPOV "develop" Branch Revision History - 2014-07-26
+UberPOV Revision History
 ------------------------------------------------------------------------------
-Note: the following list is sorted purely chronologically; changes listed
-below a certain version tag were developed before that version's release, but
-may or may not have been included in it. All changes listed are, however,
-included in this particular version.
-------------------------------------------------------------------------------
+
+Commit e1028cd on 2014-07-29 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit 7b22bda on 2014-07-28 by Christoph Lipka
+
+    More work on a well-defined colour model.
+
+Commit e56957c on 2014-07-28 by Christoph Lipka
+
+    Merge branch 'master' into feature/colour_model
+
+Commit ce0aae6 on 2014-07-27 by Christoph Lipka
+
+    Added script to auto-generate revision.txt.
 
 Commit 8da4939 on 2014-07-26 by Christoph Lipka
 
@@ -22,6 +33,34 @@ Commit 7f01776 on 2014-07-26 by Christoph Lipka
 Commit b3f6946 on 2014-07-26 by Christoph Lipka
 
     Merge branch 'release/v1.37.0.0-beta.7' into develop
+
+Commit 5b0ce25 on 2014-07-08 by Christoph Lipka
+
+    More work on a well-defined colour model.
+
+    Modified the colour class templates to be palatable for g++.
+
+Commit c59196f on 2014-07-08 by Christoph Lipka
+
+    Merge branch 'master' into feature/colour_model
+
+Commit f1a6556 on 2014-07-02 by Christoph Lipka
+
+    More work on a well-defined colour model.
+
+Commit 2282fa2 on 2014-07-02 by Christoph Lipka
+
+    More work on a well-defined colour model.
+
+    Prepared the colour classes to work with different colour models.
+
+Commit 807fcb8 on 2014-07-02 by Christoph Lipka
+
+    Merge branch 'hotfix/github_issue_29' into feature/colour_model
+
+Commit a19fa9c on 2014-07-02 by Christoph Lipka
+
+    Started work on a well-defined colour model.
 
 ------------------------------------------------------------------------------
 UberPOV v1.37.0.0-beta.7
@@ -107,15 +146,16 @@ Commit 54b283a on 2014-07-23 by Christoph Lipka
       - Radiosity support for brilliance is now available; to activate it, specify `brilliance on`
         in the global radiosity settings.
       - The brilliance effect can now be applied not only to incoming light, but also to outgoing
-        light; to activate this, specify a second FLOAT value after the `brilliance` keyword. For
-        maximum realism, both parameters should be set to the same value.
+        light; to activate this, specify a second FLOAT value
+        after the `brilliance` keyword. For maximum realism, both parameters should be set to the
+        same value.
       - Fresnel angle-dependent attenuation can now also be enabled for highlights and the diffuse
         component, by specifying `fresnel on` directly in the finish block.
         (Note that you will still need to enable fresnel attenuation for reflections separately;
-        also note that where reflection and highlights increase at shallow angles, the diffuse
-        component decreases accordingly.) For a perfect match between reflection and highlights use
-        the `albedo` keyword for the highlight with the same value as the reflection maximum; the
-        reflection minimum should be set to zero.
+        also note that where reflection and highlights increase at shallow angles,
+        the diffuse component decreases accordingly.) For a perfect match between reflection and
+        highlights use the `albedo` keyword for the highlight with the same
+        value as the reflection maximum; the reflection minimum should be set to zero.
 
 Commit 9b10411 on 2014-07-21 by Christoph Lipka
 
@@ -189,8 +229,9 @@ Commit eee8ece on 2014-06-25 by Christoph Lipka
     More colour related refactoring.
 
     Render engine is now almost entirely unaware of the colour model used (currently still RGB, but
-    a spectral model might be a future option). Also "unbundled" colour and filter/transmit
-    information in many places, in preparation for full-colour transparency computations.
+    a spectral model might be a future option).
+    Also "unbundled" colour and filter/transmit information in many places, in preparation for
+    full-colour transparency computations.
 
 Commit caee861 on 2014-06-24 by Christoph Lipka
 
@@ -205,11 +246,11 @@ Commit 0ea2da4 on 2014-06-23 by Christoph Lipka
     More colour data type refactoring.
 
     Now using different dedicated colour data types for:
-      - parsing (legacy RGBFT format)
-      - front-end result image processing (RGBT format; the front-end never actually used the filter
-        channel)
-      - render engine colour math (currently RGBFT format; intended to be later replaced with RGB
-        colour + RGB transmit)
+    - parsing (legacy RGBFT format)
+    - front-end result image processing (RGBT format; the front-end never actually used the filter
+      channel)
+    - render engine colour math (currently RGBFT format; intended to be later replaced with RGB
+      colour + RGB transmit)
 
 Commit eca922a on 2014-06-19 by Christoph Lipka
 
@@ -311,11 +352,11 @@ Commit 16f24ce on 2014-05-29 by Christoph Lipka
 
     Merge branch 'master' into refactor
 
-Commit 789f791 on 2014-05-29 by Christoph Lipka
+Commit 789f791 on 2014-05-29 by Christoph Lipka (c-lipka)
 
     Update README.md
 
-Commit 900128d on 2014-05-29 by Christoph Lipka
+Commit 900128d on 2014-05-29 by Christoph Lipka (c-lipka)
 
     Update README.md
 
@@ -323,31 +364,7 @@ Commit 6ee7d8c on 2014-05-29 by Christoph Lipka
 
     Merge branch 'master' into develop
 
-------------------------------------------------------------------------------
-UberPOV v1.37.0.0-beta.5
-------------------------------------------------------------------------------
-
-Commit de7077e on 2014-05-28 by Christoph Lipka
-
-    Merge branch 'release/v1.37.0.0-beta.5'
-
-Commit aa6f1ea on 2014-05-28 by Christoph Lipka
-
-    preparing v1.37.0.0-beta.5
-
-Commit e7b7ed3 on 2014-05-28 by Christoph Lipka
-
-    Improved render performance in scenes with many distance-based fading lights, by cutting off
-    fading lights entirely at a certain distance.
-    The cutoff distance is computed automatically from light source parameters and global
-    adc_bailout, but can be overridden individually by the new max_distance parameter in the
-    light_source block.
-
-Commit 70c7054 on 2014-05-27 by Christoph Lipka
-
-    Implemented persistent variables, to pass data between animation frames.
-
-Commit 34d0c6c on 2014-05-24 by Christoph Lipka
+Commit 34d0c6c on 2014-05-24 by Christoph Lipka (c-lipka)
 
     Merge pull request #25 from nicolas17/comment-typos
 
@@ -357,39 +374,6 @@ Commit 1bdfcac on 2014-03-07 by Nicolás Alvarez
 
     Fix some comment typos.
 
-Commit 8c2a8ad on 2014-01-24 by Christoph Lipka
-
-    minor comment fix
-
-Commit 20c837e on 2014-01-24 by Christoph Lipka
-
-    attempt to fix unix build errors introduced with previous change
-
-Commit a4b2e32 on 2014-01-23 by Christoph Lipka
-
-    work around a problem leading to pitch black pixels near the horizon
-
-------------------------------------------------------------------------------
-UberPOV v1.37.0.0-beta.4
-------------------------------------------------------------------------------
-
-Commit 63c0f48 on 2014-01-18 by Christoph Lipka
-
-    Merge branch 'release/v1.37.0.0-beta.4'
-
-Commit f001ea0 on 2014-01-18 by Christoph Lipka
-
-    preparing v1.37.0.0-beta.4
-
-Commit 796adb6 on 2014-01-18 by Christoph Lipka
-
-    Merge branch 'povray/master' into develop
-
-Commit e6df712 on 2014-01-18 by Christoph Lipka
-
-    fix bug in Vector3d::orthogonal(), which caused blurred reflections to break for some surface
-    orientations
-
 Commit 0b40390 on 2014-01-06 by Christoph Lipka
 
     fix typo in configure.ac
@@ -397,11 +381,6 @@ Commit 0b40390 on 2014-01-06 by Christoph Lipka
 Commit 98a3cdf on 2014-01-06 by Christoph Lipka
 
     Merge branch 'master' into hotfix/boost1.49-boost_system
-
-Commit d76159a on 2014-01-06 by Christoph Lipka
-
-    Reverted last change 4e6ca9e257030a4d949735665348e3d02937b5f2 due to unacceptable side effects,
-    and implemented a different approach to try and fix issue #18
 
 Commit b039cf3 on 2014-01-04 by Christoph Lipka
 
@@ -411,75 +390,13 @@ Commit 16ea3b4 on 2014-01-04 by Christoph Lipka
 
     Fix for configure attempting to link boost_system even with boost 1.49 or earlier.
 
-Commit 4e6ca9e on 2014-01-01 by Christoph Lipka
-
-    Merge pull request #18 from jlec/master
-
-    Only test mkl library with --with-libmkl
-
-Commit 20de88e on 2013-12-26 by Justin Lecher
-
-    Update logic for mkl location testing
-
-    Signed-off-by: Justin Lecher <jlec@gentoo.org>
-
-Commit 781b2f3 on 2013-12-25 by Justin Lecher
-
-    Only test mkl library with --with-libmkl
-
-    If we do not make the test conditionally and use --without-libmkl during configure,
-    we end up with -Lno in LDFLAGS.
-
-    Signed-off-by: Justin Lecher <jlec@gentoo.org>
-
-Commit 5673a34 on 2013-12-25 by Christoph Lipka
-
-    Whitespace cleanup
-
-Commit 171a5b6 on 2013-12-25 by Christoph Lipka
-
-    Add `Create_Continue_Trace_Log` ini setting and `-CC` command line option.
-
-    Specifying `Create_Continue_Trace_Log=no` or `-CC` will suppress the creation of the
-    `.pov-state` file. Note that while this may save space and even speed up simple renders, if you
-    abort the render you will be unable to continue it later using the `Continue_Trace=yes` or `+C`
-    options.
-
-Commit 4745018 on 2013-12-20 by Christoph Lipka
-
-    Merge pull request #17 from LeForgeron/master
-
-    Proposal to fix fs#314 (perforce #6159)
-
-Commit a21c6e8 on 2013-12-20 by Jérôme Grimbert
-
-    Proposal to fix fs#314 (perforce #6159)
-
-Commit 5a081e9 on 2013-12-20 by Christoph Lipka
-
-    fix <http://bugs.povray.org/task/318> and other media sampling method 3 bogosities
-
-Commit 75733fe on 2013-12-17 by Christoph Lipka
-
-    Merge povray/master
-
 Commit 50d8f95 on 2013-12-17 by Christoph Lipka
 
     Merge branch 'master' into refactor
 
-Commit 8c26649 on 2013-12-17 by Christoph Lipka
-
-    update various file headers to reflect that they no longer match the Perforce depot
-
 Commit 02eb3ae on 2013-12-17 by Christoph Lipka
 
     Merge branch 'master' into refactor
-
-Commit 2fd1779 on 2013-12-16 by Christoph Lipka
-
-    Merge pull request #16 from LeForgeron/master
-
-    Fixing fs#317
 
 Commit 137ccc2 on 2013-12-16 by Christoph Lipka
 
@@ -522,12 +439,6 @@ Commit a03dd73 on 2013-12-16 by Christoph Lipka
 
     Merge branch 'master' into refactor
 
-Commit 4add3ce on 2013-12-16 by Christoph Lipka
-
-    disabled the arbitrary limit on the number of blob components
-
-    corresponds to Perforce change 6155.
-
 Commit b75c069 on 2013-12-16 by Christoph Lipka
 
     turned pattern handling code into a legion of polymorphic classes; some work on special cases
@@ -535,19 +446,179 @@ Commit b75c069 on 2013-12-16 by Christoph Lipka
 
     corresponds to Perforce change 6154.
 
-Commit 21fddef on 2013-12-16 by Christoph Lipka
-
-    updated platform config for OS X based on a patch by GitHub user Nyoho (see
-    https://github.com/Nyoho/povray/commit/a646d36abbd1e76fb04ce9b0789936d5505b075c)
-
-    corresponds to Perforce change 6148.
-
 Commit d35825d on 2013-12-16 by Christoph Lipka
 
     replaced legacy VECTOR and UV_VECT types with Vector3d and Vector2d, respectively, throughout
     almost all of the POV-Ray code.
 
     corresponds to Perforce changes 6146, 6147, 6150.
+
+Commit 7c4abbf on 2013-12-16 by Christoph Lipka
+
+    Merge branch 'hotfix' into refactor
+
+Commit 5cee76e on 2013-12-16 by Christoph Lipka
+
+    replaced legacy VECTOR, SNGL_VECT and UV_VECT types with Vector3d, SnglVector3d and Vector2d,
+    respectively, in shapes code, plus other refactoring work in fractal code.
+
+    corresponds to Perforce changes 6123, 6124, 6138, 6139, 6140, 6142, 6143, 6144, 6145, 6149.
+
+Commit 838ce9d on 2013-12-16 by Christoph Lipka
+
+    replaced legacy VECTOR and UV_VECT types with Vector3d and Vector2d, respectively, in
+    ObjectBase interface, objects.h functions, and throughout virtually all of the parser code.
+    Also fixed a few bugs introduced with previous change.
+
+    corresponds to Perforce changes 6121, 6122, 6134, 6151, 6153.
+
+Commit 40d9c39 on 2013-12-16 by Christoph Lipka
+
+    replaced legacy VECTOR, SNGL_VECT and BBOX_VECT types with Vector3d, new SnglVector3d and new
+    BBoxVector3d types, respectively, in Intersection and Ray classes, in bounding code and a small
+    portion of photons code; also replaced these types in the Blob class except where dictated by
+    the ObjectBase interface;
+    gave old BBOX data type a facelift along the way, throwing out the union and separating it into
+    two separate new types (BoundingBox and MinMaxBoundingBox).
+
+    corresponds to Perforce changes 6118, 6119, 6120.
+
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.5
+------------------------------------------------------------------------------
+
+Commit de7077e on 2014-05-28 by Christoph Lipka
+
+    Merge branch 'release/v1.37.0.0-beta.5'
+
+Commit aa6f1ea on 2014-05-28 by Christoph Lipka
+
+    preparing v1.37.0.0-beta.5
+
+Commit e7b7ed3 on 2014-05-28 by Christoph Lipka
+
+    Improved render performance in scenes with many distance-based fading lights, by cutting off
+    fading lights entirely at a certain distance.
+    The cutoff distance is computed automatically from light source parameters and global
+    adc_bailout, but can be overridden individually by the new max_distance parameter in the
+    light_source block.
+
+Commit 70c7054 on 2014-05-27 by Christoph Lipka
+
+    Implemented persistent variables, to pass data between animation frames.
+
+Commit 8c2a8ad on 2014-01-24 by Christoph Lipka
+
+    minor comment fix
+
+Commit 20c837e on 2014-01-24 by Christoph Lipka
+
+    attempt to fix unix build errors introduced with previous change
+
+Commit a4b2e32 on 2014-01-23 by Christoph Lipka
+
+    work around a problem leading to pitch black pixels near the horizon
+
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.4
+------------------------------------------------------------------------------
+
+Commit 63c0f48 on 2014-01-18 by Christoph Lipka
+
+    Merge branch 'release/v1.37.0.0-beta.4'
+
+Commit f001ea0 on 2014-01-18 by Christoph Lipka
+
+    preparing v1.37.0.0-beta.4
+
+Commit 796adb6 on 2014-01-18 by Christoph Lipka
+
+    Merge branch 'povray/master' into develop
+
+Commit e6df712 on 2014-01-18 by Christoph Lipka
+
+    fix bug in Vector3d::orthogonal(), which caused blurred reflections to break for some surface
+    orientations
+
+Commit d76159a on 2014-01-06 by Christoph Lipka
+
+    Reverted last change 4e6ca9e257030a4d949735665348e3d02937b5f2 due to unacceptable side effects,
+    and implemented a different approach to try and fix issue #18
+
+Commit 4e6ca9e on 2014-01-01 by Christoph Lipka (c-lipka)
+
+    Merge pull request #18 from jlec/master
+
+    Only test mkl library with --with-libmkl
+
+Commit 20de88e on 2013-12-26 by Justin Lecher
+
+    Update logic for mkl location testing
+
+    Signed-off-by: Justin Lecher <jlec@gentoo.org>
+
+Commit 781b2f3 on 2013-12-25 by Justin Lecher
+
+    Only test mkl library with --with-libmkl
+
+    If we do not make the test conditionally and use --without-libmkl during configure,
+    we end up with -Lno in LDFLAGS.
+
+    Signed-off-by: Justin Lecher <jlec@gentoo.org>
+
+Commit 5673a34 on 2013-12-25 by Christoph Lipka
+
+    Whitespace cleanup
+
+Commit 171a5b6 on 2013-12-25 by Christoph Lipka
+
+    Add `Create_Continue_Trace_Log` ini setting and `-CC` command line option.
+
+    Specifying `Create_Continue_Trace_Log=no` or `-CC` will suppress the creation of the
+    `.pov-state` file. Note that while this may save space and even speed up simple renders, if you
+    abort the render you will be unable to continue it later using the `Continue_Trace=yes` or `+C`
+    options.
+
+Commit 4745018 on 2013-12-20 by Christoph Lipka (c-lipka)
+
+    Merge pull request #17 from LeForgeron/master
+
+    Proposal to fix fs#314 (perforce #6159)
+
+Commit a21c6e8 on 2013-12-20 by Jérôme Grimbert
+
+    Proposal to fix fs#314 (perforce #6159)
+
+Commit 5a081e9 on 2013-12-20 by Christoph Lipka
+
+    fix <http://bugs.povray.org/task/318> and other media sampling method 3 bogosities
+
+Commit 75733fe on 2013-12-17 by Christoph Lipka
+
+    Merge povray/master
+
+Commit 8c26649 on 2013-12-17 by Christoph Lipka
+
+    update various file headers to reflect that they no longer match the Perforce depot
+
+Commit 2fd1779 on 2013-12-16 by Christoph Lipka (c-lipka)
+
+    Merge pull request #16 from LeForgeron/master
+
+    Fixing fs#317
+
+Commit 4add3ce on 2013-12-16 by Christoph Lipka
+
+    disabled the arbitrary limit on the number of blob components
+
+    corresponds to Perforce change 6155.
+
+Commit 21fddef on 2013-12-16 by Christoph Lipka
+
+    updated platform config for OS X based on a patch by GitHub user Nyoho (see
+    https://github.com/Nyoho/povray/commit/a646d36abbd1e76fb04ce9b0789936d5505b075c)
+
+    corresponds to Perforce change 6148.
 
 Commit 0221338 on 2013-12-16 by Christoph Lipka
 
@@ -581,10 +652,6 @@ Commit 7807b53 on 2013-12-16 by Christoph Lipka
 
     corresponds to Perforce changes 6129, 6131, 6133.
 
-Commit 7c4abbf on 2013-12-16 by Christoph Lipka
-
-    Merge branch 'hotfix' into refactor
-
 Commit b260c34 on 2013-12-16 by Christoph Lipka
 
     Merge branch 'hotfix'
@@ -592,32 +659,6 @@ Commit b260c34 on 2013-12-16 by Christoph Lipka
 Commit f69d768 on 2013-12-16 by Christoph Lipka
 
     fix for build error introduced with latest change (forgot to commit types.h)
-
-Commit 5cee76e on 2013-12-16 by Christoph Lipka
-
-    replaced legacy VECTOR, SNGL_VECT and UV_VECT types with Vector3d, SnglVector3d and Vector2d,
-    respectively, in shapes code, plus other refactoring work in fractal code.
-
-    corresponds to Perforce changes 6123, 6124, 6138, 6139, 6140, 6142, 6143, 6144, 6145, 6149.
-
-Commit 838ce9d on 2013-12-16 by Christoph Lipka
-
-    replaced legacy VECTOR and UV_VECT types with Vector3d and Vector2d, respectively, in
-    ObjectBase interface, objects.h functions, and throughout virtually all of the parser code.
-    Also fixed a few bugs introduced with previous change.
-
-    corresponds to Perforce changes 6121, 6122, 6134, 6151, 6153.
-
-Commit 40d9c39 on 2013-12-16 by Christoph Lipka
-
-    replaced legacy VECTOR, SNGL_VECT and BBOX_VECT types with Vector3d, new SnglVector3d and new
-    BBoxVector3d types, respectively, in Intersection and Ray classes, in bounding code and a small
-    portion of photons code; also replaced these types in the Blob class except where dictated by
-    the ObjectBase interface;
-    gave old BBOX data type a facelift along the way, throwing out the union and separating it into
-    two separate new types (BoundingBox and MinMaxBoundingBox).
-
-    corresponds to Perforce changes 6118, 6119, 6120.
 
 Commit c768ecd on 2013-12-16 by Christoph Lipka
 
@@ -713,7 +754,7 @@ Commit 7ae56bc on 2013-12-15 by Jérôme Grimbert
 
     Fixing fs#317
 
-Commit d60416f on 2013-12-06 by Christoph Lipka
+Commit d60416f on 2013-12-06 by Christoph Lipka (c-lipka)
 
     Merge pull request #14 from yoe/master
 
@@ -749,7 +790,7 @@ Commit 318e32d on 2013-12-06 by Christoph Lipka
       minor whitespace cleanup
       eliminate duplicate inclusion of hcmplx.h in backend/math/hcmplx.cpp
 
-Commit 227c801 on 2013-12-05 by Christoph Lipka
+Commit 227c801 on 2013-12-05 by Christoph Lipka (c-lipka)
 
     Merge pull request #13 from yoe/master
 
@@ -772,7 +813,7 @@ Commit 8986ec3 on 2013-12-05 by Christoph Lipka
 
     minor whitespace cleanup
 
-Commit 63cb736 on 2013-12-04 by chris20
+Commit 63cb736 on 2013-12-04 by Chris Cason (chris20)
 
     Merge pull request #11 from c-lipka/master
 
@@ -787,6 +828,18 @@ Commit f80b19c on 2013-11-26 by Christoph Lipka
     fixed a bug in the AA mode 3 code that caused memory consumption to soar when using excessively
     high quality settings, and could also cause a "Cannot access data in file." render abort.
 
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.3
+------------------------------------------------------------------------------
+
+Commit b0f8d7c on 2013-11-24 by Christoph Lipka
+
+    new beta version
+
+Commit a8407f7 on 2013-11-24 by Christoph Lipka
+
+    Merge branch 'master' into beta
+
 Commit 5ccf4a7 on 2013-11-24 by Christoph Lipka
 
     fixed trace() SDL function, which got broken by the addition of multiple exposure support
@@ -796,6 +849,18 @@ Commit 2e57c42 on 2013-11-24 by Christoph Lipka
 
     fixed SSLT, which got broken by the addition of multiple exposure support (change #6116); the
     two should now go along perfectly fine.
+
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.2
+------------------------------------------------------------------------------
+
+Commit ae45857 on 2013-11-22 by Christoph Lipka
+
+    1.37.0.0-beta.2
+
+Commit e0dec98 on 2013-11-22 by Christoph Lipka
+
+    Merge branch 'master' into beta
 
 Commit 102fea5 on 2013-11-22 by Christoph Lipka
 
@@ -814,9 +879,21 @@ Commit c022326 on 2013-11-20 by Christoph Lipka
 
     integrate latest changes from Perforce repository (revision #6112)
 
+------------------------------------------------------------------------------
+UberPOV v1.37.0.0-beta.1
+------------------------------------------------------------------------------
+
+Commit 388bb5e on 2013-11-20 by Christoph Lipka
+
+    Merge branch 'master' into beta
+
 Commit 9219661 on 2013-11-20 by Christoph Lipka
 
     another bugfix for anti-aliasing mode 3
+
+Commit 9d23b5b on 2013-11-20 by Christoph Lipka
+
+    changed version string to reflect that this is not a final release
 
 Commit 8bf9434 on 2013-11-20 by Christoph Lipka
 
@@ -834,7 +911,7 @@ Commit 18362b2 on 2013-11-19 by Christoph Lipka
 
     properly initialize blurred reflection parameters
 
-Commit 9dcd5e9 on 2013-11-18 by Christoph Lipka
+Commit 9dcd5e9 on 2013-11-18 by Christoph Lipka (c-lipka)
 
     Update README.md
 
@@ -859,7 +936,7 @@ Commit da915c8 on 2013-11-17 by Christoph Lipka
 
     UberPOV revision #6094
 
-Commit 6d3d43e on 2013-11-17 by chris20
+Commit 6d3d43e on 2013-11-17 by Chris Cason (chris20)
 
     Merge pull request #4 from ideasman42/master
 
@@ -872,29 +949,29 @@ Commit b3846f5 on 2013-11-17 by Campbell Barton
     - remove some unused defines.
     - other minor changes to quiet warnings.
 
-Commit fbc04c9 on 2013-11-16 by chris20
+Commit fbc04c9 on 2013-11-16 by Chris Cason (chris20)
 
     Merge pull request #2 from POV-Ray/3.7-stable
 
     3.7 stable
 
-Commit cfbd0c1 on 2013-11-16 by chris20
+Commit cfbd0c1 on 2013-11-16 by Chris Cason (chris20)
 
     Update README.md
 
-Commit b775d60 on 2013-11-16 by chris20
+Commit b775d60 on 2013-11-16 by Chris Cason (chris20)
 
     Update README.md
 
-Commit 0bbe2b7 on 2013-11-16 by chris20
+Commit 0bbe2b7 on 2013-11-16 by Chris Cason (chris20)
 
     Create README.md
 
-Commit 16c80a3 on 2013-11-16 by chris20
+Commit 16c80a3 on 2013-11-16 by Chris Cason (chris20)
 
     Update README.md
 
-Commit 373631e on 2013-11-16 by chris20
+Commit 373631e on 2013-11-16 by Chris Cason (chris20)
 
     Add docs
 
@@ -902,23 +979,23 @@ Commit 373631e on 2013-11-16 by chris20
 POV-Ray v3.7.0.0
 ------------------------------------------------------------------------------
 
-Commit 392510a on 2013-11-06 by chris20
+Commit 392510a on 2013-11-06 by Chris Cason (chris20)
 
     Fix typo
 
-Commit b0fd27d on 2013-11-06 by chris20
+Commit b0fd27d on 2013-11-06 by Chris Cason (chris20)
 
     Add .gitignore
 
-Commit c7442df on 2013-11-06 by chris20
+Commit c7442df on 2013-11-06 by Chris Cason (chris20)
 
     Update README.md
 
-Commit 5378182 on 2013-11-06 by chris20
+Commit 5378182 on 2013-11-06 by Chris Cason (chris20)
 
     Add README.md
 
-Commit 86f4639 on 2013-11-06 by chris20
+Commit 86f4639 on 2013-11-06 by Chris Cason (chris20)
 
     Initial import
 
