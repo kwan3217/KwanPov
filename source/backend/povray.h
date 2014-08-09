@@ -91,15 +91,14 @@ bool povray_terminated();
 
 // POV-Ray version and copyright message macros
 
-#if POV_RAY_IS_OFFICIAL == 1
-#define POV_RAY_VERSION "3.7.0"
-#else
-#define POV_RAY_VERSION "3.7.0.unofficial"
-#endif
+#define POV_RAY_COPYRIGHT "Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd."
+#define OFFICIAL_VERSION_STRING "3.7.1"
+#define OFFICIAL_VERSION_NUMBER 371
+#define OFFICIAL_VERSION_NUMBER_HEX 0x0371
 
-#define POV_RAY_COPYRIGHT "Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd."
-#define OFFICIAL_VERSION_NUMBER 370
-#define OFFICIAL_VERSION_NUMBER_HEX 0x0370
+#define POV_RAY_PRERELEASE "alpha.7681887"
+
+#define POV_RAY_EDITOR_VERSION "3.7.0"
 
 
 #ifdef BRANCH_NAME
@@ -108,23 +107,44 @@ bool povray_terminated();
 #error A branch build cannot be an official POV-Ray build.
 #endif
 
-#define POV_RAY_IS_BRANCH   1
+#ifdef POV_RAY_PRERELEASE
+#define POV_RAY_VERSION OFFICIAL_VERSION_STRING "-" POV_RAY_PRERELEASE
+#else
+#define POV_RAY_VERSION OFFICIAL_VERSION_STRING
+#endif
+
+#define POV_RAY_IS_BRANCH 1
 
 #if STANDALONE_BUILD == 1
     #define STANDALONE_VER ".stalone"
-    #define REGCURRENT_VERSION BRANCH_VERSION
+    #define REGCURRENT_VERSION BRANCH_FULL_VERSION
 #else
     #define STANDALONE_VER ""
-    #define REGCURRENT_VERSION POV_RAY_VERSION "-" BRANCH_NAME "-" BRANCH_VERSION
+    #define REGCURRENT_VERSION POV_RAY_VERSION "-" BRANCH_NAME "-" BRANCH_FULL_VERSION
 #endif
 
 #else
+
+#if POV_RAY_IS_OFFICIAL == 1
+#ifdef POV_RAY_PRERELEASE
+#define POV_RAY_VERSION OFFICIAL_VERSION_STRING "-" POV_RAY_PRERELEASE
+#else
+#define POV_RAY_VERSION OFFICIAL_VERSION_STRING
+#endif
+#else
+#ifdef POV_RAY_PRERELEASE
+#define POV_RAY_VERSION OFFICIAL_VERSION_STRING "-" POV_RAY_PRERELEASE ".unofficial"
+#else
+#define POV_RAY_VERSION OFFICIAL_VERSION_STRING "-unofficial"
+#endif
+#endif
 
 #define BRANCH_NAME                 "POV-Ray"
 #define BRANCH_FULL_NAME            "Persistence of Vision Raytracer(tm)"
 #define BRANCH_MAINTAINER           "the POV-Ray Team"
 #define BRANCH_CONTACT              "http://www.povray.org"
-#define BRANCH_VERSION              POV_RAY_VERSION
+#define BRANCH_VERSION              OFFICIAL_VERSION
+#define BRANCH_FULL_VERSION         POV_RAY_VERSION
 #define BRANCH_COPYRIGHT            POV_RAY_COPYRIGHT
 #define BRANCH_BUILD_IS_OFFICIAL    POV_RAY_IS_OFFICIAL
 #define POV_RAY_IS_BRANCH           0
@@ -136,6 +156,10 @@ bool povray_terminated();
 
 
 #if POV_RAY_IS_OFFICIAL == 1
+
+#ifdef DISTRIBUTION_MESSAGE_2
+#undef DISTRIBUTION_MESSAGE_2
+#endif
 
 #define DISTRIBUTION_MESSAGE_1 "This is an official version prepared by the POV-Ray Team. See the"
 #define DISTRIBUTION_MESSAGE_2 "documentation on how to contact the authors or visit us on the"
@@ -150,12 +174,16 @@ bool povray_terminated();
 #else
 
 #ifndef BUILT_BY
-#error Please complete the BUILT_BY definition in source/base/build-config.h
+#error Please complete the BUILT_BY definition in source/base/build.h
 #endif
 
 #define DISTRIBUTION_MESSAGE_1 "This is an unofficial version compiled by:"
 #define DISTRIBUTION_MESSAGE_2 BUILT_BY
-#define DISTRIBUTION_MESSAGE_3 "Neither the POV-Ray Team nor the UberPOV maintainers are responsible for supporting this version.\n"
+#if POV_RAY_IS_BRANCH
+#define DISTRIBUTION_MESSAGE_3 "Neither the POV-Ray Team(tm) nor the " BRANCH_NAME " maintainers are responsible for supporting this version.\n"
+#else
+#define DISTRIBUTION_MESSAGE_3 "The POV-Ray Team(tm) is not responsible for supporting this version.\n"
+#endif
 
 #endif
 

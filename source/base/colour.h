@@ -1928,7 +1928,7 @@ class GenericTransColour
             mTrans(col.trans())
         {}
 
-        inline explicit GenericTransColour(const GenericColour<T>& col, T filter, T transm) :
+        inline explicit GenericTransColour(const Colour& col, Channel filter, Channel transm) :
             mColour(col),
             mFilter(filter),
             mTransm(transm)

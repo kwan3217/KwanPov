@@ -65,7 +65,7 @@ class Metadata
 		 *  @note   This method should return at most 40 ascii bytes, otherwise it may become truncated by some file formats.
 		 *          non-printable characters, line feeds and tabs are not allowed.
 		 */
-		static string getSoftware() { return BRANCH_NAME " " BRANCH_VERSION;}
+		static string getSoftware() { return BRANCH_NAME " " BRANCH_FULL_VERSION;}
 
 		/* Up to 4 comments, each at most 80 ascii bytes, no line feed, no tab 
 		 * if it's longer, it can either fit anyway or get truncated, it's the

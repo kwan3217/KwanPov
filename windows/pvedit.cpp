@@ -225,7 +225,7 @@ bool LoadEditorDLL (char *path, bool errorOK)
 #endif
                       "Could not load internal editor - download it?",
                       MB_ICONQUESTION | MB_YESNO) == IDYES)
-                        ShellExecute (NULL, NULL, "http://www.povray.org/download/wineditdll/" POV_RAY_VERSION COMPILER_VER "." PVENGINE_VER, NULL, NULL, SW_SHOWNORMAL) ;
+                        ShellExecute (NULL, NULL, "http://www.povray.org/download/wineditdll/" POV_RAY_EDITOR_VERSION COMPILER_VER "." PVENGINE_VER, NULL, NULL, SW_SHOWNORMAL) ;
 #endif
     }
     return (false) ;
