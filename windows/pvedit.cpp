@@ -48,7 +48,7 @@
 
 #include <windows.h>
 #include <shellapi.h>
-#include <string.h>
+#include <cstring>
 #include <sys/stat.h>
 #include "pvengine.h"
 #include "pvedit.h"

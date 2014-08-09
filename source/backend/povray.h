@@ -8,6 +8,8 @@
 /// Rendering is controlled by the classes provided in the frontend
 /// files.
 ///
+/// This file also contains version information strings.
+///
 /// @copyright
 /// @parblock
 ///
@@ -42,6 +44,10 @@
 /// @endparblock
 ///
 //******************************************************************************
+
+/// @file
+/// @todo   Maybe we want to move the version information stuff to a separate file,
+///         preferably in the `base` directory.
 
 #ifndef POVRAY_BACKEND_POVRAY_H
 #define POVRAY_BACKEND_POVRAY_H

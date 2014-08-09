@@ -1928,6 +1928,12 @@ class GenericTransColour
             mTrans(col.trans())
         {}
 
+        inline explicit GenericTransColour(const GenericColour<T>& col, T filter, T transm) :
+            mColour(col),
+            mFilter(filter),
+            mTransm(transm)
+        {}
+
         inline Colour     colour() const { return mColour; }
         inline Colour&    colour()       { return mColour; }
 

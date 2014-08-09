@@ -485,9 +485,9 @@ void GenericPigmentBlendMap::Blend(TransColour& result, const TransColour& colou
                 result = colour1 * weight1 + colour2 * weight2;
             else
             {
-                result.trans() = GammaCurve::Encode(thread->GetSceneData()->workingGamma,
-                                                    GammaCurve::Decode(thread->GetSceneData()->workingGamma, colour1.trans()) * weight1
-                                                  + GammaCurve::Decode(thread->GetSceneData()->workingGamma, colour2.trans()) * weight2);
+                result.trans()  = GammaCurve::Encode(thread->GetSceneData()->workingGamma,
+                                                     GammaCurve::Decode(thread->GetSceneData()->workingGamma, colour1.trans()) * weight1
+                                                   + GammaCurve::Decode(thread->GetSceneData()->workingGamma, colour2.trans()) * weight2);
                 result.colour() = GammaCurve::Decode(blendGamma,
                                                      GammaCurve::Encode(blendGamma, colour1.colour()) * weight1
                                                    + GammaCurve::Encode(blendGamma, colour2.colour()) * weight2);

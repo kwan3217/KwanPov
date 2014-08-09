@@ -3452,6 +3452,13 @@ ObjectPtr Parser::Parse_Light_Source ()
         END_CASE
     END_EXPECT
 
+    if ((Object->Fade_Power != 0) && (fabs(Object->Fade_Distance) < EPSILON) && (sceneData->EffectiveLanguageVersion() < 371))
+    {
+        Warning(0, "fade_power with fade_distance 0 is not supported in legacy (pre-3.71) scenes; fade_power is ignored.");
+        Object->Fade_Power    = 0;
+        Object->Fade_Distance = 0;
+    }
+
     Parse_End ();
 
     Object->Direction = Object->Points_At - Object->Center;
