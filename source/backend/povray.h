@@ -96,7 +96,7 @@ bool povray_terminated();
 #define OFFICIAL_VERSION_NUMBER 371
 #define OFFICIAL_VERSION_NUMBER_HEX 0x0371
 
-#define POV_RAY_PRERELEASE "alpha.7681887"
+#define POV_RAY_PRERELEASE "alpha.7695042"
 
 #define POV_RAY_EDITOR_VERSION "3.7.0"
 
