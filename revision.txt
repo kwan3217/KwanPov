@@ -2,9 +2,146 @@
 UberPOV Revision History
 ------------------------------------------------------------------------------
 
+------------------------------------------------------------------------------
+UberPOV v1.37.1.0-beta.8
+------------------------------------------------------------------------------
+
+Commit 0580a94 on 2014-08-28 by Christoph Lipka
+
+    preparing v1.37.1.0-beta.8
+
+Commit 97ddae8 on 2014-08-18 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit 6157a9d on 2014-08-18 by Christoph Lipka
+
+    Merge branch 'hotfix/mesh_camera' into feature/colour_model
+
+Commit 4bc2086 on 2014-08-18 by Christoph Lipka
+
+    Fixed bug in mesh_camera with distribution 3
+
+Commit 8fd6d94 on 2014-08-09 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit 8e1b5a0 on 2014-08-09 by Christoph Lipka
+
+    fixed previous merge
+
+Commit 644c948 on 2014-08-09 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit 70c5ab7 on 2014-08-09 by Christoph Lipka
+
+    Merge branch 'master' into feature/colour_model
+
+Commit ad6d545 on 2014-08-09 by Christoph Lipka
+
+    Merge branch 'hotfix/average_texture'
+
+Commit 0dcda86 on 2014-08-09 by Christoph Lipka
+
+    Fixed a bug in average textures introduced during colour refactoring.
+
+Commit ca0d798 on 2014-08-07 by Christoph Lipka
+
+    Light sources' distance-based fading can now be set to obey an inverse-power law at all
+    distances.
+
+    Setting a light source to have non-zero `fade_power` but zero `fade_distance` (or not
+    specifying `fade_distance` at all) will now cause the distance-based light attenuation to
+    follow the simple formula "attenuation = 1/(d^fade_power)",
+    yielding the light's nominal power at a distance of 1.0 units. (At large distances this has a
+    similar effect as setting `fade_distance 1/pow(2,fade_power)`, or setting `fade_distance 1`
+    while reducing the light's nominal brightness by 50%.)
+
+    When `#version 3.70` or lower is set, a non-zero `fade_power` setting will be ignored if
+    `fade_distance` is set to zero or left unset, mimicking the behaviour of previous versions,
+    except that now a parse warning will be generated.
+
+Commit c9fb89c on 2014-08-07 by Christoph Lipka
+
+    Merge branch 'feature/auto-revision-number' and update version number to 3.7.1 (alpha)
+
+Commit 1c7f198 on 2014-08-07 by Christoph Lipka
+
+    Added some basic documentation on version numbering in `source-doc/versioning.md`
+
+Commit 6166f5a on 2014-08-07 by Christoph Lipka
+
+    Modified povray.h and pre-commit hook for new version numbering scheme.
+
+    For official proper releases, POV_RAY_PRERELEASE in povray.h should be undefined, resulting in
+    the version number "X.Y.Z"; unix/VERSION should contain that same string.
+
+    For development versions, POV_RAY_PRERELEASE in povray.h should be set to "alpha.NUMBER", which
+    the pre-commit hook will update to "alpha.TIMESTAMP", resulting in the version number
+    "X.Y.Z-alpha.TIMESTAMP";
+    unix/VERSION should contain the string "X.Y.Z-alpha.NUMBER", which the pre-commit hook will
+    also update to "X.Y.Z-alpha.TIMESTAMP";
+    if desired, "alpha." might be replaced with any other string; e.g. "beta.NUMBER" would result
+    in the version number "X.Y.Z-beta.TIMESTAMP".
+
+    Note that the pre-commit hook script in .git/hooks in your local workspace needs to be replaced
+    with the new version provided in "tools/git/hooks".
+
+Commit b1dbb21 on 2014-08-05 by Christoph Lipka
+
+    Merge branch 'povray/master' into develop
+
+Commit 4881e0f on 2014-08-05 by Christoph Lipka
+
+    Implemented non-linear colour and pigment map interpolation.
+
+    The syntax is changed as follows:
+
+        COLOR_MAP:
+          color_map { COLOR_MAP_BODY } | colour_map { COLOR_MAP_BODY }
+        COLOR_MAP_BODY:
+          COLOR_MAP_IDENTIFIER | [blend_mode INT] [blend_gamma FLOAT] COLOR_MAP_ENTRY...
+
+        PIGMENT_MAP:
+          pigment_map { PIGMENT_MAP_BODY }
+        PIGMENT_MAP_BODY:
+          PIGMENT_MAP_IDENTIFIER | [blend_mode INT] [blend_gamma FLOAT] PIGMENT_MAP_ENTRY...
+
+    The possible values for blend_mode are as follows:
+
+        0 (default): Colour interpolation is performed working gamma space as defined by
+        assumed_gamma.
+        1: Colour interpolation is performed in linear colour space.
+        2: Colour interpolation is performed in the gamma space defined by blend_gamma (defaulting
+        to 2.5).
+        3: Chromaticity interpolation is performed in linear space, while brightness interpolation
+        is performed in the gamma space defined by blend_gamma.
+
+Commit 4395982 on 2014-08-05 by Christoph Lipka
+
+    Update for `colors_ral.inc`.
+
+    Added previously undefined RAL_8000 colour.
+
+Commit 5f4474c on 2014-08-05 by Christoph Lipka
+
+    Added CIE L*a*b* conversion macros to `colors.inc`, and added `colors_ral.inc` containing RAL
+    Classic colours.
+
+Commit c570b99 on 2014-07-29 by Christoph Lipka
+
+    Auto-generated revision.txt is now ordered by version rather than purely chronologically.
+
 Commit e1028cd on 2014-07-29 by Christoph Lipka
 
     Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit a3fe721 on 2014-07-28 by Christoph Lipka
+
+    Corrected wrong rotation in `Round_Pyramid_N_in` in shapes3.inc.
+
+    Submitted on behalf of Friedrich Lohmueller.
 
 Commit 7b22bda on 2014-07-28 by Christoph Lipka
 
@@ -33,6 +170,14 @@ Commit 7f01776 on 2014-07-26 by Christoph Lipka
 Commit b3f6946 on 2014-07-26 by Christoph Lipka
 
     Merge branch 'release/v1.37.0.0-beta.7' into develop
+
+Commit b2f7144 on 2014-07-26 by Christoph Lipka
+
+    Updated comments in povray.h
+
+Commit 1736635 on 2014-07-26 by Christoph Lipka
+
+    Implemented a mechanism for automatic version numbering,
 
 Commit 5b0ce25 on 2014-07-08 by Christoph Lipka
 
