@@ -226,7 +226,7 @@ BEGIN
             VALUE "FileDescription", "UberPOV for Windows v1.37"
             VALUE "FileVersion", "1.37"
             VALUE "InternalName", "UberPOV"
-            VALUE "LegalCopyright", "Copyright (c) 2013 Christoph Lipka. Based on POV-Ray(tm) 3.7, (c) 1991-2013 Persistence of Vision Raytracer Pty. Ltd."
+            VALUE "LegalCopyright", "Portions Copyright (c) 2013-2014 Christoph Lipka. Based on POV-Ray(tm) 3.7, (c) 1991-2014 Persistence of Vision Raytracer Pty. Ltd."
             VALUE "LegalTrademarks", "POV-Ray(tm) is a trademark of Persistence of Vision Raytracer Pty. Ltd."
             VALUE "OriginalFilename", "uberpov.exe"
             VALUE "ProductName", "UberPOV"

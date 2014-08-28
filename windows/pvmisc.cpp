@@ -639,7 +639,7 @@ void write_INI_settings (bool noreset)
   PutHKCU("General", "LastRenderPath", lastRenderPath) ;
   PutHKCU("General", "LastQueuePath", lastQueuePath) ;
   PutHKCU("General", "SecondaryINISection", SecondaryRenderIniFileSection) ;
-  PutHKCU("General", VERSIONVAL, BRANCH_VERSION COMPILER_VER "." PVENGINE_VER) ;
+  PutHKCU("General", VERSIONVAL, BRANCH_FULL_VERSION COMPILER_VER "." PVENGINE_VER) ;
   PutHKCU("Sounds", "RenderCompleteSoundEnabled", render_complete_sound_enabled) ;
   PutHKCU("Sounds", "ParseErrorSoundEnabled", parse_error_sound_enabled) ;
   PutHKCU("Sounds", "RenderErrorSoundEnabled", render_error_sound_enabled) ;

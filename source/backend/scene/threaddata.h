@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013 Christoph Lipka.
+/// Portions Copyright 2013-2014 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -81,8 +81,10 @@ class SceneThreadData : public Task::TaskData
         /**
          *  Create thread local data.
          *  @param  sd              Scene data defining scene attributes.
+         *  @param  seed            Seed for the stochastic random number generator;
+         *                          should be unique for each thread and each render.
          */
-        SceneThreadData(shared_ptr<SceneData> sd);
+        SceneThreadData(shared_ptr<SceneData> sd, size_t seed);
 
         /**
          *  Get the statistics.
@@ -124,7 +126,7 @@ class SceneThreadData : public Task::TaskData
         LightSource *photonSourceLight;
         ObjectPtr photonTargetObject;
         bool litObjectIgnoresPhotons;
-        MathColour GFilCol;
+        AttenuatingColour GFilCol; // TODO FIXME - eliminate this abomination
         int hitObject;    // did we hit the target object? (for autostop)
         DBL photonSpread; // photon spread (in radians)
         DBL photonDepth;  // total distance from light to intersection
@@ -211,8 +213,10 @@ class ViewThreadData : public SceneThreadData
          *  Create thread local data.
          *  @param  vd              View data defining view attributes
          *                          as well as view output.
+         *  @param  seed            Seed for the stochastic random number generator;
+         *                          should be unique for each thread and each render.
          */
-        ViewThreadData(ViewData *vd);
+        ViewThreadData(ViewData *vd, size_t seed);
 
         /**
          *  Get width of view.

@@ -223,7 +223,18 @@ Unbiased Diffuse Illumination:
     effectively turns the radiosity algorithm into a purely stochastic unbiased
     algorithm to compute diffuse illumination.
 
-    Most radiosity settings are without effect in this mode.
+    Most radiosity settings are without effect in this mode, except for the
+    following:
+
+        adc_bailout FLOAT
+        brightness FLOAT
+        brilliance BOOL
+        count FLOAT
+        gray_threshold FLOAT
+        media BOOL
+        normal BOOL
+        recursion_limit INT
+        subsurface BOOL
 
     The current implementation does not translate classic radiosity settings
     into useful parameters for this mode of operation; it is therefore highly
@@ -306,6 +317,17 @@ Adaptive Multi-Level Oversampling:
     oversampling processes can adapt to the number of radiosity sample rays
     shot. It does not adapt its own number of sample rays, as this would
     scramble the radiosity algorithm.
+
+    UberPOV also recognizes the following command line option and .ini file
+    parameter:
+
+        Stochastic_Seed=n       +SSn
+
+    This instructs UberPOV to seed the stochastic pseudo-random number
+    generator with a particular initial state. This can be used to either make
+    the sequence reproducible, or to the contrary cause different sequences to
+    be used even in renders started at the same time. If set to 0 (the
+    default), the seed value is determined from the current time and date.
 
 Windows Related:
 ----------------

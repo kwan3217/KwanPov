@@ -110,6 +110,8 @@ const RESERVED_WORD Reserved_Words[LAST_TOKEN] = {
     {BITWISE_OR_TOKEN, "bitwise_or"},
     {BITWISE_XOR_TOKEN, "bitwise_xor"},
     {BLACK_HOLE_TOKEN, "black_hole"},
+    {BLEND_GAMMA_TOKEN, "blend_gamma"},
+    {BLEND_MODE_TOKEN, "blend_mode"},
     {BLINK_TOKEN, "blink"},
     {BLOB_TOKEN, "blob"},
     {BLUE_TOKEN, "blue"},

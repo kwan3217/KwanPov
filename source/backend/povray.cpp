@@ -298,7 +298,7 @@ void BuildInitInfo(POVMSObjectPtr msg)
 		err = POVMSUtil_SetString(msg, kPOVAttrib_PlatformName, POVRAY_PLATFORM_NAME);
 	if(err == kNoErr)
 		err = POVMSUtil_SetFormatString(msg, kPOVAttrib_CoreVersion,
-		                                BRANCH_FULL_NAME " Version %s", BRANCH_VERSION STANDALONE_VER COMPILER_VER SSE2_INCLUDED);
+		                                BRANCH_FULL_NAME STANDALONE_VER " Version %s", BRANCH_FULL_VERSION COMPILER_VER SSE2_INCLUDED);
 	if(err == kNoErr)
 		err = POVMSUtil_SetString(msg, kPOVAttrib_EnglishText,
 		                          DISTRIBUTION_MESSAGE_1 "\n" DISTRIBUTION_MESSAGE_2 "\n" DISTRIBUTION_MESSAGE_3
@@ -773,7 +773,7 @@ int main(int argc, char **argv)
 	int ret = 0;
 	int i = 0;
 
-	printf("Welcome to " BRANCH_NAME " " BRANCH_VERSION " SMP!\n");
+	printf("Welcome to " BRANCH_NAME STANDALONE_VER " " BRANCH_FULL_VERSION "!\n");
 	fflush(stdout);
 
 //	char *nargv[2];

@@ -296,7 +296,7 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, RGBTColour& col
 
             if (CreateCameraRay(ray, x, y, width, height, rayno) == true)
             {
-                MathColour col;
+                LightColour col;
                 ColourChannel transm = 0.0;
 
                 ticket.subFrameTime = (*threadData->stochasticRandomGenerator)();
@@ -308,7 +308,7 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, RGBTColour& col
                 TraceRay(ray, col, transm, 1.0, false, camera.Max_Ray_Distance);
                 if (col.IsSane())
                 {
-                    colour += RGBTColour(ToRGBColour(col), transm);
+                    colour += RGBTColour(RGBColour(col), transm);
                     numTraced++;
                 }
             }
@@ -842,7 +842,7 @@ bool TracePixel::CreateCameraRay(Ray& ray, DBL x, DBL y, DBL width, DBL height, 
                                     continue;
 
                                 // now all we need to do is convert the barycentric co-ordinates back to a point in 3d space which is on the surface of the face
-                                ray.Origin = Vector3d(mesh->Data->Vertices[tr->P1][X] * B1 + mesh->Data->Vertices[tr->P2][X] * B2 + mesh->Data->Vertices[tr->P3][X] * B3);
+                                ray.Origin = Vector3d(mesh->Data->Vertices[tr->P1] * B1 + mesh->Data->Vertices[tr->P2] * B2 + mesh->Data->Vertices[tr->P3] * B3);
 
                                 // we use the one normal for any location on the face, unless smooth is set
                                 ray.Direction = Vector3d(mesh->Data->Normals[tr->Normal_Ind]);
@@ -1047,10 +1047,10 @@ void TracePixel::TraceRayWithFocalBlur(RGBTColour& colour, DBL x, DBL y, DBL wid
                     ticket.stochasticCount *= siblingRays;
                     ticket.stochasticDepth ++;
                 }
-                MathColour tempC;
+                LightColour tempC;
                 ColourChannel tempT = 0.0;
                 TraceRay(ray, tempC, tempT, 1.0, false, camera.Max_Ray_Distance);
-                C = RGBTColour(ToRGBColour(tempC), tempT);
+                C = RGBTColour(RGBColour(tempC), tempT);
             }
             else
                 C = RGBTColour(0.0, 0.0, 0.0, 1.0);
@@ -1088,7 +1088,7 @@ void TracePixel::TraceRayWithFocalBlur(RGBTColour& colour, DBL x, DBL y, DBL wid
             // Exit if samples are likely too be good enough.
 
             double threshold  = focalBlurData->Sample_Threshold[nr - 1];
-            double brightness = S1.Greyscale() / n;
+            double brightness = S1.rgb().Greyscale() / n;
             if (brightness > 1.0)
                 // for pixels with excessive brightness, use a relative threshold rather than an absolute one
                 threshold = threshold * Sqr(brightness);

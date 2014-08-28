@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013 Christoph Lipka.
+/// Portions Copyright 2013-2014 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -64,7 +64,7 @@
 namespace pov
 {
 
-SceneThreadData::SceneThreadData(shared_ptr<SceneData> sd):
+SceneThreadData::SceneThreadData(shared_ptr<SceneData> sd, size_t seed):
     sceneData(sd),
     qualityFlags(9),
     stochasticRandomGenerator(GetRandomDoubleGenerator(0.0,1.0))
@@ -100,8 +100,7 @@ SceneThreadData::SceneThreadData(shared_ptr<SceneData> sd):
     cpuTime = 0;
     realTime = 0;
 
-    // TODO - seed the stochasticRandomGenerator
-    //stochasticRandomGenerator->Seed(...);
+    stochasticRandomGenerator->Seed(seed);
 
     for(vector<LightSource *>::iterator it = sceneData->lightSources.begin(); it != sceneData->lightSources.end(); it++)
         lightSources.push_back(static_cast<LightSource *> (Copy_Object(*it))) ;
@@ -190,8 +189,8 @@ void SceneThreadData::AfterTile()
     }
 }
 
-ViewThreadData::ViewThreadData(ViewData *vd) :
-    SceneThreadData(vd->GetSceneData()),
+ViewThreadData::ViewThreadData(ViewData *vd, size_t seed) :
+    SceneThreadData(vd->GetSceneData(), seed),
     viewData(vd)
 {
 }

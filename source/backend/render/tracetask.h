@@ -69,7 +69,7 @@ namespace pov
 class TraceTask : public RenderTask
 {
     public:
-        TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr);
+        TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr, size_t seed);
         virtual ~TraceTask();
 
         virtual void Run();

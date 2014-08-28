@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013 Christoph Lipka.
+/// Portions Copyright 2013-2014 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -79,10 +79,11 @@ SceneData::SceneData() :
 {
     atmosphereIOR = 1.0;
     atmosphereDispersion = 0.0;
-    backgroundColour = ToTransColour(RGBFTColour(0.0, 0.0, 0.0, 0.0, 1.0));
-    ambientLight = MathColour(1.0);
+    backgroundTrans  = FilterTransm(0.0, 1.0);
+    ambientLight = ColourModelRGB::Whitepoint::Colour;
+    generalWhitepoint = ColourModelRGB::Whitepoint::Colour;
 
-    iridWavelengths = MathColour::DefaultWavelengths();
+    iridWavelengths = PseudoColour::DominantWavelengths;
 
     languageVersion = OFFICIAL_VERSION_NUMBER;
     languageVersionSet = false;
@@ -449,6 +450,8 @@ Scene::~Scene()
 
 void Scene::StartParser(POVMS_Object& parseOptions)
 {
+    size_t seed = 0; // TODO
+
     // A scene can only be parsed once
     if(parserControlThread == NULL)
 #ifndef USE_OFFICIAL_BOOST
@@ -483,7 +486,7 @@ void Scene::StartParser(POVMS_Object& parseOptions)
     if (!sceneData->outputAlpha)
         // if we're not outputting an alpha channel, precompose the scene background against a black "background behind the background"
         // (NB: Here, background color is still at its default of <0,0,0,0,1> = full transparency; we're changing that to opaque black.)
-        sceneData->backgroundColour.Clear();
+        sceneData->backgroundTrans.Clear();
 
     // NB a value of '0' for any of the BSP parameters tells the BSP code to use its internal default
     sceneData->bspMaxDepth = parseOptions.TryGetInt(kPOVAttrib_BSP_MaxDepth, 0);
@@ -527,14 +530,14 @@ void Scene::StartParser(POVMS_Object& parseOptions)
     }
 
     // do parsing
-    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new Parser(sceneData, bool(parseOptions.Exist(kPOVAttrib_Clock)), parseOptions.TryGetFloat(kPOVAttrib_Clock, 0.0)))));
+    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new Parser(sceneData, bool(parseOptions.Exist(kPOVAttrib_Clock)), parseOptions.TryGetFloat(kPOVAttrib_Clock, 0.0), seed))));
 
     // wait for parsing
     parserTasks.AppendSync();
 
     // do bounding - we always call this even if the bounding is turned off
     // because it also generates object statistics
-    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new BoundingTask(sceneData, parseOptions.TryGetInt(kPOVAttrib_BoundingThreshold, 1)))));
+    sceneThreadData.push_back(dynamic_cast<SceneThreadData *>(parserTasks.AppendTask(new BoundingTask(sceneData, parseOptions.TryGetInt(kPOVAttrib_BoundingThreshold, 1), seed))));
 
     // wait for bounding
     parserTasks.AppendSync();
