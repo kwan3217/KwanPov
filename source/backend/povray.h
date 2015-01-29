@@ -14,26 +14,28 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
-/// UberPOV is free software: you can redistribute it and/or modify
+/// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
+/// subject to the same licensing terms and conditions.
+///
+/// ----------------------------------------------------------------------------
+///
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+///
+/// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// UberPOV is distributed in the hope that it will be useful,
+/// POV-Ray is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
 ///
 /// You should have received a copy of the GNU Affero General Public License
 /// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-///
-/// ---------------------------------------------------------------------------
-///
-/// UberPOV is based on the popular Persistence of Vision Ray Tracer
-/// ('POV-Ray') version 3.7, Copyright 1991-2013 Persistence of Vision
-/// Raytracer Pty. Ltd.
 ///
 /// ----------------------------------------------------------------------------
 ///
@@ -91,12 +93,12 @@ bool povray_terminated();
 
 // POV-Ray version and copyright message macros
 
-#define POV_RAY_COPYRIGHT "Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd."
+#define POV_RAY_COPYRIGHT "Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd."
 #define OFFICIAL_VERSION_STRING "3.7.1"
 #define OFFICIAL_VERSION_NUMBER 371
 #define OFFICIAL_VERSION_NUMBER_HEX 0x0371
 
-#define POV_RAY_PRERELEASE "alpha.7695042"
+#define POV_RAY_PRERELEASE "alpha.7930442"
 
 #define POV_RAY_EDITOR_VERSION "3.7.0"
 
