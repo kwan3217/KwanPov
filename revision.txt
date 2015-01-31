@@ -2,11 +2,119 @@
 UberPOV Revision History
 ------------------------------------------------------------------------------
 
+Commit ??????? on 2015-01-31 by Christoph Lipka
+
+    preparing v1.37.1.0-beta.9
+
+Commit 94c1dda on 2015-01-31 by Christoph Lipka
+
+    Added a predefined variable named "unofficial" having the value "patch".
+
+Commit 1f68c0e on 2015-01-29 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit fe2f1db on 2015-01-29 by Christoph Lipka
+
+    Merge branch 'master' into feature/colour_model
+
+Commit e24c93e on 2015-01-29 by Christoph Lipka
+
+    Fixed unwarranted "Rainbow's up and direction vector are co-linear" error message.
+
+Commit 44d47df on 2015-01-27 by Christoph Lipka
+
+    Fixed `colour_map` not accepting `blend_mode` and `blend_gamma`.
+
+Commit c4deb40 on 2015-01-24 by Christoph Lipka
+
+    POV-Ray for Windows now displays file names and line numbers of warnings in message pane.
+
+Commit 4f3a8be on 2015-01-21 by Christoph Lipka (c-lipka)
+
+    Merge pull request #40 from c-lipka/master
+
+    Sync with official POV-Ray repo
+
+Commit c48e776 on 2015-01-21 by Christoph Lipka
+
+    Fixed newest Git pre-commit hook to automatically stage any changes it makes to files.
+
+Commit 93c7ed8 on 2015-01-21 by Christoph Lipka
+
+    Cleanup of previously undocumented backslash handling in string literals when parsing for a
+    filename.
+
+Commit ec597b9 on 2015-01-14 by Christoph Lipka
+
+    updated Git pre-commit hook; now also performs some sanity-checking of updated C/C++ files.
+
+Commit 2d82f74 on 2015-01-13 by Christoph Lipka
+
+    Trivial to minor code cleanup; some format cleanup in separate source doc files.
+
+Commit 036fe3d on 2015-01-13 by Christoph Lipka
+
+    Add some small dev utilities for VS 2010
+
+Commit 7086fa9 on 2014-09-04 by Chris Cason
+
+    Merge pull request #34 from POV-Ray/revert-33-develop
+
+    Revert "Develop" (meant to merge into a test branch.)
+
+Commit d23ff77 on 2014-09-04 by Chris Cason
+
+    Revert "Develop"
+
+Commit bd4b762 on 2014-09-04 by Chris Cason
+
+    Merge pull request #33 from chris20/develop
+
+    Update boost to 1.56 (#8bbea3a)
+    Add support for VS 2012 (#c1e0ae9)
+    Update VS 2010 solution for use with updated boost library. Also add boost_chrono to build.
+    (#45f6e0b)
+
+Commit 45f6e0b on 2014-09-03 by Chris Cason
+
+    Update VS 2010 solution for use with updated boost library. Also add boost_chrono to build.
+
+Commit c1e0ae9 on 2014-09-03 by Chris Cason
+
+    Add support for VS 2012.
+
+Commit 8bbea3a on 2014-09-03 by Chris Cason
+
+    Update boost to 1.56.
+
+Commit f6ad589 on 2014-08-29 by Christoph Lipka
+
+    Merge branch 'release/v1.37.1.0-beta.8' into develop
+
+Commit b15d86b on 2014-08-18 by Christoph Lipka
+
+    Merge branch 'hotfix/mesh_camera'
+
+Commit 11ff214 on 2014-08-18 by Christoph Lipka
+
+    Silence g++ compiler warning about non-template friend function in base/colour.h
+
+Commit 22fefb5 on 2014-06-13 by Christoph Lipka (c-lipka)
+
+    Merge pull request #1 from POV-Ray/master
+
+    Sync with official POV-Ray repo
+
 ------------------------------------------------------------------------------
 UberPOV v1.37.1.0-beta.8
 ------------------------------------------------------------------------------
 
-Commit 0580a94 on 2014-08-28 by Christoph Lipka
+Commit a2054bf on 2014-08-29 by Christoph Lipka
+
+    Merge branch 'release/v1.37.1.0-beta.8'
+
+Commit 1015611 on 2014-08-29 by Christoph Lipka
 
     preparing v1.37.1.0-beta.8
 
