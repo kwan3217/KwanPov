@@ -31,6 +31,9 @@ Testing for UberPOV:
     will test for the presence of individual unofficial extensions using
     either the #patch directive or patch() function.
 
+  - UberPOV predefines a global variable named "unofficial", with the value
+    being "patch".
+
   - The new #patch directive has the following syntax:
 
         #patch STRING NUMBER;
