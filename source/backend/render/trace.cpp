@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -54,12 +54,14 @@
 #include "backend/lighting/radiosity.h"
 #include "backend/lighting/subsurface.h"
 #include "backend/math/matrices.h"
-#include "backend/math/vector.h"
 #include "backend/pattern/pattern.h"
 #include "backend/pattern/warps.h"
+#include "backend/render/ray.h"
 #include "backend/render/tracetask.h"
+#include "backend/scene/atmosph.h"
 #include "backend/scene/objects.h"
 #include "backend/scene/scene.h"
+#include "backend/scene/threaddata.h"
 #include "backend/scene/view.h"
 #include "backend/shape/boxes.h"
 #include "backend/shape/csg.h"
@@ -742,7 +744,7 @@ void Trace::ComputeLightedTexture(LightColour& resultColour, ColourChannel& resu
     std::auto_ptr<PhotonGatherer> surfacePhotonGatherer(NULL); // TODO FIXME - auto_ptr why?  [CLi] why, to auto-destruct it of course! (e.g. in case of exception)
 
     double relativeIor;
-    ComputeRelativeIOR(ray, isect.Object->interior, relativeIor);
+    ComputeRelativeIOR(ray, isect.Object->interior.get(), relativeIor);
 
     WNRXVector listWNRX(wnrxPool); // "Weight, Normal, Reflectivity, eXponent"
     assert(listWNRX->empty()); // verify that the WNRXVector pulled from the pool is in a cleaned-up condition
@@ -1023,7 +1025,7 @@ void Trace::ComputeLightedTexture(LightColour& resultColour, ColourChannel& resu
     // filtering it by filCol.
     tir_occured = false;
 
-    if(((interior = isect.Object->interior) != NULL) && (trans > ray.GetTicket().adcBailout) && qualityFlags.refractions)
+    if(((interior = isect.Object->interior.get()) != NULL) && (trans > ray.GetTicket().adcBailout) && qualityFlags.refractions)
     {
         // [CLi] changed filCol to RGB, as filter and transmit were always pinned to 1.0 and 0.0, respectively anyway
         // TODO CLARIFY - is this working properly if some filCol component is negative? (what would be the right thing then?)
@@ -1150,7 +1152,7 @@ void Trace::ComputeLightedTexture(LightColour& resultColour, ColourChannel& resu
 void Trace::ComputeShadowTexture(LightColour& resultColour, const LightColour& lightColour, const TEXTURE *texture, vector<const TEXTURE *>& warps, const Vector3d& ipoint,
                                  const Vector3d& rawnormal, const Ray& ray, Intersection& isect)
 {
-    Interior *interior = isect.Object->interior;
+    Interior *interior = isect.Object->interior.get();
     const TEXTURE *layer;
     double caustics, dotval, k;
     Vector3d layer_Normal;
@@ -1598,7 +1600,7 @@ void Trace::ComputePhotonDiffuseLight(LightColour& colour, const FINISH *Finish,
 
         // now add diffuse, phong, specular, irid contribution
 
-        ComputeClassicColour(tmpCol, Light_Colour, Layer_Pigment_Colour, Eye.Direction, lightDirection, Layer_Normal, Finish, IPoint, relativeIor, Attenuation, backside, 
+        ComputeClassicColour(tmpCol, Light_Colour, Layer_Pigment_Colour, Eye.Direction, lightDirection, Layer_Normal, Finish, IPoint, relativeIor, Attenuation, backside,
             // NK rad - don't compute highlights for radiosity gather rays, since this causes
             // problems with colors being far too bright
             // TODO FIXME radiosity - is this really the right way to do it (speaking of realism)?
@@ -2589,7 +2591,7 @@ void Trace::ComputeIridColour(LightColour& colour,
     double cos_angle_of_incidence_light, cos_angle_of_incidence_eye, interference;
     double film_thickness;
     double noise;
-    TURB turb;
+    TurbulenceWarp turb;
 
     film_thickness = finish->Irid_Film_Thickness;
 
@@ -2618,7 +2620,7 @@ void Trace::ComputeIridColour(LightColour& colour,
     colour *= 1.0 + finish->Irid * Cos(interference / sceneData->iridWavelengths);
 }
 
-void Trace::ComputeRelativeIOR(const Ray& ray, const Interior* interior, double& ior)
+void Trace::ComputeRelativeIOR(const Ray& ray, const Interior *interior, double& ior)
 {
     // Get ratio of iors depending on the interiors the ray is traversing.
     if (interior == NULL)
@@ -2856,7 +2858,7 @@ void Trace::ComputeSky(LightColour& colour, ColourChannel& transm, const Ray& ra
         colour = colour * transColour + col * sceneData->skysphere->Emission;
         transm *= filterc_transm;
     }
-    else // i.e. sceneData->languageVersion >= 370
+    else // i.e. sceneData->EffectiveLanguageVersion() >= 370
     {
         // this gives the same results regarding sky sphere filter as a layered-texture genuine sphere
 
@@ -3079,8 +3081,8 @@ void Trace::ComputeShadowMedia(LightColour& resultcolour, Ray& light_source_ray,
 
     // If ray is entering from the atmosphere or the ray is currently *not* inside an object add it,
     // but if it is currently inside an object, the ray is leaving the current object and is removed
-    if((isect.Object != NULL) && ((light_source_ray.GetInteriors().empty()) || (light_source_ray.RemoveInterior(isect.Object->interior) == false)))
-        light_source_ray.AppendInterior(isect.Object->interior);
+    if((isect.Object != NULL) && ((light_source_ray.GetInteriors().empty()) || (light_source_ray.RemoveInterior(isect.Object->interior.get()) == false)))
+        light_source_ray.AppendInterior(isect.Object->interior.get());
 }
 
 
@@ -3734,7 +3736,7 @@ void Trace::ComputeSubsurfaceScattering(LightColour& Final_Colour, const FINISH 
 
     double eta;
 
-    ComputeRelativeIOR(Eye, out.Object->interior, eta);
+    ComputeRelativeIOR(Eye, out.Object->interior.get(), eta);
 
 #if 0
     // user setting specifies mean free path

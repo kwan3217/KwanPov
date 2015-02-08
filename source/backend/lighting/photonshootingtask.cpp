@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -47,12 +47,11 @@
 #include "backend/frame.h"
 #include "backend/lighting/photonshootingtask.h"
 
-#include "base/povms.h"
-#include "base/povmsgid.h"
 #include "backend/bounding/bbox.h"
+#include "backend/lighting/photonshootingstrategy.h"
 #include "backend/lighting/point.h"
 #include "backend/math/matrices.h"
-#include "backend/math/vector.h"
+#include "backend/render/ray.h"
 #include "backend/scene/objects.h"
 #include "backend/scene/scene.h"
 #include "backend/scene/threaddata.h"
@@ -60,6 +59,8 @@
 #include "backend/shape/csg.h"
 #include "backend/support/msgutil.h"
 #include "backend/support/octree.h"
+#include "base/povms.h"
+#include "base/povmsgid.h"
 #include "lightgrp.h"
 
 // this must be the last file included
@@ -69,10 +70,9 @@ namespace pov
 {
 
 PhotonShootingTask::PhotonShootingTask(ViewData *vd, PhotonShootingStrategy* strategy, size_t seed) :
-    RenderTask(vd, seed),
+    RenderTask(vd, seed, "Photon"),
     trace(vd->GetSceneData(), GetViewDataPtr(), vd->GetSceneData()->photonSettings.Max_Trace_Level,
           vd->GetSceneData()->photonSettings.adcBailout, vd->GetQualityFeatureFlags(), cooperate),
-    messageFactory(10, 370, "Photon", vd->GetSceneData()->backendAddress, vd->GetSceneData()->frontendAddress, vd->GetSceneData()->sceneId, 0), // TODO FIXME - Values need to come from the correct place!
     rands(0.0, 1.0, 32768),
     randgen(&rands),
     strategy(strategy),
@@ -362,12 +362,12 @@ void PhotonShootingTask::ShootPhotonsAtObject(LightTargetCombo& combo)
 
                     /* As mike said, "fire photon torpedo!" */
                     //Initialize_Ray_Containers(&ray);
-                    ray.ClearInteriors () ;
+                    ray.ClearInteriors ();
 
                     for(vector<ObjectPtr>::iterator object = GetSceneData()->objects.begin(); object != GetSceneData()->objects.end(); object++)
                     {
                         if((*object)->Inside(ray.Origin, renderDataPtr) && ((*object)->interior != NULL))
-                            ray.AppendInterior((*object)->interior);
+                            ray.AppendInterior((*object)->interior.get());
                     }
 
                     notComputed = false;

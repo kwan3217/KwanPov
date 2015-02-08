@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -39,24 +39,25 @@
 ///
 /// @endparblock
 ///
-//*******************************************************************************
+//******************************************************************************
 
 #ifndef PHOTONSHOOTINGTASK_H
 #define PHOTONSHOOTINGTASK_H
 
-#include "base/povms.h"
 #include "backend/frame.h"
-#include "backend/colour/colutils.h"
-#include "backend/control/messagefactory.h"
-#include "backend/lighting/photonshootingstrategy.h"
-#include "backend/parser/parse.h"
-#include "backend/render/rendertask.h"
+#include "backend/lighting/photons.h"
 #include "backend/render/trace.h"
+#include "backend/render/rendertask.h"
 
 namespace pov
 {
 
 using namespace pov_base;
+
+class LightSource;
+class LightTargetCombo;
+class PhotonMap;
+class PhotonShootingStrategy;
 
 class PhotonShootingTask : public RenderTask
 {
@@ -65,7 +66,6 @@ class PhotonShootingTask : public RenderTask
 
         PhotonShootingStrategy* strategy;
 
-        MessageFactory messageFactory;
         Timer timer;
         RandomDoubleSequence rands;
         RandomDoubleSequence::Generator randgen;

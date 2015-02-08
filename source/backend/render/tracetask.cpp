@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -47,13 +47,16 @@
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
-#include "backend/math/vector.h"
+#include "backend/render/tracetask.h"
+
+#include "backend/math/chi2.h"
 #include "backend/math/matrices.h"
 #include "backend/render/trace.h"
-#include "backend/render/tracetask.h"
+#include "backend/scene/scene.h"
+#include "backend/scene/threaddata.h"
+#include "backend/scene/view.h"
 #include "backend/support/jitter.h"
 #include "backend/texture/normal.h"
-#include "backend/math/chi2.h"
 
 #ifdef PROFILE_INTERSECTIONS
 #include "base/image/image.h"
@@ -223,8 +226,8 @@ void TraceTask::SubdivisionBuffer::Clear()
         *i = false;
 }
 
-TraceTask::TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr, size_t seed) :
-    RenderTask(vd, seed),
+TraceTask::TraceTask(ViewData *vd, unsigned int tm, DBL js, DBL aat, DBL aac, unsigned int aad, pov_base::GammaCurvePtr& aag, unsigned int ps, bool psc, bool final, bool hr, size_t seed) :
+    RenderTask(vd, seed, "Trace"),
     trace(vd, GetViewDataPtr(), vd->GetSceneData()->parsedMaxTraceLevel, vd->GetSceneData()->parsedAdcBailout,
           vd->GetQualityFeatureFlags(), cooperate, media, radiosity),
     cooperate(*this),

@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -44,6 +44,16 @@
 #ifndef POVRAY_FRONTEND_RENDERFRONTEND_H
 #define POVRAY_FRONTEND_RENDERFRONTEND_H
 
+#include <list>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+#include <boost/scoped_ptr.hpp>
+
 #include "base/path.h"
 #include "base/povms.h"
 #include "base/povmscpp.h"
@@ -57,16 +67,6 @@
 #include "frontend/console.h"
 #include "frontend/display.h"
 #include "frontend/imageprocessing.h"
-
-#include <string>
-#include <vector>
-#include <list>
-#include <map>
-#include <set>
-
-#include <boost/scoped_ptr.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 namespace pov_frontend
 {

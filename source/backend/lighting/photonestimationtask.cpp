@@ -10,7 +10,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -18,7 +18,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -43,16 +43,15 @@
 ///
 //*******************************************************************************
 
+#include <algorithm>
+
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/lighting/photonestimationtask.h"
 
-#include "base/povms.h"
-#include "base/povmsgid.h"
 #include "backend/bounding/bbox.h"
 #include "backend/lighting/point.h"
 #include "backend/math/matrices.h"
-#include "backend/math/vector.h"
 #include "backend/scene/objects.h"
 #include "backend/scene/scene.h"
 #include "backend/scene/threaddata.h"
@@ -60,9 +59,9 @@
 #include "backend/shape/csg.h"
 #include "backend/support/msgutil.h"
 #include "backend/support/octree.h"
+#include "base/povms.h"
+#include "base/povmsgid.h"
 #include "lightgrp.h"
-
-#include <algorithm>
 
 // this must be the last file included
 #include "base/povdebug.h"
@@ -71,7 +70,7 @@ namespace pov
 {
 
 PhotonEstimationTask::PhotonEstimationTask(ViewData *vd, size_t seed) :
-    RenderTask(vd, seed),
+    RenderTask(vd, seed, "Photon"),
     cooperate(*this)
 {
     photonCountEstimate = 0;

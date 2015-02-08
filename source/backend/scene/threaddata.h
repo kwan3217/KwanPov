@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -48,7 +48,10 @@
 #include <stack>
 
 #include "base/types.h"
+// frame.h must always be the first backend POV file included (pulls in platform config)
 #include "backend/frame.h"
+
+#include "backend/bounding/bcyl.h"
 #include "backend/pattern/pattern.h"
 #include "backend/shape/mesh.h"
 #include "backend/support/randomsequences.h"
@@ -101,9 +104,9 @@ class SceneThreadData : public Task::TaskData
         int Blob_Coefficient_Count;
         int Blob_Interval_Count;
         ISO_ThreadData *isosurfaceData;
-        void *BCyl_Intervals;
-        void *BCyl_RInt;
-        void *BCyl_HInt;
+        vector<BCYL_INT> BCyl_Intervals;
+        vector<BCYL_INT> BCyl_RInt;
+        vector<BCYL_INT> BCyl_HInt;
         IStackPool stackPool;
         FPUContext *functionContext;
         vector<FPUContext *> functionPatternContext;
