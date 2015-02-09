@@ -19,15 +19,23 @@ then
   exit 1
 fi
 
-echo "Identified version as '$version'."
+rversion=`echo "$version" | sed -n 's:-.*::p'`
+if [ x"$rversion" == x"$version" ]
+then
+  pversion=""
+  echo "Identified version as '$version' release."
+else
+  pversion=`echo "$version" | sed -n 's:[^-]*-::p'`
+  echo "Identified version as '$rversion' prerelease '$pversion'."
+fi
 
 echo "Updating 'unix/VERSION'..."
 echo "$version" >unix/VERSION
 git add "unix/VERSION"
 
 echo "Updating 'source/base/branch.h'..."
-sed 's:\(#define BRANCH_VERSION          "\)[^"]*:\1'"$version"':g' source/base/branch.h > source/base/branch.h~
-mv -f source/base/branch.h~ source/base/branch.h
+sed -i 's:\(#define BRANCH_VERSION *"\)[^"]*:\1'"$rversion"':g' source/base/branch.h >/dev/null 2>/dev/null
+sed -i 's:\(#define BRANCH_PRERELEASE *"\)[^"]*:\1'"$pversion"':g' source/base/branch.h >/dev/null 2>/dev/null
 git add "source/base/branch.h"
 
 echo "Creating commit..."

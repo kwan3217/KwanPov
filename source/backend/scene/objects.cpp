@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -45,9 +45,11 @@
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
+#include "backend/scene/objects.h"
+
 #include "backend/interior/interior.h"
 #include "backend/math/matrices.h"
-#include "backend/scene/objects.h"
+#include "backend/render/ray.h"
 #include "backend/scene/threaddata.h"
 #include "backend/shape/boxes.h"
 #include "backend/shape/csg.h"
@@ -745,9 +747,9 @@ ObjectPtr Copy_Object (ObjectPtr Old)
     New->Texture = Copy_Textures (Old->Texture);
     New->Interior_Texture = Copy_Textures (Old->Interior_Texture);
     if(Old->interior != NULL)
-        New->interior = new Interior(*(Old->interior));
+        New->interior = InteriorPtr(new Interior(*(Old->interior)));
     else
-        New->interior = NULL;
+        New->interior.reset();
 
     /* NK 1998 */
     New->UV_Trans = Copy_Transform(Old->UV_Trans);
@@ -775,11 +777,11 @@ ObjectPtr Copy_Object (ObjectPtr Old)
 
 vector<ObjectPtr> Copy_Objects (vector<ObjectPtr>& Src)
 {
-    vector<ObjectPtr> Dst ;
+    vector<ObjectPtr> Dst;
 
     for(vector<ObjectPtr>::iterator it = Src.begin(); it != Src.end(); it++)
-        Dst.push_back(Copy_Object(*it)) ;
-    return (Dst) ;
+        Dst.push_back(Copy_Object(*it));
+    return (Dst);
 }
 
 /*****************************************************************************
@@ -816,13 +818,10 @@ void Destroy_Single_Object (ObjectPtr *objectPtr)
 
     Destroy_Object(object->Bound);
 
-    Destroy_Interior(object->interior);
-
     /* NK 1998 */
     Destroy_Transform(object->UV_Trans);
 
     Destroy_Object(object->Bound);
-    Destroy_Interior(object->interior);
 
     if(object->Bound != object->Clip)
         Destroy_Object(object->Clip);
@@ -841,15 +840,14 @@ void Destroy_Object(ObjectPtr Object)
 {
     if(Object != NULL)
     {
-        bool DestroyClip = true ;
+        bool DestroyClip = true;
         if (!Object->Bound.empty() && !Object->Clip.empty())
             if (*Object->Bound.begin() == *Object->Clip.begin())
-                DestroyClip = false ;
+                DestroyClip = false;
         Destroy_Textures(Object->Texture);
         Destroy_Textures(Object->Interior_Texture);
         Destroy_Object(Object->Bound);
 
-        Destroy_Interior(Object->interior);
         Destroy_Transform(Object->UV_Trans);
 
         if (DestroyClip)

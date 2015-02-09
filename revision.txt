@@ -2,7 +2,152 @@
 UberPOV Revision History
 ------------------------------------------------------------------------------
 
-Commit ??????? on 2015-01-31 by Christoph Lipka
+Commit ??????? on 2015-02-09 by Christoph Lipka
+
+    preparing v1.37.1.0-beta.10
+
+Commit 358a8dd on 2015-02-09 by Christoph Lipka
+
+    Fixed shadows missing in some circumstances.
+
+Commit 948350e on 2015-02-08 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit 8f001a6 on 2015-02-08 by Christoph Lipka
+
+    Merge branch 'master' into feature/colour_model
+
+Commit 9b7cd1b on 2015-02-08 by Christoph Lipka
+
+    Fixed black background.
+
+Commit baa95d2 on 2015-02-03 by Christoph Lipka
+
+    Added missing file from the boost/test library.
+
+Commit d800055 on 2015-02-03 by Christoph Lipka
+
+    Merge branch 'hotfix/unix_build' into feature/colour_model
+
+Commit 3f56c5f on 2015-02-03 by Christoph Lipka
+
+    Fixed Unix build errors.
+
+Commit 5137fad on 2015-02-03 by Christoph Lipka
+
+    Merge branch 'master' into feature/colour_model
+
+Commit 725efe1 on 2015-02-03 by Christoph Lipka
+
+    Merge branch 'refactor'
+
+Commit 1fac52a on 2015-02-03 by Christoph Lipka
+
+    Merge branch 'feature/unit_tests'
+
+Commit 845851e on 2015-02-03 by Christoph Lipka
+
+    Source code documentation pertaining to entities spanning more than one file (namespaces,
+    directories) now resides in `source-doc/*.dox`.
+
+Commit e16458c on 2015-02-03 by Christoph Lipka
+
+    Fixed Unix build errors
+
+Commit 4291131 on 2015-02-03 by Christoph Lipka
+
+    Fixed bug in parser causing an error when no file type is specified and the file name is
+    specified using a variable.
+
+    Also renamed some macros in the parser for clarity.
+
+Commit f775c54 on 2015-02-03 by Christoph Lipka
+
+    updated Git pre-commit hook; now automatically cleans up leading tabs and trailing blanks in
+    updated C/C++ files.
+
+Commit 54c2f4e on 2015-02-02 by Christoph Lipka
+
+    Header Overhaul.
+
+    Changed include file hierarchy; moved some code (most notably blend map specializations) to
+    other files.
+    Also updated file comments to new format, and cleaned up whitespace.
+
+Commit b159379 on 2015-02-01 by Christoph Lipka
+
+    Merge branch 'hotfix/OTOc_issue'
+
+Commit a587015 on 2015-02-01 by Christoph Lipka
+
+    Under-the-hood changes related to scene language version and warnings.
+
+Commit 5dd9a4d on 2015-02-01 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model' into develop
+
+Commit 4a092fc on 2015-02-01 by Christoph Lipka
+
+    Updated the script I use to bump version numbers in the source code.
+
+Commit cd17cae on 2015-02-01 by Christoph Lipka
+
+    Merge branch 'release/v1.37.0.0-beta.7' into develop
+
+Commit 44e5f50 on 2015-01-31 by Christoph Lipka
+
+    Eliminated more "C-isms" in favour of C++-style code.
+
+    Replaced various `POV_MALLOC` / `POV_FREE` calls with `new` and `delete` invocations.
+    Avoided some `POV_REALLOC` calls by using vectors instead of dynamic C arrays.
+    Changed `Interior` reference counting to use `shared_ptr` instead.
+    Added constructors and destructors to various structs.
+    Encapsulated BBoxPriorityQueue and associated basic functionality into a class.
+    Refactored `Spline_Struct` into polymorphic family of classes (`GenericSpline` and derived
+    classes).
+    Refactored warps into polymorphic family of classes (`GenericWarp` and derived classes)
+    Renamed `POV_MACRO` type to `Macro`.
+
+Commit fd2e0dd on 2015-01-30 by Christoph Lipka
+
+    More work on Developer's Manual.
+
+    - Added Doxygen configuration.
+    - Minor changes to stand-alone source documentation pages.
+    - Styleguide change: `@startuml` tag format is now to be used for sequence charts instead of
+      `@msc` tag format.
+    - Added page on compiler requirements.
+
+Commit 4d42e38 on 2015-01-19 by Christoph Lipka
+
+    Add skeleton for unit tests, based on the boost test library.
+
+Commit 3ca7476 on 2015-01-06 by Christoph Lipka
+
+    hopefully fixes issue with OTOc.inc ("Odd Tiles Object") reported in povray.binaries.images.
+
+------------------------------------------------------------------------------
+UberPOV v1.37.1.0-beta.9b
+------------------------------------------------------------------------------
+
+Commit b50a87c on 2015-02-01 by Christoph Lipka
+
+    Merge remote-tracking branch 'povray/feature/colour_model'
+
+Commit 3f2386b on 2015-02-01 by Christoph Lipka
+
+    Fixed errors in base/colour.h and base/colour.cpp causing build errors on Unix.
+
+------------------------------------------------------------------------------
+UberPOV v1.37.1.0-beta.9
+------------------------------------------------------------------------------
+
+Commit 04d4629 on 2015-01-31 by Christoph Lipka
+
+    Merge branch 'release/v1.37.1.0-beta.9'
+
+Commit bf2aea5 on 2015-01-31 by Christoph Lipka
 
     preparing v1.37.1.0-beta.9
 

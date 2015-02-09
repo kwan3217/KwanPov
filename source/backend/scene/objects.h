@@ -11,7 +11,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -19,7 +19,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -50,6 +50,7 @@
 #include <limits>
 
 #include "backend/bounding/bbox.h"
+#include "backend/texture/texture.h"
 
 namespace pov
 {
@@ -169,7 +170,7 @@ class ObjectBase
         int Type; // TODO - make obsolete
         TEXTURE *Texture;
         TEXTURE *Interior_Texture;
-        Interior *interior;
+        InteriorPtr interior;
         vector<ObjectPtr> Bound;
         vector<ObjectPtr> Clip;
         vector<LightSource *> LLights;  ///< Used for light groups.
@@ -189,7 +190,7 @@ class ObjectBase
         /// Construct object from scratch.
         ObjectBase(int t) :
             Type(t),
-            Texture(NULL), Interior_Texture(NULL), interior(NULL), Trans(NULL), UV_Trans(NULL),
+            Texture(NULL), Interior_Texture(NULL), interior(), Trans(NULL), UV_Trans(NULL),
             Ph_Density(0), RadiosityImportance(0.0), Flags(0),
             subFrameTimeStart(-std::numeric_limits<float>::max()), subFrameTimeEnd(std::numeric_limits<float>::max())
         {
@@ -213,7 +214,7 @@ class ObjectBase
             {
                 o.Texture = NULL;
                 o.Interior_Texture = NULL;
-                o.interior = NULL;
+                o.interior.reset();
                 o.Trans = NULL;
                 o.UV_Trans = NULL;
                 o.Bound.clear();

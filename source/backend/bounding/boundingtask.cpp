@@ -8,7 +8,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +16,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -43,21 +43,22 @@
 
 #include <set>
 
-#include <boost/thread.hpp>
 #include <boost/bind.hpp>
+#include <boost/thread.hpp>
 
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/bounding/boundingtask.h"
 
-#include "base/povmsgid.h"
-#include "backend/math/vector.h"
 #include "backend/math/matrices.h"
 #include "backend/scene/objects.h"
+#include "backend/scene/scene.h"
+#include "backend/scene/threaddata.h"
 #include "backend/shape/cones.h"
 #include "backend/support/bsptree.h"
 #include "backend/texture/pigment.h"
 #include "backend/texture/texture.h"
+#include "base/povmsgid.h"
 
 // this must be the last file included
 #include "base/povdebug.h"
@@ -143,7 +144,7 @@ class BSPProgress : public BSPTree::Progress
 };
 
 BoundingTask::BoundingTask(shared_ptr<SceneData> sd, unsigned int bt, size_t seed) :
-    Task(new SceneThreadData(sd, seed), boost::bind(&BoundingTask::SendFatalError, this, _1)),
+    SceneTask(new SceneThreadData(sd, seed), boost::bind(&BoundingTask::SendFatalError, this, _1), "Bounding", sd),
     sceneData(sd),
     boundingThreshold(bt)
 {

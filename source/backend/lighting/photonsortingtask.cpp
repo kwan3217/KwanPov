@@ -10,7 +10,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -18,7 +18,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -43,17 +43,18 @@
 ///
 //*******************************************************************************
 
+#include <algorithm>
+
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/lighting/photonsortingtask.h"
 
-#include "base/povms.h"
-#include "base/povmsgid.h"
+
 #include "backend/bounding/bbox.h"
-#include "backend/lighting/point.h"
 #include "backend/lighting/photonshootingstrategy.h"
-#include "backend/math/vector.h"
+#include "backend/lighting/point.h"
 #include "backend/math/matrices.h"
+#include "backend/render/rendertask.h"
 #include "backend/scene/objects.h"
 #include "backend/scene/scene.h"
 #include "backend/scene/threaddata.h"
@@ -62,8 +63,6 @@
 #include "backend/support/msgutil.h"
 #include "backend/support/octree.h"
 #include "lightgrp.h"
-
-#include <algorithm>
 
 // this must be the last file included
 #include "base/povdebug.h"
@@ -81,11 +80,10 @@ namespace pov
       4) clean up memory (delete the non-merged maps and delete the strategy)
 */
 PhotonSortingTask::PhotonSortingTask(ViewData *vd, const vector<PhotonMap*>& surfaceMaps, const vector<PhotonMap*>& mediaMaps, PhotonShootingStrategy* strategy, size_t seed) :
-    RenderTask(vd, seed),
+    RenderTask(vd, seed, "Photon"),
     surfaceMaps(surfaceMaps),
     mediaMaps(mediaMaps),
     strategy(strategy),
-    messageFactory(10, 370, "Photon", vd->GetSceneData()->backendAddress, vd->GetSceneData()->frontendAddress, vd->GetSceneData()->sceneId, 0), // TODO FIXME - Values need to come from the correct place!
     cooperate(*this)
 {
 }
@@ -209,13 +207,13 @@ void PhotonSortingTask::sortPhotonMap()
             /* status bar for user */
 //          Send_Progress("Saving Photon Maps", PROGRESS_SAVING_PHOTON_MAPS);
             if (!this->save())
-                messageFactory.Warning(0,"Could not save photon map.");
+                messageFactory.Warning(kWarningGeneral,"Could not save photon map.");
         }
     }
     else
     {
         if (GetSceneData()->photonSettings.fileName && !GetSceneData()->photonSettings.loadFile)
-            messageFactory.Warning(0,"Could not save photon map - no photons!");
+            messageFactory.Warning(kWarningGeneral,"Could not save photon map - no photons!");
     }
 }
 
@@ -343,7 +341,7 @@ int PhotonSortingTask::load()
 
     if (!GetSceneData()->photonSettings.photonsEnabled) return 0;
 
-    messageFactory.Warning(0,"Starting the load of photon file %s\n",GetSceneData()->photonSettings.fileName);
+    messageFactory.Warning(kWarningGeneral,"Starting the load of photon file %s\n",GetSceneData()->photonSettings.fileName);
 
     f = fopen(GetSceneData()->photonSettings.fileName, "rb");
     if (!f) return 0;

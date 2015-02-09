@@ -9,7 +9,7 @@
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -17,7 +17,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -48,13 +48,20 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "base/stringutilities.h"
-#include "base/fileinputoutput.h"
-#include "backend/parser/parse.h"
+
+namespace pov_base
+{
+class IMemStream;
+class IStream;
+}
 
 namespace pov
 {
 
 using namespace pov_base;
+
+class Parser;
+class SceneData;
 
 IStream *Locate_File(Parser *p, shared_ptr<SceneData>& sd, const UCS2String& filename, unsigned int stype, UCS2String& buffer, bool err_flag = false);
 boost::posix_time::ptime Get_File_Time(Parser *p, shared_ptr<SceneData>& sd, const UCS2String& filename, unsigned int stype, bool err_flag = false);

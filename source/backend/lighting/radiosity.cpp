@@ -4,11 +4,14 @@
 ///
 /// This file contains radiosity computation task code.
 ///
+/// @author Jim McElhiney (original code)
+/// @author Christoph Lipka (revisions and updates for POV-Ray 3.7)
+///
 /// @copyright
 /// @parblock
 ///
 /// UberPOV Raytracer version 1.37.
-/// Portions Copyright 2013-2014 Christoph Lipka.
+/// Portions Copyright 2013-2015 Christoph Lipka.
 ///
 /// UberPOV 1.37 is an experimental unofficial branch of POV-Ray 3.7, and is
 /// subject to the same licensing terms and conditions.
@@ -16,7 +19,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -74,11 +77,14 @@
 #include "backend/lighting/radiosity.h"
 
 #include "backend/lighting/photons.h"
-#include "backend/math/vector.h"
+#include "backend/render/ray.h"
 #include "backend/render/tracetask.h"
+#include "backend/scene/scene.h"
+#include "backend/scene/threaddata.h"
 #include "backend/scene/view.h"
 #include "backend/support/fileutil.h"
 #include "backend/support/octree.h"
+#include "base/fileinputoutput.h"
 
 // this must be the last file included
 #include "base/povdebug.h"
