@@ -2433,7 +2433,7 @@ void Trace::ComputeShadowColour(LightColour& colour, const LightSource &lightsou
     if(fabs(resultColour.Weight()) < lightsourceray.GetTicket().adcBailout)
     {
         // close enough to full shadow - bail out to avoid media computations
-        resultColour.Clear();
+        colour.Clear();
         return;
     }
 
