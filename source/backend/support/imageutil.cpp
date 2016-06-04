@@ -45,6 +45,7 @@
 #include "backend/support/fileutil.h"
 #include "backend/texture/normal.h"
 #include "backend/texture/texture.h"
+#include "backend/scene/scene.h"
 #include "base/pov_err.h"
 
 #ifdef SYS_IMAGE_HEADER
@@ -85,6 +86,7 @@ const DBL DIV_1_BY_255 = 1.0 / 255.0;
 static int cylindrical_image_map(const Vector3d& EPoint, const ImageData *image, DBL *u, DBL *v);
 static int torus_image_map(const Vector3d& EPoint, const ImageData *image, DBL *u, DBL *v);
 static int spherical_image_map(const Vector3d& EPoint, const ImageData *image, DBL *u, DBL *v);
+static int spheroid_image_map(const Vector3d& EPoint, const ImageData *image, DBL *u, DBL *v);
 static int planar_image_map(const Vector3d& EPoint, const ImageData *image, DBL *u, DBL *v);
 static void no_interpolation(const ImageData *image, DBL xcoor, DBL ycoor, RGBFTColour& colour, int *index, bool premul);
 static void bilinear(DBL *factors, DBL x, DBL y);
@@ -774,6 +776,102 @@ static int spherical_image_map(const Vector3d& EPoint, const ImageData *image, D
     return 1;
 }
 
+
+static inline DBL dsign(DBL a, /**<Return a value with the same absolute value as this value */
+                        DBL b  /**<Return a value with the same sign as this value */) {
+  DBL s=(b>0)?1:-1;
+	return fabs(a)*s;
+}
+
+/** Given a rectangular vector, calculate geodetic coordinates */
+void xyz2lla(DBL x, /**<[in] X coordinate in units of equatorial radius. +X points from the origin to the prime meridian */
+             DBL y, /**<[in] Y coordinate in units of equatorial radius. +Y points toward 90deg E */
+             DBL z, /**<[in] Z ccordinate in units of equatorial radius. +Z points towards North Pole */
+             DBL f, /**<[in] Flatness - One minus ratio of polar axis to equatorial axis */
+             DBL& lat, /**<[out] Geodetic latitude in radians */
+             DBL& lon, /**<[out] East Longitude in radians*/
+             DBL& alt  /**<[out] Altitude above spheroid surface in units of equatorial radius */) {
+  // Nothing special about this
+  lon=atan2(y,x);
+
+  // Length of projection of vector to equatorial plane, m
+  DBL r=sqrt(x*x+y*y);
+  // Polar should not appear below here
+  // Ellipsoid equatorial radius is 1 unit
+  // Ellipsoid polar radius, units
+  DBL b=dsign(1.0-f,z);
+  if(0==r) {
+    lat=dsign(M_PI_2,z);
+    alt=fabs(z)-fabs(b);
+  } else {
+    DBL E=((z+b)*b-1.0)/r;
+    DBL F=((z-b)*b+1.0)/r;
+    DBL P=4.0*(E*F+1.0)/3.0;
+    DBL Q=(E*E-F*F)*2.0;
+    DBL D=P*P*P+Q*Q;
+    DBL v;
+    if(D>=0.0) {
+      v=cbrt(sqrt(D)-Q)-cbrt(sqrt(D)+Q);
+    } else {
+      v=2.0*sqrt(-P)*cos(acos(Q/P/sqrt(-P))/3.0);
+    }
+    DBL G=(E+sqrt(E*E+v))/2.0;
+    DBL t=sqrt(G*G+(F-v*G)/(G+G-E))-G;
+    lat=atan((1.0-t*t)/(2*b*t));
+    alt=(r-t)*cos(lat)+(z-b)*sin(lat);
+    assert (lat>0 || lat<0 || lat==0);
+    assert (lon>0 || lon<0 || lon==0);
+    assert (alt>0 || alt<0 || alt==0);
+  }
+}
+
+/** Given geodetic coordinates, calculate rectangular coordinates */
+void lla2xyz(DBL lat, /**<[in] Geodetic latitude in radians */
+             DBL lon, /**<[in] East Longitude in radians*/
+             DBL alt,  /**<[in] Altitude above spheroid surface in units of equatorial radius */
+             DBL f, /**<[in] Flatness - One minus ratio of polar axis to equatorial axis */
+             DBL& x, /**<[in] X coordinate in units of equatorial radius. +X points from the origin to the prime meridian */
+             DBL& y, /**<[in] Y coordinate in units of equatorial radius. +Y points toward 90deg E */
+             DBL& z /**<[in] Z ccordinate in units of equatorial radius. +Z points towards North Pole */) {
+  /* Ellipsoid equatorial radius is 1 unit */
+  /* Ellipsoid polar radius, units */
+  DBL b=1-f;
+  DBL b2=b*b;
+  /* Square of ellipsoid eccentricity */
+  DBL e2=(1-b2);
+  DBL N = 1.0 / sqrt(1.0 - e2 * pow(sin(lat),2));
+  x = (N              + alt) * cos(lat) * cos(lon);
+  y = (N              + alt) * cos(lat) * sin(lon);
+  z = (N * (1.0 - e2) + alt) * sin(lat);
+}
+
+static int spheroid_image_map(const Vector3d& EPoint, const ImageData *Image, DBL *u, DBL  *v) {
+  DBL altitude;  // Not really used, but...
+  DBL latitude;
+  DBL longitude;
+
+  DBL prime,right,polar;//These are in Map_Axis coordinates
+//  if(fabs(EPoint[Y])<0.01) printf("spheroid_image_map EPoint: %lf, %lf, %lf\n",EPoint[X],EPoint[Y],EPoint[Z]);
+  prime=EPoint[X];
+  polar=EPoint[Y];
+  right=EPoint[Z];
+//  if(fabs(EPoint[Y])<0.01) printf("prime: %lf, right %lf, polar %lf\n",prime,right,polar);
+
+  xyz2lla(prime,right,polar,Image->Map_Flatness,latitude,longitude,altitude);
+//  if(fabs(EPoint[Y])<0.01) printf("f: %lf, lat: %lf, lon %lf, alt %lf\n",Image->Map_Flatness,latitude,longitude,altitude);
+
+  *u = ((longitude/ TWO_M_PI) * Image->width);
+
+
+  *v = ((0.5 + latitude / M_PI) * Image->height);
+//  if(fabs(EPoint[Y])<0.01) printf("u: %lf, v %lf\n",*u,*v);
+//  assert (boost::math::isfinite(*u));
+//  assert (boost::math::isfinite(*v));
+
+  return 1;
+
+}
+
 /*
  * 2-D to 3-D Procedural Texture Mapping of a Bitmapped Image onto an Object:
  *
@@ -902,6 +1000,10 @@ static int map_pos(const Vector3d& EPoint, const BasicPattern* pPattern, DBL *xc
             break;
         case TORUS_MAP:
             if(!torus_image_map(EPoint, image, xcoor, ycoor))
+                return (1);
+            break;
+        case SPHEROID_MAP:
+            if(!spheroid_image_map(EPoint, image, xcoor, ycoor))
                 return (1);
             break;
         default:
@@ -1260,6 +1362,8 @@ ImageData *Create_Image()
     image->Map_Type = PLANAR_MAP;
 
     image->Interpolation_Type = NO_INTERPOLATION;
+
+    image->Map_Flatness = 0.0;
 
     image->iwidth = image->iheight = 0;
     image->width = image->height = 0.0;
