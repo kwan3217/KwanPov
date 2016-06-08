@@ -69,6 +69,7 @@
 #include "backend/vm/fncode.h"
 #include "backend/vm/fnpovfpu.h"
 #include "base/fileinputoutput.h"
+#include "backend/parser/spice.h"
 
 // this must be the last file included
 #include "base/povdebug.h"
@@ -681,11 +682,22 @@ void Parser::Parse_Num_Factor (EXPRESS& Express,int *Terms)
 
     Ok_To_Declare=true;
 
+    //Only used in ckckov
+    char *tempascii;
+    UCS2String temp,foundfile;
+    SpiceInt idcode,n_window;
+    SpiceDouble tol;
+    char *level,*timsys;
+
     EXPECT
         CASE (FLOAT_FUNCT_TOKEN)
             /* All of these functions return a DBL result */
             switch(Token.Function_Id)
             {
+                case GDPOOL_TOKEN:
+                    Val=Parse_Gdpool();
+                    break;
+
                 case ABS_TOKEN:
                     Val = Parse_Float_Param();
                     Val = fabs(Val);
@@ -813,6 +825,106 @@ void Parser::Parse_Num_Factor (EXPRESS& Express,int *Terms)
 
                     GET (RIGHT_PAREN_TOKEN);
                     break;
+
+                case CKCOV_TOKEN:
+                  GET (LEFT_PAREN_TOKEN);
+                  tempascii=Parse_C_String();
+                  Parse_Comma();
+                  idcode=(SpiceInt)Parse_Float();
+                  Parse_Comma();
+                  level=Parse_C_String();
+                  Parse_Comma();
+                  tol=(SpiceDouble)Parse_Float();
+                  Parse_Comma();
+                  timsys=Parse_C_String();
+                  Parse_Comma();
+                  n_window=(int)Parse_Float();
+                  if(sceneData->ckcovStruct.base!=NULL) POV_FREE(sceneData->ckcovStruct.base);
+
+                  //Set up coverage struct based on given size
+                  sceneData->ckcovStruct.dtype=SPICE_DP;
+                  sceneData->ckcovStruct.length=0;
+                  sceneData->ckcovStruct.size=n_window*2;
+                  sceneData->ckcovStruct.card=0;
+                  sceneData->ckcovStruct.isSet=SPICETRUE;
+                  sceneData->ckcovStruct.adjust=SPICEFALSE;
+                  sceneData->ckcovStruct.init=SPICEFALSE;
+                  sceneData->ckcovStruct.base=POV_MALLOC((SPICE_CELL_CTRLSZ+n_window*2)*sizeof(SpiceDouble),"Spice coverage cells");
+                  sceneData->ckcovStruct.data=(void*)(((char*)sceneData->ckcovStruct.base)+sizeof(SpiceDouble)*SPICE_CELL_CTRLSZ);
+
+                  //Find the kernel - based on Furnish() in spice.cpp
+                  temp = ASCIItoUCS2String(tempascii);
+                  POV_FREE(tempascii);
+
+                  foundfile=sceneData->FindFile(GetPOVMSContext(), temp, POV_File_Unknown);
+
+                  if(foundfile.empty() == true) {
+                    Error("Cannot find kernel '%s'", UCS2toASCIIString(temp).c_str());
+                    return;
+                  }
+
+                  ckcov_c(UCS2toASCIIString(foundfile).c_str(), idcode, SPICEFALSE, level,tol,timsys,&sceneData->ckcovStruct);
+                  if(failed_c()) {
+                	char explain[320];
+                    getmsg_c("EXPLAIN",319,explain);
+                    Error(explain);
+                  }
+
+                  Val=wncard_c(&sceneData->ckcovStruct);
+
+                  POV_FREE(level);
+                  POV_FREE(timsys);
+
+                  GET (RIGHT_PAREN_TOKEN);
+                  break;
+
+                case CKGETCOV_TOKEN:
+                  GET (LEFT_PAREN_TOKEN);
+                  SpiceInt window,terminus;
+                  SpiceDouble b,e;
+                  window=(SpiceInt)Parse_Float();
+                  Parse_Comma();
+                  terminus=(SpiceInt)Parse_Float();
+                  wnfetd_c(&sceneData->ckcovStruct,window,&b,&e);
+                  if(failed_c()) {
+                  	char explain[320];
+                    getmsg_c("EXPLAIN",319,explain);
+                    Error(explain);
+                  }
+                  Val=(terminus==1)?e:b;
+                  GET (RIGHT_PAREN_TOKEN);
+                  break;
+
+                case SCE2C_TOKEN:
+                  GET (LEFT_PAREN_TOKEN);
+                  SpiceInt sc;
+                  SpiceDouble et;
+                  sc=(SpiceInt)Parse_Float();
+                  Parse_Comma();
+                  et=(SpiceDouble)Parse_Float();
+                  sce2c_c(sc,et,&Val);
+                  if(failed_c()) {
+                	char explain[320];
+                    getmsg_c("EXPLAIN",319,explain);
+                    Error(explain);
+                  }
+
+                  GET (RIGHT_PAREN_TOKEN);
+                  break;
+
+                case STR2ET_TOKEN:
+                  GET (LEFT_PAREN_TOKEN);
+                  Local_C_String=Parse_C_String();
+                  str2et_c(Local_C_String,&Val);
+                  if(failed_c()) {
+                  	char explain[320];
+                    getmsg_c("EXPLAIN",319,explain);
+                    Error(explain);
+                  }
+
+                  POV_FREE(Local_C_String);
+                  GET (RIGHT_PAREN_TOKEN);
+                  break;
 
                 case FILE_TIME_TOKEN:
                     GET (LEFT_PAREN_TOKEN);
@@ -1206,6 +1318,37 @@ void Parser::Parse_Num_Factor (EXPRESS& Express,int *Terms)
                 case TRACE_TOKEN:
                     Parse_Trace( Vect );
                     break;
+
+                case SPKEZR_TOKEN:
+                  Parse_Spkezr( Vect );
+                  break;
+
+                case PXFORM_TOKEN:
+                  Parse_Pxform(Express);
+                  *Terms=4;
+                  //These (and similar code in CKGP and CKGPAV) is there just because
+                  //there is code below which copies Vect[0..2] back to Express[0..2]
+                  //so it's ok that we only get the first three components of a quaternion
+                  Vect[0]=Express[0];
+                  Vect[1]=Express[1];
+                  Vect[2]=Express[2];
+                  break;
+
+                case CKGP_TOKEN:
+                  Parse_Ckgp(Express);
+                  *Terms=4;
+                  Vect[0]=Express[0];
+                  Vect[1]=Express[1];
+                  Vect[2]=Express[2];
+                  break;
+
+                case CKGPAV_TOKEN:
+                  Parse_Ckgpav(Express);
+                  *Terms=4;
+                  Vect[0]=Express[0];
+                  Vect[1]=Express[1];
+                  Vect[2]=Express[2];
+                  break;
 
                 case MIN_EXTENT_TOKEN:
                     GET (LEFT_PAREN_TOKEN);

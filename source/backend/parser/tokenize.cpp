@@ -2169,6 +2169,18 @@ void Parser::Parse_Directive(int After_Hash)
             EXIT
         END_CASE
 
+		CASE (FURNISH_TOKEN)
+		   if (Skipping)
+		   {
+		      UNGET
+		   }
+		   else
+		   {
+		      Furnish();
+		   }
+		   EXIT
+		END_CASE
+
         CASE (FLOAT_FUNCT_TOKEN)
             if (Skipping)
             {
