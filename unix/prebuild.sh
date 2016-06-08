@@ -203,8 +203,8 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
     echo "Copy distribution" | tee -a $log_file
     $cp_u -f -R ../distribution $build/
     cd $build/scenes/kwanpov
-    tar xvf kernels.tar
-    rm kernels.tar
+    tar xvf kernels.tar.bz2
+    rm kernels.tar.bz2
     cd -
   fi
   if ! test -d $builddoc; then
