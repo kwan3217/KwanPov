@@ -202,10 +202,6 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
     echo "Create $build/distribution" | tee -a $log_file
     echo "Copy distribution" | tee -a $log_file
     $cp_u -f -R ../distribution $build/
-    cd $build/scenes/kwanpov
-    tar xvf kernels.tar.bz2
-    rm kernels.tar.bz2
-    cd -
   fi
   if ! test -d $builddoc; then
     echo "Create $builddoc" | tee -a $log_file
@@ -390,6 +386,10 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   done
 
   # special cases:
+    cd ../scenes/kwanpov
+    tar xvf kernels.tar.bz2
+    rm kernels.tar.bz2
+    cd -
 
   # INSTALL
   echo "Create ../INSTALL"
@@ -953,23 +953,6 @@ case "$1" in
 esac
 
 
-##### Supporting libraries: Spice ###############################################
-
-case "$1" in
-  clean)
-  ;;
-
-  doc*)
-  ;;
-
-  *)
-  cd "../libraries/cspice"
-  ./makeall.csh
-  cd -
-  ;;
-esac
-
-
 ###
 ### ../libraries/png/Makefile.am
 ###
@@ -1452,3 +1435,21 @@ case "$1" in
   done
   ;;
 esac  # boost
+
+##### Supporting libraries: Spice ###############################################
+
+case "$1" in
+  clean)
+  ;;
+
+  doc*)
+  ;;
+
+  *)
+  cd "../libraries/cspice"
+  ./makeall.csh
+  cd -
+  ;;
+esac
+
+
