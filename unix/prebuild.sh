@@ -202,6 +202,10 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
     echo "Create $build/distribution" | tee -a $log_file
     echo "Copy distribution" | tee -a $log_file
     $cp_u -f -R ../distribution $build/
+    cd $build/scenes/kwanpov
+    tar xvf kernels.tar
+    rm kernels.tar
+    cd -
   fi
   if ! test -d $builddoc; then
     echo "Create $builddoc" | tee -a $log_file
@@ -450,6 +454,7 @@ ${pov_binary}_SOURCES = \\
 # Include paths for headers.
 AM_CPPFLAGS = \\
   -I\$(top_srcdir) \\
+  -I\$(top_srcdir)/libraries/cspice/include \\
   -I\$(top_srcdir)/source \\
   -I\$(top_builddir)/source \\
   -I\$(top_srcdir)/source/backend \\
@@ -462,7 +467,8 @@ AM_CPPFLAGS = \\
 # Beware: order does matter!
 LDADD = \\
   \$(top_builddir)/vfe/libvfe.a \\
-  \$(top_builddir)/source/libpovray.a
+  \$(top_builddir)/source/libpovray.a \\
+  \$(top_builddir)/libraries/cspice/lib/cspice.a
 pbEOF
   ;;
 esac
@@ -818,6 +824,7 @@ libpovray_a_SOURCES = \\
 # Include paths for headers.
 AM_CPPFLAGS = \\
   -I\$(top_srcdir) \\
+  -I\$(top_srcdir)/libraries/cspice/include \\
   -I\$(top_srcdir)/source/backend \\
   -I\$(top_srcdir)/source/base \\
   -I\$(top_srcdir)/source/frontend \\
@@ -942,6 +949,23 @@ case "$1" in
   ;;
 
   *)
+  ;;
+esac
+
+
+##### Supporting libraries: Spice ###############################################
+
+case "$1" in
+  clean)
+  ;;
+
+  doc*)
+  ;;
+
+  *)
+  cd "../libraries/cspice"
+  ./makeall.csh
+  cd -
   ;;
 esac
 
@@ -1356,6 +1380,7 @@ libvfe_a_SOURCES = \\
 AM_CPPFLAGS = \\
   -I\$(top_srcdir)/vfe/unix \\
   -I\$(top_srcdir)/unix \\
+  -I\$(top_srcdir)/libraries/cspice/include \\
   -I\$(top_srcdir)/source \\
   -I\$(top_srcdir)/source/base \\
   -I\$(top_srcdir)/source/backend

@@ -1,6 +1,7 @@
 #furnsh "generic/generic.tm" //load generic kernels like lsk, de4xx, etc.
-#furnsh "MSL/msl_rec.tm" //metakernel pulls in the right sclk kernel
-#declare Ncov=ckcov("MSL/ck/msl_cruise_recon_raweng_v1.bc",-76000,"INTERVAL",0,"TDB",1000);
+#furnsh "MSL/msl.tm"
+//Notice that we don't necessarily ever furnish this kernel below
+#declare Ncov=ckcov("MSL/ck/msl_edl_v01.bc",-76000,"INTERVAL",0,"TDB",1000);
 #debug concat("Number of intervals: ",str(Ncov,0,0),"\n")
 #declare I=0;
 #while(I<Ncov)
