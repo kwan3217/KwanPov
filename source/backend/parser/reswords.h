@@ -151,6 +151,8 @@ enum TOKEN_IDS
     FLOAT_FUNCT_TOKEN,/*WARNING: All new functions returning a float value must be placed before FLOAT_FUNCT_TOKEN or the parser won't work right. */
 
     VAXIS_ROTATE_TOKEN,
+    XYZ2LLA_TOKEN,
+    LLA2XYZ_TOKEN,
     VCROSS_TOKEN,
     VECTOR_ID_TOKEN,
     VNORMALIZE_TOKEN,
@@ -529,6 +531,9 @@ enum TOKEN_IDS
     STRLWR_TOKEN,
     U_TOKEN,
     V_TOKEN,
+    LAT_TOKEN,
+    LON_TOKEN,
+    ALT_TOKEN,
     IFDEF_TOKEN,
     PNG_TOKEN,
     PRECISION_TOKEN,
@@ -568,6 +573,7 @@ enum TOKEN_IDS
     APPEND_TOKEN,
     PLANAR_TOKEN,
     SPHERICAL_TOKEN,
+    SPHEROID_TOKEN,
     BOXED_TOKEN,
     CYLINDRICAL_TOKEN,
     CUBIC_WAVE_TOKEN,

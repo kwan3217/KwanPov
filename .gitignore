@@ -195,3 +195,16 @@ unix/config/config.sub
 unix/config/depcomp
 unix/config/install-sh
 unix/config/missing
+unix/uberpov
+.deps
+Makefile
+Makefile.am
+Makefile.in
+.dirstamp
+
+#Things installed by unix/prebuild.sh
+./scenes
+icons/
+include/
+ini/
+

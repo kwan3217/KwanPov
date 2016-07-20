@@ -529,6 +529,46 @@ SimpleGammaCurvePtr Parser::Parse_Gamma (void)
     return gamma;
 }
 
+
+void Parser::Parse_Map_Type(int& map_type) {
+  EXPECT_ONE
+    CASE (PLANAR_TOKEN)
+      map_type=PLANAR_MAP;
+    END_CASE
+
+    CASE (SPHERICAL_TOKEN)
+      map_type=SPHERICAL_MAP;
+    END_CASE
+
+    CASE (CYLINDRICAL_TOKEN)
+      map_type=CYLINDRICAL_MAP;
+    END_CASE
+
+    CASE (TORUS_TOKEN)
+      map_type=TORUS_MAP;
+    END_CASE
+
+    CASE (SPHEROID_TOKEN)
+      map_type=SPHEROID_MAP;
+    END_CASE
+
+    OTHERWISE
+      UNGET
+      map_type = (int) Parse_Float ();
+      switch(map_type) {
+        case PLANAR_MAP:
+        case SPHERICAL_MAP:
+        case CYLINDRICAL_MAP:
+        case TORUS_MAP:
+        case SPHEROID_MAP:
+          break;
+        default:
+          Error("Invalid map_type value.");
+          break;
+      }
+    END_CASE
+  END_EXPECT
+}
 /*****************************************************************************
 *
 * FUNCTION
@@ -581,19 +621,11 @@ void Parser::Parse_Image_Map (PIGMENT *Pigment)
         END_CASE
 
         CASE (MAP_TYPE_TOKEN)
-            image->Map_Type = (int) Parse_Float ();
-            switch(image->Map_Type)
-            {
-                case PLANAR_MAP:
-                case SPHERICAL_MAP:
-                case CYLINDRICAL_MAP:
-                case TORUS_MAP:
-                    break;
+           Parse_Map_Type(image->Map_Type);
+        END_CASE
 
-                default:
-                    Error("Invalid map_type value.");
-                    break;
-            }
+        CASE (FLATNESS_TOKEN)
+           image->Map_Flatness=Parse_Float();
         END_CASE
 
         CASE (USE_COLOUR_TOKEN)
@@ -791,7 +823,11 @@ void Parser::Parse_Bump_Map (TNORMAL *Tnormal)
         END_CASE
 
         CASE (MAP_TYPE_TOKEN)
-            image->Map_Type = (int) Parse_Float ();
+           Parse_Map_Type(image->Map_Type);
+        END_CASE
+
+        CASE (FLATNESS_TOKEN)
+           image->Map_Flatness=Parse_Float();
         END_CASE
 
         CASE (INTERPOLATE_TOKEN)
@@ -873,7 +909,11 @@ void Parser::Parse_Image_Pattern (TPATTERN *TPattern)
         END_CASE
 
         CASE (MAP_TYPE_TOKEN)
-            image->Map_Type = (int) Parse_Float ();
+           Parse_Map_Type(image->Map_Type);
+        END_CASE
+
+        CASE (FLATNESS_TOKEN)
+           image->Map_Flatness=Parse_Float();
         END_CASE
 
         CASE (INTERPOLATE_TOKEN)
@@ -2978,7 +3018,11 @@ TEXTURE *Parser::Parse_Material_Map()
         END_CASE
 
         CASE (MAP_TYPE_TOKEN)
-            dynamic_cast<ImagePattern*>(Texture->pattern.get())->pImage->Map_Type = (int) Parse_Float ();
+           Parse_Map_Type(dynamic_cast<ImagePattern*>(Texture->pattern.get())->pImage->Map_Type);
+        END_CASE
+
+        CASE (FLATNESS_TOKEN)
+            dynamic_cast<ImagePattern*>(Texture->pattern.get())->pImage->Map_Flatness=Parse_Float();
         END_CASE
 
         CASE (REPEAT_TOKEN)
