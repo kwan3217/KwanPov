@@ -59,8 +59,7 @@ enum
     HYPERBOLIC_MAP   = 4,
     TORUS_MAP        = 5,
     PIRIFORM_MAP     = 6,
-    OLD_MAP          = 7,
-	SPHEROID_MAP     = 8
+    OLD_MAP          = 7
 };
 
 // Bit map interpolation types.
@@ -95,7 +94,6 @@ class ImageData
         SNGL width, height;
         Vector2d Offset;
         DBL AllFilter, AllTransmit;
-        DBL Map_Flatness;
         void *Object;
         Image *data;
 
@@ -122,8 +120,7 @@ ImageData *Copy_Image(ImageData *old);
 ImageData *Create_Image(void);
 void Destroy_Image(ImageData *image);
 Image *Read_Image(Parser *p, shared_ptr<SceneData>& sd, int filetype, const UCS2 *filename, const Image::ReadOptions& options);
-void xyz2lla(DBL x, DBL y, DBL z, DBL f, DBL& lat, DBL& lon, DBL & alt);
-void lla2xyz(DBL lat, DBL lon, DBL alt, DBL f, DBL& x, DBL& y, DBL & z);
+
 }
 
 #endif

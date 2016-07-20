@@ -1146,24 +1146,6 @@ void Parser::Parse_Num_Factor (EXPRESS& Express,int *Terms)
                     MTransPoint(Vect, Vect2, &Trans);
                     break;
 
-          case XYZ2LLA_TOKEN:
-            GET (LEFT_PAREN_TOKEN);
-            Parse_Vector(Vect2);
-            Parse_Comma();
-            Val=Parse_Float();
-            GET (RIGHT_PAREN_TOKEN);
-            xyz2lla (Vect2[X],Vect2[Y],Vect2[Z],Val,Vect[X],Vect[Y],Vect[Z]);
-            break;
-
-          case LLA2XYZ_TOKEN:
-            GET (LEFT_PAREN_TOKEN);
-            Parse_Vector(Vect2);
-            Parse_Comma();
-            Val=Parse_Float();
-            GET (RIGHT_PAREN_TOKEN);
-            lla2xyz (Vect2[X],Vect2[Y],Vect2[Z],Val,Vect[X],Vect[Y],Vect[Z]);
-            break;
-
                 case VCROSS_TOKEN:
                     Parse_Vector_Param2(Vect2,Vect3);
                     Vect = cross(Vect2,Vect3);
@@ -1528,23 +1510,8 @@ void Parser::Parse_Num_Factor (EXPRESS& Express,int *Terms)
                     EXIT
                 END_CASE
 
-                CASE(LAT_TOKEN)
-                    i=LAT;
-                    EXIT
-                END_CASE
-
-                CASE(LON_TOKEN)
-                    i=LON;
-                    EXIT
-                END_CASE
-
-                CASE(ALT_TOKEN)
-                    i=ALT;
-                    EXIT
-                END_CASE
-
                 OTHERWISE
-                    Expectation_Error ("vector or color component name");
+                    Expectation_Error ("x, y, z or color component");
                 END_CASE
             END_EXPECT
 

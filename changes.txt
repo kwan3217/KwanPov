@@ -4,18 +4,6 @@ located in the same directory as this file is.
 ----------------------------------------------------------------------------
 
 --------------------------------------------------
-Changes between UberPOV 1.37.0.0 and KwanPov
---------------------------------------------------
-
-  - KwanPov is tracked with Git, so we will be lazy with version numbers.
-
-  - All features from (Kwan)MegaPov 1.2.2 have been located and isolated, and
-    will be implemented one-at-a-time
-
-  - Preferred configure:
-    ./configure --disable-io-restrictions COMPILED_BY="Chris Jeppesen (for $HOSTNAME)" --without-libtiff NON_REDISTRIBUTABLE_BUILD=yes
-
---------------------------------------------------
 Changes between POV-Ray 3.7.0 and UberPOV 1.37.0.0
 --------------------------------------------------
 
