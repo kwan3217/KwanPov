@@ -49,7 +49,7 @@
 // frame.h must always be the first POV file included (pulls in platform config)
 #include "backend/frame.h"
 #include "backend/parser/parse.h"
-
+#include "backend/parser/spice.h"
 #include "pov_mem.h" // TODO
 
 // this must be the last file included
@@ -160,6 +160,16 @@ UCS2 *Parser::Parse_String(bool pathname, bool require)
             New = Parse_Str(pathname);
             EXIT
         END_CASE
+
+		CASE(ETCAL_TOKEN)
+		    New = Parse_Etcal();
+		    EXIT
+		END_CASE
+
+		CASE(TIMOUT_TOKEN)
+		    New = Parse_Timout();
+		    EXIT
+		END_CASE
 
         CASE(VSTR_TOKEN)
             New = Parse_VStr(pathname);

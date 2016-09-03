@@ -278,6 +278,11 @@ void Parser::Run()
     Terminate_Tokenizer();
     Destroy_Textures(Default_Texture);
 
+    if(sceneData->ckcovStruct.base) {
+      POV_FREE(sceneData->ckcovStruct.base);
+      sceneData->ckcovStruct.base=NULL;
+    }
+
     POV_FREE (Brace_Stack);
 
     Destroy_Random_Generators();
@@ -503,6 +508,7 @@ void Parser::Frame_Init()
     sceneData->lightSources.clear();
     sceneData->atmosphereIOR = 1.0;
     sceneData->atmosphereDispersion = 1.0;
+    sceneData->ckcovStruct.base=NULL;
     // TODO FIXME Frame.Antialias_Threshold = opts.Antialias_Threshold;
 
     /* Init atmospheric stuff. [DB 12/94] */
@@ -8881,7 +8887,7 @@ int Parser::Parse_RValue (int Previous, int *NumberPtr, void **DataPtr, SYM_ENTR
         END_CASE
 
         CASE5 (STRING_LITERAL_TOKEN,CHR_TOKEN,SUBSTR_TOKEN,STR_TOKEN,VSTR_TOKEN)
-        CASE4 (CONCAT_TOKEN,STRUPR_TOKEN,STRLWR_TOKEN,DATETIME_TOKEN)
+        CASE6 (CONCAT_TOKEN,STRUPR_TOKEN,STRLWR_TOKEN,DATETIME_TOKEN,ETCAL_TOKEN,TIMOUT_TOKEN)
             UNGET
             Temp_Data  = Parse_String();
             *NumberPtr = STRING_ID_TOKEN;

@@ -59,6 +59,7 @@
 #include "backend/support/taskqueue.h"
 #include "base/image/colourspace.h"
 #include "base/stringutilities.h"
+#include "SpiceUsr.h"
 
 namespace pov
 {
@@ -140,6 +141,7 @@ class SceneData
         Rainbow_Struct *rainbow;
         /// skyssphere around scene
         Skysphere_Struct *skysphere;
+        SpiceCell ckcovStruct;
         /// language version to assume
         int languageVersion;
         /// true if a #version statement has been encountered

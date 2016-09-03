@@ -386,6 +386,10 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   done
 
   # special cases:
+    cd ../scenes/kwanpov
+    tar xvf kernels.tar.bz2
+    rm kernels.tar.bz2
+    cd -
 
   # INSTALL
   echo "Create ../INSTALL"
@@ -450,6 +454,7 @@ ${pov_binary}_SOURCES = \\
 # Include paths for headers.
 AM_CPPFLAGS = \\
   -I\$(top_srcdir) \\
+  -I\$(top_srcdir)/libraries/cspice/include \\
   -I\$(top_srcdir)/source \\
   -I\$(top_builddir)/source \\
   -I\$(top_srcdir)/source/backend \\
@@ -462,7 +467,8 @@ AM_CPPFLAGS = \\
 # Beware: order does matter!
 LDADD = \\
   \$(top_builddir)/vfe/libvfe.a \\
-  \$(top_builddir)/source/libpovray.a
+  \$(top_builddir)/source/libpovray.a \\
+  \$(top_builddir)/libraries/cspice/lib/cspice.a
 pbEOF
   ;;
 esac
@@ -818,6 +824,7 @@ libpovray_a_SOURCES = \\
 # Include paths for headers.
 AM_CPPFLAGS = \\
   -I\$(top_srcdir) \\
+  -I\$(top_srcdir)/libraries/cspice/include \\
   -I\$(top_srcdir)/source/backend \\
   -I\$(top_srcdir)/source/base \\
   -I\$(top_srcdir)/source/frontend \\
@@ -1356,6 +1363,7 @@ libvfe_a_SOURCES = \\
 AM_CPPFLAGS = \\
   -I\$(top_srcdir)/vfe/unix \\
   -I\$(top_srcdir)/unix \\
+  -I\$(top_srcdir)/libraries/cspice/include \\
   -I\$(top_srcdir)/source \\
   -I\$(top_srcdir)/source/base \\
   -I\$(top_srcdir)/source/backend
@@ -1427,3 +1435,21 @@ case "$1" in
   done
   ;;
 esac  # boost
+
+##### Supporting libraries: Spice ###############################################
+
+case "$1" in
+  clean)
+  ;;
+
+  doc*)
+  ;;
+
+  *)
+  cd "../libraries/cspice"
+  ./makeall.csh
+  cd -
+  ;;
+esac
+
+

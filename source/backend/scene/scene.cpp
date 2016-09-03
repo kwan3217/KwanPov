@@ -78,6 +78,7 @@ SceneData::SceneData() :
     skysphere(NULL),
     functionVM(NULL)
 {
+	ckcovStruct.base=NULL;
     atmosphereIOR = 1.0;
     atmosphereDispersion = 0.0;
     backgroundTrans  = FilterTransm(0.0, 1.0);
@@ -155,6 +156,11 @@ SceneData::~SceneData()
 
     if(tree != NULL)
         delete tree;
+
+    if(ckcovStruct.base!=NULL) {
+    	POV_FREE(ckcovStruct.base);
+    	ckcovStruct.base=NULL;
+    }
 }
 
 UCS2String SceneData::FindFile(POVMSContext ctx, const UCS2String& filename, unsigned int stype)

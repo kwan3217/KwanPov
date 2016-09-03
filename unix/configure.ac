@@ -314,7 +314,7 @@ if test x"$ax_cv_boost_thread" != x"yes"; then
 else
   CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"  # append
   LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"     # append
-  LIBS="$BOOST_THREAD_LIB $LIBS"
+  LIBS="$BOOST_THREAD_LIB -lboost_date_time -lboost_filesystem $LIBS"
 fi
 AC_MSG_CHECKING([whether the boost thread library is usable])
 SAVED_LIBS=$LIBS

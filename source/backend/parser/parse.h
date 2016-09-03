@@ -468,6 +468,16 @@ class Parser : public SceneTask
         char *Parse_C_String(bool pathname = false, bool require = true);
         UCS2 *Parse_String(bool pathname = false, bool require = true);
 
+        // spice.cpp
+        UCS2 *Parse_Etcal();
+        UCS2 *Parse_Timout();
+        void Furnish();
+        DBL Parse_Gdpool();
+        void Parse_Spkezr(Vector3d& Express);
+        void Parse_Pxform(EXPRESS& Express);
+        void Parse_Ckgp(EXPRESS& Express);
+        void Parse_Ckgpav(EXPRESS& Express);
+
         UCS2 *String_Literal_To_UCS2(const char *str, bool pathname = false);
         UCS2 *String_To_UCS2(const char *str);
         char *UCS2_To_String(const UCS2 *str);
