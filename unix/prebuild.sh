@@ -77,8 +77,8 @@
 
 umask 022
 
-pov_branch="UberPOV"
-pov_binary="uberpov"
+pov_branch="KwanPov"
+pov_binary="kwanpov"
 pov_version_base=`cat ./VERSION | sed 's,\([0-9]*.[0-9]*\).*,\1,g'`
 pov_config_bugreport="Christoph Lipka (http://www.lipka-koeln.de/)"
 
