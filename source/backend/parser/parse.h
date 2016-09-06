@@ -717,6 +717,7 @@ class Parser : public SceneTask
         void Parse_Image_Pattern (TPATTERN *TPattern);
         void Parse_Bump_Map (TNORMAL *Tnormal);
         void Parse_Image_Map (PIGMENT *Pigment);
+        void Parse_Map_Type (int& map_type);
         template<typename MAP_T, typename PATTERN_T> void Parse_Pattern (PATTERN_T *New, int TPat_Type);
         TEXTURE *Parse_Vers1_Texture (void);
         TEXTURE *Parse_Tiles (void);
