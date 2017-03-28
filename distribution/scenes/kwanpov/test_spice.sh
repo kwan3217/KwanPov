@@ -1,2 +1,2 @@
-for i in *.pov; do ../../unix/uberpov +i$i -d -p -f +lkernels || break; done
+for i in *.pov; do ../../unix/kwanpov +i$i -d -p -f +lkernels || break; done
 

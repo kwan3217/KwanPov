@@ -926,6 +926,22 @@ void Parser::Parse_Num_Factor (EXPRESS& Express,int *Terms)
                   GET (RIGHT_PAREN_TOKEN);
                   break;
 
+                case SCS2E_TOKEN:
+                  GET (LEFT_PAREN_TOKEN);
+                  sc=(SpiceInt)Parse_Float();
+                  Parse_Comma();
+                  Local_C_String=Parse_C_String();
+                  scs2e_c(sc,Local_C_String,&Val);
+                  if(failed_c()) {
+                	char explain[320];
+                    getmsg_c("EXPLAIN",319,explain);
+                    Error(explain);
+                  }
+
+                  POV_FREE(Local_C_String);
+                  GET (RIGHT_PAREN_TOKEN);
+                  break;
+
                 case FILE_TIME_TOKEN:
                     GET (LEFT_PAREN_TOKEN);
 
@@ -1687,7 +1703,7 @@ void Parser::Parse_Num_Factor (EXPRESS& Express,int *Terms)
                 END_CASE
 
                 OTHERWISE
-                     Expectation_Error ("vector or color component name");
+                    Expectation_Error ("vector or color component name");
                 END_CASE
             END_EXPECT
 
