@@ -20,6 +20,7 @@ void Parse_Pxform(Vector3d& Res);
 void Parse_Ckgp(Vector3d& Res);
 void Parse_Ckgpav(Vector3d& Res);
 DBL Parse_Gdpool();
+//void Parse_Pcpool();
 UCS2 *Parse_Etcal(bool pathname);
 UCS2 *Parse_Timout(bool pathname);
 void Furnish (void);

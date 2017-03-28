@@ -270,6 +270,7 @@ const RESERVED_WORD Reserved_Words[LAST_TOKEN] = {
 	{SPKEZR_TOKEN, "spkezr"},
 	{PXFORM_TOKEN, "pxform"},
 	{SCE2C_TOKEN, "sce2c"},
+	{SCS2E_TOKEN, "scs2e"},
 	{CKGP_TOKEN, "ckgp"},
 	{CKGPAV_TOKEN, "ckgpav"},
 	{STR2ET_TOKEN, "str2et"},
