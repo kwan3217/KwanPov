@@ -131,9 +131,10 @@ void ReadOldLine(unsigned char *scanline, int width, IStream *file)
 
         // NB EOF won't be set at this point even if the last read obtained the
         // final byte in the file (we need to read another byte for that to happen).
+/* Commented out CDJ
         if(*file == false)
             throw POV_EXCEPTION(kFileDataErr, "Invalid HDR file (unexpected EOF)");
-
+*/
         if(file->Read_Byte(b).eof())
             return;
 
@@ -186,9 +187,10 @@ Image *Read(IStream *file, const Image::ReadOptions& options)
 
     while(*file)
     {
-        if((file->getline(line, sizeof(line)) == false) || (line[0] == '-') || (line[0] == '+'))
+/*  
+      if((file->getline(line, sizeof(line)) == false) || (line[0] == '-') || (line[0] == '+'))
             break;
-
+*/
         // TODO: what do we do with exposure?
         if(strncmp(line, "EXPOSURE", 8) == 0)
         {
@@ -219,10 +221,10 @@ Image *Read(IStream *file, const Image::ReadOptions& options)
             SetRGBE(scanline.get(), image, row, width, gamma);
             continue;
         }
-
+/*
         if(file->Read_Byte(b) == false)
             throw POV_EXCEPTION(kFileDataErr, "Incomplete HDR file");
-
+*/
         if(b != 2)
         {
             file->UnRead_Byte(b);
@@ -235,9 +237,10 @@ Image *Read(IStream *file, const Image::ReadOptions& options)
         scanline[1] = file->Read_Byte();
         scanline[2] = file->Read_Byte();
 
+/*
         if(file->Read_Byte(b) == false)
             throw POV_EXCEPTION(kFileDataErr, "Incomplete or invalid HDR file");
-
+*/
         if((scanline[1] != 2) || ((scanline[2] & 128) != 0))
         {
             scanline[0] = 2;
@@ -255,16 +258,17 @@ Image *Read(IStream *file, const Image::ReadOptions& options)
         {
             for(int j = 0; j < width; )
             {
-                if(file->Read_Byte(b) == false)
-                    throw POV_EXCEPTION(kFileDataErr, "Invalid HDR file (unexpected EOF)");
+  
+//              if(file->Read_Byte(b) == false)
+//                    throw POV_EXCEPTION(kFileDataErr, "Invalid HDR file (unexpected EOF)");
 
                 if(b > 128)
                 {
                     // run
                     b &= 127;
 
-                    if(file->Read_Byte(val) == false)
-                        throw POV_EXCEPTION(kFileDataErr, "Invalid HDR file (unexpected EOF)");
+//                    if(file->Read_Byte(val) == false)
+//                        throw POV_EXCEPTION(kFileDataErr, "Invalid HDR file (unexpected EOF)");
 
                     while(b--)
                         scanline[j++ * 4 + i] = (unsigned char) val;
@@ -273,8 +277,8 @@ Image *Read(IStream *file, const Image::ReadOptions& options)
                 {
                     while(b--)
                     {
-                        if(file->Read_Byte(val) == false)
-                            throw POV_EXCEPTION(kFileDataErr, "Invalid HDR file (unexpected EOF)");
+//                        if(file->Read_Byte(val) == false)
+//                            throw POV_EXCEPTION(kFileDataErr, "Invalid HDR file (unexpected EOF)");
 
                         scanline[j++ * 4 + i] = (unsigned char) val;
                     }
@@ -325,8 +329,8 @@ void Write(OStream *file, const Image *image, const Image::WriteOptions& options
             {
                 GetRGBE(rgbe, image, col, row, gamma, dither);
 
-                if(file->write(&rgbe, sizeof(RGBE)) == false)
-                    throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
+//                if(file->write(&rgbe, sizeof(RGBE)) == false)
+  //                  throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
             }
         }
         else
@@ -370,8 +374,8 @@ void Write(OStream *file, const Image *image, const Image::WriteOptions& options
                                 // short run
                                 file->Write_Byte(128 + beg - col);
 
-                                if(file->Write_Byte(scanline[col][i]) == false)
-                                    throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
+//                                if(file->Write_Byte(scanline[col][i]) == false)
+  //                                  throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
 
                                 col = beg;
                                 break;
@@ -388,8 +392,8 @@ void Write(OStream *file, const Image *image, const Image::WriteOptions& options
 
                         while(c2--)
                         {
-                            if(file->Write_Byte(scanline[col++][i]) == false)
-                                throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
+//                            if(file->Write_Byte(scanline[col++][i]) == false)
+  //                              throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
                         }
                     }
                     if(cnt >= MINRUN)
@@ -397,8 +401,8 @@ void Write(OStream *file, const Image *image, const Image::WriteOptions& options
                         // write run
                         file->Write_Byte(128 + cnt);
 
-                        if(file->Write_Byte(scanline[beg][i]) == false)
-                            throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
+    //                    if(file->Write_Byte(scanline[beg][i]) == false)
+      //                      throw POV_EXCEPTION(kFileDataErr, "Failed to write data to HDR file");
                     }
                     else
                         cnt = 0;
