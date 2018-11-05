@@ -50,7 +50,7 @@
 #include <limits>
 
 #include <boost/utility.hpp>
-#include <boost/tr1/type_traits.hpp>
+#include <type_traits>
 
 #include "base/configbase.h"
 
@@ -160,7 +160,7 @@ inline T1 RoundUpToMultiple(T1 x, T2 base) { return RoundDownToMultiple (x + bas
 
 // Simple Scalar Square
 template<typename T>
-inline typename boost::enable_if<std::tr1::is_arithmetic<T>, T>::type Sqr(T a)
+inline typename boost::enable_if<std::is_arithmetic<T>, T>::type Sqr(T a)
 {
     return a * a;
 }

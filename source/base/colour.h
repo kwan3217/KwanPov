@@ -49,7 +49,7 @@
 #include <limits>
 
 #include <boost/utility.hpp>
-#include <boost/tr1/type_traits.hpp>
+#include <type_traits>
 
 #include "base/configbase.h"
 #include "base/types.h"
@@ -472,10 +472,10 @@ class GenericLinearColour
         inline GenericLinearColour& operator=(const GenericLinearColour& col) { SetEqual(col); return *this; }
 
         /// Provides direct access to an individual channel.
-        inline Channel  channel(unsigned int idx) const { assert(idx < kChannels); return mColour[idx]; }
+        inline Channel  channel(unsigned int idx) const { return mColour[idx]; }
 
         /// Provides direct access to an individual channel.
-        inline Channel& channel(unsigned int idx)       { assert(idx < kChannels); return mColour[idx]; }
+        inline Channel& channel(unsigned int idx)       { return mColour[idx]; }
 
 
         /// Computes the sum of the channels' values.
@@ -967,7 +967,7 @@ class GenericRGBColour : public GenericLinearColour<ColourModelRGB, CHANNEL_T>
         inline GenericRGBColour operator* (Channel b) const                 { GenericRGBColour result; result.SetProduct   (*this, b); return result; }
         inline GenericRGBColour operator/ (Channel b) const                 { GenericRGBColour result; result.SetQuotient  (*this, b); return result; }
 
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericRGBColour>::type operator* (T a, const GenericRGBColour& b) { return b * a; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericRGBColour>::type operator* (T a, const GenericRGBColour& b) { return b * a; }
 
         friend inline GenericRGBColour Sqr  (const GenericRGBColour& a) { GenericRGBColour result; result.SetProduct(a, a); return result; }
         friend inline GenericRGBColour Sqrt (const GenericRGBColour& a) { GenericRGBColour result; result.SetSqrt   (a);    return result; }
@@ -1304,7 +1304,7 @@ class GenericRGBFTColour
         inline GenericRGBFTColour operator* (Channel b) const                   { GenericRGBFTColour result(*this); result *= b; return result; }
         inline GenericRGBFTColour operator/ (Channel b) const                   { GenericRGBFTColour result(*this); result /= b; return result; }
 
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericRGBFTColour>::type operator* (T a, const GenericRGBFTColour& b) { return  b * a; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericRGBFTColour>::type operator* (T a, const GenericRGBFTColour& b) { return  b * a; }
 
         friend inline Channel ColourDistanceRGBT (const GenericRGBFTColour& a, const GenericRGBFTColour& b)
         { return ColourDistance(a.mColour, b.mColour) + fabs(a.mTrans.transm() - b.mTrans.transm()); }
@@ -1428,7 +1428,7 @@ class GenericRGBTColour
         inline GenericRGBTColour operator* (double b) const                   { GenericRGBTColour result(*this); result *= b; return result; }
         inline GenericRGBTColour operator/ (double b) const                   { GenericRGBTColour result(*this); result /= b; return result; }
 
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericRGBTColour>::type operator* (T a, const GenericRGBTColour& b) { return  b * a; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericRGBTColour>::type operator* (T a, const GenericRGBTColour& b) { return  b * a; }
 
         friend inline GenericRGBTColour Sqr  (const GenericRGBTColour& a) { return GenericRGBTColour(Sqr (a.mColour), Sqr (a.mTransm)); }
         friend inline GenericRGBTColour Sqrt (const GenericRGBTColour& a) { return GenericRGBTColour(Sqrt(a.mColour), sqrt(a.mTransm)); }
@@ -1593,7 +1593,7 @@ class GenericLightColour : public GenericLinearColour<ColourModelInternal,CHANNE
         inline GenericLightColour& operator*= (const GenericPseudoColour<Channel>& b)      { this->SetProduct   (*this, b); return *this; }
         inline GenericLightColour& operator/= (const GenericPseudoColour<Channel>& b)      { this->SetQuotient  (*this, b); return *this; }
 
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericLightColour>::type operator* (T a, const GenericLightColour& b) { GenericLightColour result; result.SetProduct   (b, a); return result; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericLightColour>::type operator* (T a, const GenericLightColour& b) { GenericLightColour result; result.SetProduct   (b, a); return result; }
 
         friend inline GenericLightColour           Pow  (const GenericLightColour& a, Channel b) { GenericLightColour           result; result.SetPow    (a, b); return result; } ///< @deprecated Only allowed for the physically bogus reflection exponent feature.
         friend inline GenericPseudoColour<Channel> Sqr  (const GenericLightColour& a)            { GenericPseudoColour<Channel> result; result.SetProduct(a, a); return result; } ///< @note       Squaring a colour is allowed, but the result is not really a colour anymore.
@@ -1705,7 +1705,7 @@ class GenericAttenuatingColour : public GenericLinearColour<ColourModelInternal,
         inline GenericAttenuatingColour& operator+= (const GenericAttenuatingColour& b) { this->SetSum     (*this, b); return *this; }
         inline GenericAttenuatingColour& operator*= (const GenericAttenuatingColour& b) { this->SetProduct (*this, b); return *this; }
 
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericAttenuatingColour>::type operator* (T a, const GenericAttenuatingColour& b) { GenericAttenuatingColour result; result.SetProduct(b, a); return result; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericAttenuatingColour>::type operator* (T a, const GenericAttenuatingColour& b) { GenericAttenuatingColour result; result.SetProduct(b, a); return result; }
 
         friend inline GenericAttenuatingColour     Exp  (const GenericAttenuatingColour& a) { GenericAttenuatingColour     result; result.SetExp    (a);    return result; } ///< @deprecated Encapsulate this in a more specialized function to compute distance-based attenuation.
         friend inline GenericPseudoColour<Channel> Sqr  (const GenericAttenuatingColour& a) { GenericPseudoColour<Channel> result; result.SetProduct(a, a); return result; } ///< @note       Squaring a colour is allowed, but the result is not really a colour anymore.
@@ -1855,10 +1855,10 @@ class GenericPseudoColour : public GenericLinearColour<ColourModelInternal,CHANN
         inline GenericPseudoColour& operator*= (const GenericPseudoColour& b) { this->SetProduct   (*this, b); return *this; }
         inline GenericPseudoColour& operator/= (const GenericPseudoColour& b) { this->SetQuotient  (*this, b); return *this; }
 
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericPseudoColour>::type operator+ (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetSum       (b, a); return result; }
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericPseudoColour>::type operator- (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetDifference(a, b); return result; }
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericPseudoColour>::type operator* (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetProduct   (b, a); return result; }
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericPseudoColour>::type operator/ (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetQuotient  (a, b); return result; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericPseudoColour>::type operator+ (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetSum       (b, a); return result; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericPseudoColour>::type operator- (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetDifference(a, b); return result; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericPseudoColour>::type operator* (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetProduct   (b, a); return result; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericPseudoColour>::type operator/ (T a, const GenericPseudoColour& b) { GenericPseudoColour result; result.SetQuotient  (a, b); return result; }
 
         friend inline GenericPseudoColour Cos  (const GenericPseudoColour& a)            { GenericPseudoColour result; result.SetCos    (a);    return result; }
         friend inline GenericPseudoColour Exp  (const GenericPseudoColour& a)            { GenericPseudoColour result; result.SetExp    (a);    return result; }
@@ -1961,7 +1961,7 @@ class GenericTransColour
         inline GenericTransColour operator* (Channel b) const                   { GenericTransColour result(*this); result *= b; return result; }
         inline GenericTransColour operator/ (Channel b) const                   { GenericTransColour result(*this); result /= b; return result; }
 
-        template<typename T> friend inline typename boost::enable_if<std::tr1::is_arithmetic<T>, GenericTransColour>::type operator* (T a, const GenericTransColour& b) { return b * a; }
+        template<typename T> friend inline typename boost::enable_if<std::is_arithmetic<T>, GenericTransColour>::type operator* (T a, const GenericTransColour& b) { return b * a; }
 
     protected:
 

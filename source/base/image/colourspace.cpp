@@ -251,7 +251,7 @@ SimpleGammaCurvePtr PowerLawGammaCurve::GetByEncodingGamma(float gamma)
 {
     if (IsNeutral(gamma))
         return NeutralGammaCurve::Get();
-    return std::tr1::dynamic_pointer_cast<SimpleGammaCurve,GammaCurve>(GetMatching(GammaCurvePtr(new PowerLawGammaCurve(gamma))));
+    return std::dynamic_pointer_cast<SimpleGammaCurve,GammaCurve>(GetMatching(GammaCurvePtr(new PowerLawGammaCurve(gamma))));
 }
 SimpleGammaCurvePtr PowerLawGammaCurve::GetByDecodingGamma(float gamma)
 {

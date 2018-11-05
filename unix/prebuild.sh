@@ -1447,7 +1447,7 @@ case "$1" in
 
   *)
   cd "../libraries/cspice"
-  ./makeall.csh
+  tcsh ./makeall.csh
   cd -
   ;;
 esac
