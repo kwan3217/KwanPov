@@ -50,6 +50,7 @@
 
 #include <boost/utility.hpp>
 #include <type_traits>
+#include <cassert>
 
 #include "base/configbase.h"
 #include "base/types.h"
